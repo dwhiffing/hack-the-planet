@@ -24,7 +24,10 @@ export const WorldSvg = memo(function WorldSvg(props: {
               d={path || ''}
               fill={land}
               stroke={background}
-              strokeWidth={0.15}
+              strokeWidth={0.01}
+              // onClick={() => {
+              //   alert(`Clicked: ${feature.properties.name} (${feature.id})`)
+              // }}
             />
           ))}
         </g>
