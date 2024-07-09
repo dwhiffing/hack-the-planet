@@ -19,6 +19,10 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
       scaleXMax={500}
       scaleYMin={1}
       scaleYMax={500}
+      wheelDelta={(e) => {
+        const f = 1 + -0.01 * e.deltaY
+        return { scaleX: f, scaleY: f }
+      }}
       transformMatrix={{
         scaleX: 1,
         scaleY: 1,
