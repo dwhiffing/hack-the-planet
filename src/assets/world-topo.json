@@ -93032,7 +93032,7 @@
           "type": "Polygon",
           "id": "BIH",
           "properties": {
-            "name": "Bosnia and Herz."
+            "name": "Bosnia and Herzegovina"
           }
         },
         {
@@ -93275,7 +93275,7 @@
           "type": "Polygon",
           "id": "CAF",
           "properties": {
-            "name": "Central African Rep."
+            "name": "Central African Republic"
           }
         },
         {
@@ -94137,7 +94137,7 @@
           "type": "MultiPolygon",
           "id": "CIV",
           "properties": {
-            "name": "C\u00f4te d'Ivoire"
+            "name": "Côte d'Ivoire"
           }
         },
         {
@@ -94235,7 +94235,7 @@
           "type": "MultiPolygon",
           "id": "COD",
           "properties": {
-            "name": "Dem. Rep. Congo"
+            "name": "Dem. Republic Congo"
           }
         },
         {
@@ -94457,7 +94457,7 @@
           "type": "Polygon",
           "id": "CZE",
           "properties": {
-            "name": "Czech Rep."
+            "name": "Czech Republic"
           }
         },
         {
@@ -94597,7 +94597,7 @@
           "type": "MultiPolygon",
           "id": "DOM",
           "properties": {
-            "name": "Dominican Rep."
+            "name": "Dominican Republic"
           }
         },
         {
@@ -95241,7 +95241,7 @@
           "type": "MultiPolygon",
           "id": "GNQ",
           "properties": {
-            "name": "Eq. Guinea"
+            "name": "Equitorial Guinea"
           }
         },
         {
@@ -96569,7 +96569,7 @@
           "type": "MultiPolygon",
           "id": "KOR",
           "properties": {
-            "name": "Korea"
+            "name": "Korea, Republic of"
           }
         },
         {
@@ -96621,7 +96621,7 @@
           "type": "Polygon",
           "id": "LAO",
           "properties": {
-            "name": "Lao PDR"
+            "name": "Lao People's Dem. Rep."
           }
         },
         {
@@ -97902,7 +97902,7 @@
           "type": "MultiPolygon",
           "id": "PRK",
           "properties": {
-            "name": "Dem. Rep. Korea"
+            "name": "Korea, Dem. People's Rep. of"
           }
         },
         {
@@ -98411,7 +98411,7 @@
           "type": "Polygon",
           "id": "ESH",
           "properties": {
-            "name": "W. Sahara"
+            "name": "Western Sahara"
           }
         },
         {
@@ -98477,7 +98477,7 @@
           "type": "Polygon",
           "id": "SSD",
           "properties": {
-            "name": "S. Sudan"
+            "name": "South Sudan"
           }
         },
         {
