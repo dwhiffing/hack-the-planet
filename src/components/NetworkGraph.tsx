@@ -1,6 +1,7 @@
 import React, { memo } from 'react'
 import { Graph } from '@visx/network'
 import { getNodes } from '@/utils/getNodes'
+import { geoMercator } from 'd3-geo'
 
 export const NetworkGraph = memo(function NetworkGraph({
   scale,
@@ -11,12 +12,17 @@ export const NetworkGraph = memo(function NetworkGraph({
   scale: number
   translate: [number, number]
 }) {
-  console.time('nodes')
   const nodes = getNodes(scale, translate, groupRef.current)
-  console.timeEnd('nodes')
-
-  const dataSample = {
-    nodes,
+  const projection = geoMercator().translate(translate).scale(scale)
+  const data = {
+    nodes: nodes.map((n) => {
+      const coords = projection([n.x, n.y]) ?? []
+      return {
+        ...n,
+        x: coords[0],
+        y: coords[1],
+      }
+    }),
     links: [
       // { source: nodes[0], target: nodes[1] },
       // { source: nodes[1], target: nodes[2] },
@@ -26,7 +32,7 @@ export const NetworkGraph = memo(function NetworkGraph({
 
   return (
     <Graph
-      graph={dataSample}
+      graph={data}
       linkComponent={(props) => (
         // @ts-ignore
         <DefaultLink {...props} link={{ ...props.link, width: 2 }} />
@@ -53,13 +59,12 @@ const DefaultLink = ({ link: { source, target, width } }: any) => (
   />
 )
 
-const DefaultNode = (props: any) => {
+const DefaultNode = (props: { node: { x: number; y: number; r: number } }) => {
   return (
     <circle
       onMouseDown={() => console.log(props.node)}
       fill={'#ff0000'}
-      r={props.node.r}
-      {...props}
+      r={props.node.r ?? 0.1}
     />
   )
 }

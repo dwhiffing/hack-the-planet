@@ -4,9 +4,10 @@ import continents from '../assets/continents.json'
 import bordersJson from '../assets/borders.json'
 import { countryConfigs } from '@/constants'
 import { groupBy } from 'lodash'
-import { random } from '@/utils/random'
+import { getRandom } from '@/utils/random'
 import { groupCoordinates } from '@/utils/groupCoordinates'
 
+let _nodes: { x: number; y: number }[]
 // for each city, generate nodes around it based on its density and size
 export const getNodes = (
   scale: number,
@@ -38,7 +39,7 @@ export const getNodes = (
       Math.floor(Math.min(maxNodes, Math.max(1, c.population / popFactor))),
       g,
       c.country,
-    ).map((d) => ({ ...c, ...d, r: 0.1 }))
+    ).map((d) => ({ ...c, ...d }))
   })
 
   const groupedByCountry = groupBy(result, (r) => r.country)
@@ -46,10 +47,19 @@ export const getNodes = (
   const grouped = Object.values(groupedByCountry).flatMap((nodes) =>
     groupCoordinates(nodes, 50).flatMap((g) => g[0]),
   )
-  _nodes = grouped
-  return grouped
+  _nodes = grouped.map((g) => {
+    const [x, y] = projection.invert?.([g.x, g.y]) ?? [0, 0]
+
+    return {
+      // @ts-ignore
+      country: g.country,
+      x,
+      y,
+    }
+  })
+
+  return _nodes
 }
-let _nodes: { x: number; y: number }[]
 
 function getRandomNonUniformPointsInCircle(
   centerX: number,
@@ -72,6 +82,7 @@ function getRandomNonUniformPointsInCircle(
       borders.includes(p.getAttribute('name') ?? '') ||
       p.getAttribute('name') === country,
   )
+  const random = getRandom()
 
   while (points.length < numberOfPoints && fails < 1000) {
     const angle = random() * angleMultiplier

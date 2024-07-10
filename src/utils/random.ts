@@ -16,4 +16,4 @@ function sfc32(a: number, b: number, c: number, d: number) {
 
 const seedgen = () => (Math.random() * 2 ** 32) >>> 0
 const seed = [806692913, 1899394972, 1349728802, 3131459383]
-export const random = sfc32(seed[0], seed[1], seed[2], seed[3])
+export const getRandom = () => sfc32(seed[0], seed[1], seed[2], seed[3])
