@@ -14,7 +14,13 @@ export const countryConfigs = {
     densityFactor: 160,
     maxDensity: 12,
     maxNodes: 100,
-    popFactor: 200000,
+    popFactor: 50000,
+  },
+  China: {
+    densityFactor: 160,
+    maxDensity: 12,
+    maxNodes: 100,
+    popFactor: 350000,
   },
   Oceania: {
     densityFactor: 55,
@@ -37,8 +43,8 @@ export const countryConfigs = {
   'South America': {
     densityFactor: 55,
     maxDensity: 8,
-    maxNodes: 50,
-    popFactor: 100000,
+    maxNodes: 200,
+    popFactor: 50000,
   },
   Africa: {
     densityFactor: 55,
@@ -57,18 +63,18 @@ export const countryConfigs = {
     densityFactor: 40,
     maxDensity: 22,
     maxNodes: 500,
-    popFactor: 10000,
+    popFactor: 25000,
   },
   Canada: {
     densityFactor: 220,
-    maxDensity: 16,
-    maxNodes: 1500,
-    popFactor: 10000,
+    maxDensity: 20,
+    maxNodes: 1000,
+    popFactor: 18000,
   },
   'United States': {
-    densityFactor: 220,
-    maxDensity: 12,
-    maxNodes: 300,
-    popFactor: 10000,
+    densityFactor: 250,
+    maxDensity: 10,
+    maxNodes: 1000,
+    popFactor: 30000,
   },
 }
