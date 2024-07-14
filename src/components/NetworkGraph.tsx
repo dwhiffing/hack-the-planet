@@ -1,7 +1,8 @@
-import React, { memo } from 'react'
+import React, { memo, useState } from 'react'
 import { Graph } from '@visx/network'
-import { getNodes } from '@/utils/getNodes'
+import { getNodes, Node } from '@/utils/getNodes'
 import { geoMercator } from 'd3-geo'
+import { haversineDistance } from '@/utils/groupCoordinates'
 
 export const NetworkGraph = memo(function NetworkGraph({
   scale,
@@ -12,40 +13,91 @@ export const NetworkGraph = memo(function NetworkGraph({
   scale: number
   translate: [number, number]
 }) {
-  const nodes = getNodes(scale, translate, groupRef.current)
+  const [selectedNode, setSelectedNode] = useState(-1)
+  const [discoveredNodes, setDiscoveredNodes] = useState([9096])
+  const [connections, setConnections] = useState<[number, number][]>([])
+  const discoveryRange = 100
+  const rawNodes = getNodes(scale, translate, groupRef.current)
   const projection = geoMercator().translate(translate).scale(scale)
-  const data = {
-    nodes: nodes.map((n) => {
-      const coords = projection([n.x, n.y]) ?? []
-      return {
-        ...n,
-        x: coords[0],
-        y: coords[1],
+  const allNodes = rawNodes.map((n) => {
+    const coords = projection([n.x, n.y]) ?? []
+    return {
+      ...n,
+      x: coords[0] ?? 0,
+      y: coords[1] ?? 0,
+    }
+  })
+  const allNodesObj: Record<number, Node> = allNodes.reduce(
+    (obj, n) => ({ ...obj, [n.id]: n }),
+    {},
+  )
+
+  const renderedNodes = allNodes.filter((n) => {
+    if (discoveredNodes.includes(n.id)) return true
+
+    // TODO: try to improve performance of searching for discoverable nodes
+    const isDiscoverable = discoveredNodes.some((id) => {
+      const node = allNodesObj[id]!
+      return haversineDistance(node, n) < discoveryRange
+    })
+
+    return isDiscoverable
+  })
+
+  const getNodeFill = (id: number) =>
+    selectedNode === id
+      ? '#fff'
+      : discoveredNodes.includes(id)
+      ? '#ff0000'
+      : '#999'
+
+  const onClickNode = (id: number) => {
+    if (id === selectedNode) {
+      setSelectedNode(-1)
+    } else {
+      if (selectedNode === -1) {
+        setSelectedNode(id)
+      } else {
+        setSelectedNode(-1)
+        setDiscoveredNodes((n) => [...n, id])
+        setConnections((c) => [...c, [selectedNode, id]])
       }
-    }),
-    links: [
-      // { source: nodes[0], target: nodes[1] },
-      // { source: nodes[1], target: nodes[2] },
-      // { source: nodes[2], target: nodes[0] },
-    ],
+    }
   }
 
   return (
     <Graph
-      graph={data}
+      graph={{
+        nodes: renderedNodes,
+        links: connections.map(([source, target]) => ({
+          source: allNodesObj[source],
+          target: allNodesObj[target],
+        })),
+      }}
       linkComponent={(props) => (
-        // @ts-ignore
-        <DefaultLink {...props} link={{ ...props.link, width: 2 }} />
+        <DefaultLink link={props.link} width={0.05} color={'white'} />
       )}
       nodeComponent={(props) => (
-        // @ts-ignore
-        <DefaultNode {...props} />
+        <DefaultNode
+          node={props.node}
+          fill={getNodeFill(props.node.id)}
+          onClick={() => onClickNode(props.node.id)}
+        />
       )}
     />
   )
 })
 
-const DefaultLink = ({ link: { source, target, width } }: any) => (
+type Point = { x: number; y: number }
+const DefaultLink = ({
+  link: { source, target },
+  width,
+  color,
+}: {
+  link: { source: Point; target: Point }
+  width: number
+  color: string
+}) => (
   <line
     style={{ pointerEvents: 'none' }}
     x1={source.x}
@@ -53,17 +105,21 @@ const DefaultLink = ({ link: { source, target, width } }: any) => (
     x2={target.x}
     y2={target.y}
     strokeWidth={width}
-    stroke="red"
+    stroke={color}
     strokeOpacity={1}
-    // strokeDasharray={dashed ? '8,4' : undefined}
+    // strokeDasharray={true ? '8,4' : undefined}
   />
 )
 
-const DefaultNode = (props: { node: { x: number; y: number; r: number } }) => {
+const DefaultNode = (props: {
+  node: Node
+  fill: string
+  onClick: () => void
+}) => {
   return (
     <circle
-      onMouseDown={() => console.log(props.node)}
-      fill={'#ff0000'}
+      onMouseDown={props.onClick}
+      fill={props.fill ?? 'transparent'}
       r={props.node.r ?? 0.1}
     />
   )

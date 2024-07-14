@@ -25,7 +25,8 @@ export function groupCoordinates(
 
   return groups
 }
-function haversineDistance(
+
+export function haversineDistance(
   coord1: { x: number; y: number },
   coord2: { x: number; y: number },
 ) {

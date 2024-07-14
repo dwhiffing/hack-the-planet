@@ -7,7 +7,15 @@ import { groupBy } from 'lodash'
 import { getRandom } from '@/utils/random'
 import { groupCoordinates } from '@/utils/groupCoordinates'
 
-let _nodes: { x: number; y: number }[]
+export type Node = {
+  x: number
+  y: number
+  country: string
+  id: number
+  r?: number
+}
+let id = 0
+let _nodes: Node[]
 // for each city, generate nodes around it based on its density and size
 export const getNodes = (
   scale: number,
@@ -51,6 +59,7 @@ export const getNodes = (
     const [x, y] = projection.invert?.([g.x, g.y]) ?? [0, 0]
 
     return {
+      id: id++,
       // @ts-ignore
       country: g.country,
       x,
@@ -58,7 +67,7 @@ export const getNodes = (
     }
   })
 
-  return _nodes
+  return _nodes as Node[]
 }
 
 function getRandomNonUniformPointsInCircle(
