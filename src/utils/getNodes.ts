@@ -14,6 +14,7 @@ export type Node = {
   x: number
   y: number
   country: string
+  earthCoords?: [number, number]
   id: number
   r?: number
 }

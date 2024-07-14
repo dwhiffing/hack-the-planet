@@ -1,18 +1,111 @@
-import React, { useRef } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Zoom } from '@vx/zoom'
-import { background } from '@/constants'
+import {
+  background,
+  baseScale,
+  baseTranslate,
+  homeId,
+  zoomScale,
+} from '@/constants'
 import { WorldSvg } from './WorldSvg'
 import { NetworkGraph } from './NetworkGraph'
+import { geoMercator } from 'd3-geo'
+import { getNodes, Node } from '@/utils/getNodes'
+import { haversineDistance } from '@/utils/groupCoordinates'
+import { transformToCoords, coordsToTransform } from '@/utils/coords'
+import { MapControls } from './MapControls'
+
+const discoveryRange = 100
+const projection = geoMercator().translate(baseTranslate).scale(baseScale)
 
 export function WorldMap({ width, height }: { width: number; height: number }) {
-  const scale = 200
-  const translate = [width / 2, height / 2] as [number, number]
-  const ref = useRef<SVGGElement | null>(null)
+  const [nodes, setNodes] = useState<Node[]>([])
+  const [selectedNode, setSelectedNode] = useState(-1)
+  const [discoveredNodes, setDiscoveredNodes] = useState([homeId])
+  const [connections, setConnections] = useState<[number, number][]>([])
+
+  const zoomRef = useRef<Zoom | null>(null)
+
+  const ref = useCallback(
+    (node: SVGGElement) =>
+      setNodes(
+        getNodes(projection, node).map((n) => {
+          const coords = projection([n.x, n.y]) ?? []
+          return {
+            ...n,
+            earthCoords: [n.x, n.y],
+            x: coords[0] ?? 0,
+            y: coords[1] ?? 0,
+          }
+        }),
+      ),
+    [],
+  )
+
+  const allNodesObj: Record<number, Node> = useMemo(
+    () => nodes.reduce((obj, n) => ({ ...obj, [n.id]: n }), {}),
+    [nodes],
+  )
+
+  const renderedNodes = useMemo(
+    () =>
+      nodes.filter((n) => {
+        if (discoveredNodes.includes(n.id)) return true
+
+        // TODO: try to improve performance of searching for discoverable nodes
+        const isDiscoverable = discoveredNodes.some((id) => {
+          const node = allNodesObj[id]!
+          return haversineDistance(node, n) < discoveryRange
+        })
+
+        return isDiscoverable
+      }),
+    [discoveredNodes, nodes, allNodesObj],
+  )
+
+  useEffect(() => {
+    const home = allNodesObj[homeId]
+    if (home) {
+      const [x, y] = transformToCoords(
+        zoomRef.current!.state.transformMatrix,
+        width,
+        height,
+      )
+      if (x === 0 && y === 0) {
+        zoomRef.current?.setTransformMatrix(
+          coordsToTransform(...home.earthCoords!, zoomScale, width, height),
+        )
+      }
+    }
+  }, [allNodesObj, width, height])
+
+  const getNodeFill = (id: number) =>
+    selectedNode === id
+      ? '#fff'
+      : discoveredNodes.includes(id)
+      ? '#ff0000'
+      : '#999'
+
+  const onClickNode = (id: number) => {
+    console.log(allNodesObj[id])
+    if (id === selectedNode) {
+      setSelectedNode(-1)
+    } else {
+      if (selectedNode === -1) {
+        setSelectedNode(id)
+      } else {
+        setSelectedNode(-1)
+        setDiscoveredNodes((n) => [...n, id])
+        setConnections((c) => [...c, [selectedNode, id]])
+      }
+    }
+  }
 
   if (width === 0 && height === 0) return null
   return (
     // @ts-ignore
     <Zoom
+      ref={zoomRef}
       className="relative"
       width={width}
       height={height}
@@ -20,21 +113,15 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
       scaleXMax={500}
       scaleYMin={1}
       scaleYMax={500}
+      transformMatrix={coordsToTransform(0, 0, 1, width, height)}
       wheelDelta={(e) => {
         const f = 1 + -0.01 * e.deltaY
         return { scaleX: f, scaleY: f }
       }}
-      transformMatrix={{
-        scaleX: 1,
-        scaleY: 1,
-        skewX: 0,
-        skewY: 0,
-        translateX: 0,
-        translateY: 0,
-      }}
     >
       {(zoom) => (
         <>
+          {/* {console.log(...transformToCoords(zoom.transformMatrix, width, height))} */}
           <svg
             className="rounded-xl overflow-hidden"
             width={width}
@@ -44,7 +131,7 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
             <rect x={0} y={0} width={width} height={height} fill={background} />
 
             <g ref={ref} transform={zoom.toString()}>
-              <WorldSvg scale={scale} translate={translate} />
+              <WorldSvg scale={baseScale} translate={baseTranslate} />
             </g>
 
             <rect
@@ -59,35 +146,26 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
                 if (zoom.isDragging) zoom.dragEnd()
               }}
             />
-            {ref.current && (
-              <g
-                style={{ pointerEvents: zoom.isDragging ? 'none' : 'auto' }}
-                transform={zoom.toString()}
-              >
-                <NetworkGraph
-                  scale={scale}
-                  translate={translate}
-                  groupRef={ref}
-                />
-              </g>
-            )}
+            <g
+              style={{ pointerEvents: zoom.isDragging ? 'none' : 'auto' }}
+              transform={zoom.toString()}
+            >
+              <NetworkGraph
+                renderedNodes={renderedNodes}
+                connections={connections}
+                allNodes={allNodesObj}
+                onClickNode={onClickNode}
+                getNodeFill={getNodeFill}
+              />
+            </g>
           </svg>
 
-          <div className="absolute top-4 right-4 flex flex-col items-end">
-            <button onClick={() => zoom.scale({ scaleX: 1.2 })}>+</button>
-            <button onClick={() => zoom.scale({ scaleX: 0.8 })}>-</button>
-            <button
-              onClick={() =>
-                zoom.setTransformMatrix({
-                  ...zoom.transformMatrix,
-                  translateX: width / 2,
-                  translateY: height / 2,
-                })
-              }
-            >
-              Center
-            </button>
-          </div>
+          <MapControls
+            zoom={zoom}
+            nodes={allNodesObj}
+            width={width}
+            height={height}
+          />
         </>
       )}
     </Zoom>
