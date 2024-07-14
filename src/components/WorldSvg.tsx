@@ -3,18 +3,15 @@ import { CustomProjection } from '@visx/geo'
 import * as topojson from 'topojson-client'
 import topology from '../assets/world-topo.json'
 import { geoMercator } from 'd3-geo'
-import { background, land } from '@/constants'
+import { background, baseScale, baseTranslate, land } from '@/constants'
 
-export const WorldSvg = memo(function WorldSvg(props: {
-  translate: [number, number]
-  scale: number
-}) {
+export const WorldSvg = memo(function WorldSvg() {
   return (
     <CustomProjection<FeatureShape>
       projection={geoMercator}
       data={world.features}
-      scale={props.scale}
-      translate={props.translate}
+      scale={baseScale}
+      translate={baseTranslate}
     >
       {(mercator) => (
         <g>

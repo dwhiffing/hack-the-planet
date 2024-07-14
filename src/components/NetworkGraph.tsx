@@ -5,13 +5,13 @@ import { Node } from '@/utils/getNodes'
 export const NetworkGraph = memo(function NetworkGraph({
   renderedNodes,
   connections,
-  allNodes,
+  allNodesObj,
   onClickNode,
   getNodeFill,
 }: {
   renderedNodes: Node[]
   connections: [number, number][]
-  allNodes: Record<number, Node>
+  allNodesObj: Record<number, Node>
   onClickNode: (id: number) => void
   getNodeFill: (id: number) => string
 }) {
@@ -20,8 +20,8 @@ export const NetworkGraph = memo(function NetworkGraph({
       graph={{
         nodes: renderedNodes,
         links: connections.map(([source, target]) => ({
-          source: allNodes[source],
-          target: allNodes[target],
+          source: allNodesObj[source],
+          target: allNodesObj[target],
         })),
       }}
       linkComponent={(props) => (

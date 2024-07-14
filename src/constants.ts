@@ -1,7 +1,9 @@
 export const background = '#f9f7e8'
 export const land = '#aaa'
 export const zoomScale = 200
-export const homeId = 8783
+export const maxZoom = 500
+export const minZoom = 1
+export const homeId = 8477
 export const baseScale = 200
 export const baseTranslate = [0, 0] as [number, number]
 export const countryConfigs = {
