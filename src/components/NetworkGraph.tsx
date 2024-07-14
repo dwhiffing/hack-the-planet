@@ -14,11 +14,11 @@ export const NetworkGraph = memo(function NetworkGraph({
   translate: [number, number]
 }) {
   const [selectedNode, setSelectedNode] = useState(-1)
-  const [discoveredNodes, setDiscoveredNodes] = useState([9096])
+  const [discoveredNodes, setDiscoveredNodes] = useState([9155])
   const [connections, setConnections] = useState<[number, number][]>([])
   const discoveryRange = 100
-  const rawNodes = getNodes(scale, translate, groupRef.current)
   const projection = geoMercator().translate(translate).scale(scale)
+  const rawNodes = getNodes(projection, groupRef.current)
   const allNodes = rawNodes.map((n) => {
     const coords = projection([n.x, n.y]) ?? []
     return {

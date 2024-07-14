@@ -1,4 +1,4 @@
-import { geoMercator } from 'd3-geo'
+import { GeoProjection } from 'd3-geo'
 import cities from '../assets/cities-pruned.json'
 import continents from '../assets/continents.json'
 import bordersJson from '../assets/borders.json'
@@ -7,6 +7,9 @@ import { groupBy } from 'lodash'
 import { getRandom } from '@/utils/random'
 import { groupCoordinates } from '@/utils/groupCoordinates'
 
+type IContinentKey = keyof typeof continents
+type IConfigKey = keyof typeof countryConfigs
+type IBordersKey = keyof typeof bordersJson
 export type Node = {
   x: number
   y: number
@@ -17,37 +20,26 @@ export type Node = {
 let id = 0
 let _nodes: Node[]
 // for each city, generate nodes around it based on its density and size
-export const getNodes = (
-  scale: number,
-  translate: [number, number],
-  g: SVGGElement,
-) => {
+export const getNodes = (projection: GeoProjection, g: SVGGElement) => {
   if (_nodes) return _nodes
-  const projection = geoMercator().translate(translate).scale(scale)
-  const mappedCities = cities.map((c) => {
-    return {
-      ...c,
-      coords: projection(c.earthCoords as [number, number])!,
-      x: c.earthCoords[0],
-      y: c.earthCoords[1],
-    }
-  })
 
-  const result = mappedCities.flatMap((c) => {
-    const continentName = continents[c.country as keyof typeof continents]
+  const result = cities.flatMap((_city) => {
+    const city = {
+      ..._city,
+      coords: projection(_city.earthCoords as [number, number])!,
+      x: _city.earthCoords[0],
+      y: _city.earthCoords[1],
+    }
+    const continentName = continents[city.country as IContinentKey]
     const config =
-      countryConfigs[c.country as keyof typeof countryConfigs] ??
-      countryConfigs[continentName as keyof typeof countryConfigs] ??
+      countryConfigs[city.country as IConfigKey] ??
+      countryConfigs[continentName as IConfigKey] ??
       countryConfigs.default
 
-    const { densityFactor, maxDensity, maxNodes, popFactor } = config
-    return getRandomNonUniformPointsInCircle(
-      ...c.coords,
-      densityFactor / Math.min(maxDensity, c.density),
-      Math.floor(Math.min(maxNodes, Math.max(1, c.population / popFactor))),
-      g,
-      c.country,
-    ).map((d) => ({ ...c, ...d }))
+    return getRandomNonUniformPointsInCircle(city, config, g).map((point) => ({
+      ...city,
+      ...point,
+    }))
   })
 
   const groupedByCountry = groupBy(result, (r) => r.country)
@@ -71,13 +63,26 @@ export const getNodes = (
 }
 
 function getRandomNonUniformPointsInCircle(
-  centerX: number,
-  centerY: number,
-  radius: number,
-  numberOfPoints: number,
+  city: {
+    coords: [number, number]
+    country: string
+    population: number
+    density: number
+  },
+  config: {
+    densityFactor: number
+    maxDensity: number
+    maxNodes: number
+    popFactor: number
+  },
   element: SVGGElement,
-  country: string,
 ) {
+  const [centerX, centerY] = city.coords
+  const { densityFactor, maxDensity, maxNodes, popFactor } = config
+  const radius = densityFactor / Math.min(maxDensity, city.density)
+  const numberOfPoints = Math.floor(
+    Math.min(maxNodes, Math.max(1, city.population / popFactor)),
+  )
   let points: { x: number; y: number; country: string }[] = []
   let fails = 0
   const angleMultiplier = 2 * Math.PI
@@ -85,11 +90,11 @@ function getRandomNonUniformPointsInCircle(
   const svg = element.parentElement as unknown as SVGSVGElement
   const p = svg.createSVGPoint()
   const paths = Array.from(element.childNodes[0].childNodes) as SVGPathElement[]
-  const borders = bordersJson[country as keyof typeof bordersJson] as string[]
+  const borders = bordersJson[city.country as IBordersKey] as string[]
   const _paths = paths.filter(
     (p) =>
       borders.includes(p.getAttribute('name') ?? '') ||
-      p.getAttribute('name') === country,
+      p.getAttribute('name') === city.country,
   )
   const random = getRandom()
 
