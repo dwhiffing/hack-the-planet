@@ -5,7 +5,7 @@ import { WorldSvg } from './WorldSvg'
 import { NetworkGraph } from './NetworkGraph'
 import { coordsToTransform } from '@/utils/coords'
 import { MapControls } from './MapControls'
-import { useWorldState } from './useWorldState'
+import { useWorldState } from '../utils/useWorldState'
 
 export function WorldMap({ width, height }: { width: number; height: number }) {
   const worldState = useWorldState(width, height)
@@ -68,13 +68,13 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
               style={{ pointerEvents: zoom.isDragging ? 'none' : 'auto' }}
               transform={zoom.toString()}
             >
-              <NetworkGraph {...worldState} />
+              <NetworkGraph worldState={worldState} />
             </g>
           </svg>
 
           <MapControls
             zoom={zoom}
-            nodes={worldState.allNodesObj}
+            worldState={worldState}
             width={width}
             height={height}
           />

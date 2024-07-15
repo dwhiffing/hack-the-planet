@@ -1,31 +1,31 @@
 import React, { memo } from 'react'
 import { Graph } from '@visx/network'
 import { Node } from '@/utils/getNodes'
+import { IWorldState } from '../utils/useWorldState'
 
 export const NetworkGraph = memo(function NetworkGraph({
-  renderedNodes,
-  connections,
-  allNodesObj,
-  onClickNode,
-  getNodeFill,
+  worldState,
 }: {
-  renderedNodes: Node[]
-  connections: [number, number][]
-  allNodesObj: Record<number, Node>
-  onClickNode: (id: number) => void
-  getNodeFill: (id: number) => string
+  worldState: IWorldState
 }) {
+  const { renderedNodes, connections, allNodesObj, onClickNode, getNodeFill } =
+    worldState
   return (
     <Graph
       graph={{
         nodes: renderedNodes,
-        links: connections.map(([source, target]) => ({
+        links: connections.map(({ source, target, type }) => ({
           source: allNodesObj[source],
           target: allNodesObj[target],
+          type,
         })),
       }}
       linkComponent={(props) => (
-        <DefaultLink link={props.link} width={0.05} color={'white'} />
+        <DefaultLink
+          link={props.link}
+          width={props.link.type === 'scanned' ? 0.01 : 0.05}
+          color={'white'}
+        />
       )}
       nodeComponent={(props) => (
         <DefaultNode

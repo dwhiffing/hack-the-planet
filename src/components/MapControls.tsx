@@ -1,34 +1,46 @@
 import React from 'react'
 import { homeId, zoomScale } from '@/constants'
-import { Node } from '@/utils/getNodes'
 import { coordsToTransform } from '@/utils/coords'
 import { ProvidedZoom } from '@vx/zoom/lib/types'
+import { IWorldState } from '../utils/useWorldState'
 
 export const MapControls = ({
+  worldState,
   zoom,
-  nodes,
   width,
   height,
 }: {
+  worldState: IWorldState
   zoom: ProvidedZoom
-  nodes: Record<number, Node>
   width: number
   height: number
 }) => {
   return (
-    <div className="absolute top-4 right-4 flex flex-col items-end">
-      <button onClick={() => zoom.scale({ scaleX: 1.2 })}>+</button>
-      <button onClick={() => zoom.scale({ scaleX: 0.8 })}>-</button>
-      <button
-        onClick={() => {
-          const home = nodes[homeId].earthCoords!
-          zoom.setTransformMatrix(
-            coordsToTransform(...home, zoomScale, width, height),
-          )
-        }}
-      >
-        Home
-      </button>
+    <div className="absolute top-0 p-4 inset-x-0 flex justify-between">
+      <div className="">
+        Money: ${worldState.money}
+        <div className="">
+          {worldState.actions.map((a) => (
+            <button key={a.label} className="" onClick={a.onClick}>
+              {a.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="flex flex-col items-end">
+        <button onClick={() => zoom.scale({ scaleX: 1.2 })}>+</button>
+        <button onClick={() => zoom.scale({ scaleX: 0.8 })}>-</button>
+        <button
+          onClick={() => {
+            const home = worldState.allNodesObj[homeId].earthCoords!
+            zoom.setTransformMatrix(
+              coordsToTransform(...home, zoomScale, width, height),
+            )
+          }}
+        >
+          Home
+        </button>
+      </div>
     </div>
   )
 }

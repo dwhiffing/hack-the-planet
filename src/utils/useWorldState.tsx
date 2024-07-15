@@ -1,15 +1,41 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  Dispatch,
+  MutableRefObject,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { Zoom } from '@vx/zoom'
 import { homeId, zoomScale } from '@/constants'
 import { getNodes, Node } from '@/utils/getNodes'
 import { haversineDistance } from '@/utils/groupCoordinates'
 import { transformToCoords, coordsToTransform } from '@/utils/coords'
 
+export type IWorldState = {
+  money: number
+  actions: { label: string; onClick: () => void }[]
+  setMoney: Dispatch<SetStateAction<number>>
+  zoomRef: MutableRefObject<Zoom | null>
+  worldSvgMountCallback: (node: SVGGElement) => void
+  renderedNodes: Node[]
+  connections: { source: number; target: number; type: 'scanned' | 'hacked' }[]
+  allNodesObj: Record<number, Node>
+  onClickNode: (id: number) => void
+  getNodeFill: (id: number) => string
+}
+
 export const useWorldState = (width: number, height: number) => {
+  const [money, setMoney] = useState<number>(100)
   const [nodes, setNodes] = useState<Node[]>([])
   const [selectedNode, setSelectedNode] = useState(-1)
+  const [ownedNodes, setOwnedNodes] = useState([homeId])
   const [discoveredNodes, setDiscoveredNodes] = useState([homeId])
-  const [connections, setConnections] = useState<[number, number][]>([])
+  const [connections, setConnections] = useState<
+    { source: number; target: number }[]
+  >([])
 
   const zoomRef = useRef<Zoom | null>(null)
   const worldSvgMountCallback = useCallback(
@@ -23,19 +49,13 @@ export const useWorldState = (width: number, height: number) => {
   )
 
   const renderedNodes = useMemo(
-    () =>
-      nodes.filter((n) => {
-        if (discoveredNodes.includes(n.id)) return true
+    () => discoveredNodes.map((id) => allNodesObj[id]).filter(Boolean),
+    [discoveredNodes, allNodesObj],
+  )
 
-        // TODO: try to improve performance of searching for discoverable nodes
-        const isDiscoverable = discoveredNodes.some((id) => {
-          const node = allNodesObj[id]!
-          return haversineDistance(node, n) < discoveryRange
-        })
-
-        return isDiscoverable
-      }),
-    [discoveredNodes, nodes, allNodesObj],
+  const owned = useMemo(
+    () => ownedNodes.map((id) => allNodesObj[id]).filter(Boolean),
+    [ownedNodes, allNodesObj],
   )
 
   useEffect(() => {
@@ -52,28 +72,82 @@ export const useWorldState = (width: number, height: number) => {
   }, [allNodesObj, width, height])
 
   const getNodeFill = (id: number) =>
-    selectedNode === id
-      ? '#fff'
-      : discoveredNodes.includes(id)
-      ? '#ff0000'
-      : '#999'
+    selectedNode === id ? '#fff' : ownedNodes.includes(id) ? '#ff0000' : '#999'
 
   const onClickNode = (id: number) => {
     console.log(allNodesObj[id])
-    if (id === selectedNode) {
-      setSelectedNode(-1)
-    } else {
-      if (selectedNode === -1) {
-        setSelectedNode(id)
-      } else {
-        setSelectedNode(-1)
-        setDiscoveredNodes((n) => [...n, id])
-        setConnections((c) => [...c, [selectedNode, id]])
-      }
-    }
+
+    // if there's no selected node, select the clicked node
+    if (selectedNode === -1) return setSelectedNode(id)
+
+    // if we click the currently selected node, deselect it
+    if (id === selectedNode) return setSelectedNode(-1)
+
+    // otherwise, deselect the current node
+    setSelectedNode(id)
   }
 
+  const onScan = (id: number) => {
+    const node = allNodesObj[id]!
+    const scannedNodes = nodes.filter((n) => {
+      if (discoveredNodes.includes(n.id) || ownedNodes.includes(n.id))
+        return false
+
+      return haversineDistance(node, n) < discoveryRange
+    })
+
+    setDiscoveredNodes((n) => [...n, ...scannedNodes.map((n) => n.id)])
+    setConnections((c) => [
+      ...c,
+      ...scannedNodes.map((n) => ({
+        source: n.id,
+        target: id,
+        type: 'scanned',
+      })),
+    ])
+  }
+
+  const onHack = (id: number) => {
+    const node = allNodesObj[id]!
+
+    // find the closest owned node and connect it
+    const closest = owned.sort(
+      (a, b) => haversineDistance(node, a) - haversineDistance(node, b),
+    )[0]
+
+    setOwnedNodes((n) => [...n, id])
+    setConnections((c) =>
+      c.map((c) => {
+        if (c.source === id && c.target === closest.id)
+          return { ...c, type: 'hacked' }
+        return c
+      }),
+    )
+  }
+
+  const actions = [
+    {
+      label: 'test',
+      onClick: () => {
+        setMoney((m) => m + 1)
+      },
+    },
+    selectedNode !== -1 &&
+      ownedNodes.includes(selectedNode) && {
+        label: 'scan',
+        onClick: () => onScan(selectedNode),
+      },
+    selectedNode !== -1 &&
+      !ownedNodes.includes(selectedNode) && {
+        label: 'hack',
+        onClick: () => onHack(selectedNode),
+      },
+  ].filter(Boolean)
+
   return {
+    money,
+    setMoney,
+    actions,
     zoomRef,
     worldSvgMountCallback,
     renderedNodes,
@@ -81,6 +155,6 @@ export const useWorldState = (width: number, height: number) => {
     allNodesObj,
     onClickNode,
     getNodeFill,
-  }
+  } as IWorldState
 }
-const discoveryRange = 100
+const discoveryRange = 25
