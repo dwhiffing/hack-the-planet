@@ -38,29 +38,21 @@ export const getNodes = (g: SVGGElement) => {
       countryConfigs[continentName as IConfigKey] ??
       countryConfigs.default
 
-    return getRandomNonUniformPointsInCircle(city, config, g).map((point) => ({
-      ...city,
-      ...point,
-    }))
+    return getRandomNonUniformPointsInCircle(city, config, g).map((point) => {
+      const [x, y] = projection.invert?.([point.x, point.y]) ?? [0, 0]
+      return {
+        id: -1,
+        ...point,
+        earthCoords: [x, y] as [number, number],
+      }
+    })
   })
 
   const groupedByCountry = groupBy(result, (r) => r.country)
 
-  const grouped = Object.values(groupedByCountry).flatMap((nodes) =>
-    groupCoordinates(nodes, 50).flatMap((g) => g[0]),
+  _nodes = Object.values(groupedByCountry).flatMap((nodes) =>
+    groupCoordinates(nodes, 13).flatMap((g) => ({ ...g[0], id: id++ })),
   )
-  _nodes = grouped.map((g) => {
-    const [x, y] = projection.invert?.([g.x, g.y]) ?? [0, 0]
-
-    return {
-      id: id++,
-      // @ts-ignore
-      country: g.country,
-      x: g.x,
-      y: g.y,
-      earthCoords: [x, y],
-    }
-  })
 
   return _nodes as Node[]
 }
