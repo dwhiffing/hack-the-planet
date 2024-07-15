@@ -1,3 +1,41 @@
+import { Zoom } from '@vx/zoom'
+import { Dispatch, MutableRefObject, SetStateAction } from 'react'
+
+export type Point = { x: number; y: number }
+
+export type IWorldState = {
+  money: number
+  tickspeed: number
+  actions: { label: string; onClick: () => void }[]
+  setMoney: Dispatch<SetStateAction<number>>
+  selectedNode: Node
+  zoomRef: MutableRefObject<Zoom | null>
+  worldSvgMountCallback: (node: SVGGElement) => void
+  renderedNodes: Node[]
+  connections: Connection[]
+  allNodesObj: Record<number, Node>
+  onClickNode: (id: number) => void
+  onDeselect: () => void
+}
+
+export type Connection = {
+  source: number
+  target: number
+  type: string
+}
+
+export type Node = {
+  x: number
+  y: number
+  country: string
+  earthCoords?: [number, number]
+  isHome?: boolean
+  isSelected?: boolean
+  isOwned?: boolean
+  id: number
+  r?: number
+}
+
 export const background = '#f9f7e8'
 export const land = '#aaa'
 export const zoomScale = 200
@@ -5,6 +43,7 @@ export const maxZoom = 500
 export const minZoom = 1
 export const homeId = 9891
 export const baseScale = 200
+export const baseTickspeed = 500
 export const baseTranslate = [0, 0] as [number, number]
 export const countryConfigs = {
   default: {

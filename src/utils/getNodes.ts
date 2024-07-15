@@ -2,7 +2,7 @@ import { geoMercator } from 'd3-geo'
 import cities from '../assets/cities-pruned.json'
 import continents from '../assets/continents.json'
 import bordersJson from '../assets/borders.json'
-import { baseScale, baseTranslate, countryConfigs } from '@/constants'
+import { baseScale, baseTranslate, countryConfigs, Node } from '@/constants'
 import { groupBy } from 'lodash'
 import { getRandom } from '@/utils/random'
 import { groupCoordinates } from '@/utils/groupCoordinates'
@@ -11,14 +11,7 @@ const projection = geoMercator().translate(baseTranslate).scale(baseScale)
 type IContinentKey = keyof typeof continents
 type IConfigKey = keyof typeof countryConfigs
 type IBordersKey = keyof typeof bordersJson
-export type Node = {
-  x: number
-  y: number
-  country: string
-  earthCoords?: [number, number]
-  id: number
-  r?: number
-}
+
 let id = 0
 let _nodes: Node[]
 // for each city, generate nodes around it based on its density and size

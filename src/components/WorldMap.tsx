@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import { Zoom } from '@vx/zoom'
 import { background, maxZoom, minZoom } from '@/constants'
 import { WorldSvg } from './WorldSvg'
@@ -9,6 +9,7 @@ import { useWorldState } from '../utils/useWorldState'
 
 export function WorldMap({ width, height }: { width: number; height: number }) {
   const worldState = useWorldState(width, height)
+  const mouseRef = useRef<{ x: number; y: number } | null>(null)
 
   if (width === 0 && height === 0) return null
 
@@ -59,9 +60,17 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
               height={height}
               fill="transparent"
               className="relative z-10"
-              onMouseDown={zoom.dragStart}
+              onMouseDown={(e) => {
+                mouseRef.current = { x: e.screenX, y: e.screenY }
+                zoom.dragStart(e)
+              }}
               onMouseMove={zoom.dragMove}
-              onMouseUp={zoom.dragEnd}
+              onMouseUp={(e) => {
+                const xDiff = Math.abs(e.screenX - (mouseRef.current?.x ?? 0))
+                const yDiff = Math.abs(e.screenY - (mouseRef.current?.y ?? 0))
+                if (xDiff + yDiff < 1) worldState.onDeselect()
+                zoom.dragEnd()
+              }}
               onMouseLeave={onMouseLeave}
             />
             <g
