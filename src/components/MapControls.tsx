@@ -2,6 +2,7 @@ import React, { memo } from 'react'
 import { homeId, zoomScale, IWorldState } from '@/constants'
 import { coordsToTransform } from '@/utils/coords'
 import { ProvidedZoom } from '@vx/zoom/lib/types'
+import { clearLocalStorage } from '@/utils/localStorage'
 
 export const MapControls = memo(
   function MapControls({
@@ -49,6 +50,7 @@ export const MapControls = memo(
           >
             Home
           </button>
+          <button onClick={clearLocalStorage}>Reset</button>
         </div>
       </div>
     )

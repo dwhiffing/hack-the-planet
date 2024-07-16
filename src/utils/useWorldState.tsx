@@ -13,6 +13,7 @@ import {
 import { getNodes } from '@/utils/getNodes'
 import { haversineDistance as getDist } from '@/utils/groupCoordinates'
 import { transformToCoords, coordsToTransform } from '@/utils/coords'
+import { getFromLocalStorage, setToLocalStorage } from './localStorage'
 
 const initialNodeState = { money: 10 }
 
@@ -20,12 +21,16 @@ export const useWorldState = (width: number, height: number) => {
   const [nodes, setNodes] = useState<Node[]>([])
   const [publicStates, setPublicStates] = useState<
     Record<number, PublicNodeState>
-  >({
-    [homeId]: { ...initialNodeState, isOwned: true, isHome: true },
-  })
+  >(
+    getFromLocalStorage('node-states', {
+      [homeId]: { ...initialNodeState, isOwned: true, isHome: true },
+    }),
+  )
 
   const [selectedNodeId, setSelectedNodeId] = useState(-1)
-  const [connections, setConnections] = useState<Connection[]>([])
+  const [connections, setConnections] = useState<Connection[]>(
+    getFromLocalStorage('node-connections', []),
+  )
 
   const zoomRef = useRef<Zoom | null>(null)
   const worldSvgMountCallback = useCallback(
@@ -41,12 +46,12 @@ export const useWorldState = (width: number, height: number) => {
   const renderedNodes = useMemo(
     () =>
       Object.keys(publicStates)
+        .filter((id) => allNodesObj[+id])
         .map((id) => ({
           ...allNodesObj[+id],
           ...publicStates[+id],
           isSelected: selectedNodeId === +id,
-        }))
-        .filter(Boolean) as FullNode[],
+        })) as FullNode[],
     [publicStates, selectedNodeId, allNodesObj],
   )
 
@@ -198,9 +203,15 @@ export const useWorldState = (width: number, height: number) => {
           newState[+nodeId] = { ...state, money: currentMoney, outgoingMoney }
         }
       })
+      setToLocalStorage('node-states', newState)
       return newState
     })
-  }, [setPublicStates])
+
+    setConnections((_state) => {
+      setToLocalStorage('node-connections', _state)
+      return _state
+    })
+  }, [setPublicStates, setConnections])
 
   useEffect(() => {
     const intervalId = setInterval(doTick, tickspeed)
@@ -219,7 +230,7 @@ export const useWorldState = (width: number, height: number) => {
     renderedNodes,
     onDeselect,
     selectedNode,
-    connections,
+    connections: nodes.length > 0 ? connections : [],
     allNodesObj,
     onClickNode,
     tickspeed,
