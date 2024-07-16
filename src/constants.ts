@@ -44,8 +44,8 @@ export type PublicNodeState = {
 
 export type FullNode = Node & PublicNodeState
 
-export const background = '#f9f7e8'
-export const land = '#aaa'
+export const background = '#111'
+export const land = '#333'
 export const zoomScale = 200
 export const maxZoom = 500
 export const minZoom = 1

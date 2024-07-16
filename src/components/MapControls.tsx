@@ -17,30 +17,39 @@ export const MapControls = memo(
     height: number
   }) {
     return (
-      <div className="absolute top-0 p-4 inset-x-0 flex justify-between">
+      <div className="absolute top-0 p-4 inset-x-0 flex justify-between pointer-events-none">
         <div className="">
           <p>Money: ${worldState.money}</p>
-          <p>SelectedNode: {worldState.selectedNode?.id}</p>
-          <p>country: {worldState.selectedNode?.country}</p>
-          <p>money: {worldState.selectedNode?.money}</p>
-          <p>
-            coords:{' '}
-            {worldState.selectedNode?.earthCoords
-              ?.map((n) => n.toFixed(4))
-              ?.join(', ')}
-          </p>
-          <div className="">
-            {worldState.actions.map((a) => (
-              <button key={a.label} className="" onClick={a.onClick}>
-                {a.label}
-              </button>
-            ))}
-          </div>
+          {worldState.selectedNode && (
+            <div className="border border-[#555] my-2 p-2">
+              <p>id: {worldState.selectedNode?.id}</p>
+              <p>country: {worldState.selectedNode?.country}</p>
+              <p>money: {worldState.selectedNode?.money}</p>
+              <p>
+                coords:{' '}
+                {worldState.selectedNode?.earthCoords
+                  ?.map((n) => n.toFixed(4))
+                  ?.join(', ')}
+              </p>
+              <div className="flex gap-2">
+                {worldState.actions.map((a) => (
+                  <button
+                    key={a.label}
+                    className="pointer-events-auto"
+                    onClick={a.onClick}
+                  >
+                    {a.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-        <div className="flex flex-col items-end">
-          <button onClick={() => zoom.scale({ scaleX: 1.2 })}>+</button>
-          <button onClick={() => zoom.scale({ scaleX: 0.8 })}>-</button>
+        <div className="flex flex-row items-start gap-2">
+          {/* <button onClick={() => zoom.scale({ scaleX: 1.2 })}>+</button>
+          <button onClick={() => zoom.scale({ scaleX: 0.8 })}>-</button> */}
           <button
+            className="pointer-events-auto"
             onClick={() => {
               const home = worldState.allNodesObj[homeId].earthCoords!
               zoom.setTransformMatrix(
@@ -50,7 +59,9 @@ export const MapControls = memo(
           >
             Home
           </button>
-          <button onClick={clearLocalStorage}>Reset</button>
+          <button className="pointer-events-auto" onClick={clearLocalStorage}>
+            Reset
+          </button>
         </div>
       </div>
     )
