@@ -116,15 +116,21 @@ export const useWorldState = (width: number, height: number) => {
 
   const onScan = useCallback(
     (id: number) => {
-      const node = allNodesObj[id]!
-      const scannedIds = nodes
-        .filter((n) => !publicStates[n.id] && getDist(node, n) < discoveryRange)
-        .map((n) => n.id)
+      const node = nodes.find((n) => n.id === id)
+      if (node) {
+        const scannedIds = nodes
+          .filter(
+            (n) =>
+              !renderedNodes.find((_n) => n.id === _n.id) &&
+              getDist(node, n) < discoveryRange,
+          )
+          .map((n) => n.id)
 
-      updateNodes(scannedIds, { isScanned: true, target: id })
-      addConnections(id, scannedIds)
+        updateNodes(scannedIds, { isScanned: true, target: id })
+        addConnections(id, scannedIds)
+      }
     },
-    [allNodesObj, nodes, publicStates, addConnections, updateNodes],
+    [nodes, renderedNodes, addConnections, updateNodes],
   )
 
   const onHack = useCallback(
@@ -166,29 +172,40 @@ export const useWorldState = (width: number, height: number) => {
   )
   const money = useMemo(() => homeNode?.money ?? 0, [homeNode])
 
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setPublicStates((_state) => {
-        let newState = { ..._state }
-        const ids = Object.keys(newState)
-        ids.forEach((id) => {
-          const state = newState[+id]!
-          const target = newState[+(state.target ?? 0)]
+  const doTick = useCallback(() => {
+    setPublicStates((_state) => {
+      let newState = { ..._state }
+      const nodeIds = Object.keys(newState)
+      nodeIds.forEach((nodeId) => {
+        const state = newState[+nodeId]!
+        const targetId = +(state.target ?? 0)
+        const target = newState[targetId]
 
-          if (target && state.isOwned && state.money && state.money > 0) {
-            newState[+id] = { ...state, money: (state?.money ?? 0) - 1 }
-            newState[+(state.target ?? 0)] = {
-              ...target,
-              money: (target?.money ?? 0) + 1,
-            }
+        if (target && state.outgoingMoney) {
+          newState[targetId] = {
+            ...target,
+            money: (target?.money ?? 0) + state.outgoingMoney,
           }
-        })
-        return newState
-      })
-    }, tickspeed)
+        }
 
+        if (target && state.isOwned) {
+          let outgoingMoney = 1
+          let currentMoney = state?.money ?? 0
+          if (currentMoney < outgoingMoney) {
+            outgoingMoney = currentMoney
+          }
+          currentMoney -= outgoingMoney
+          newState[+nodeId] = { ...state, money: currentMoney, outgoingMoney }
+        }
+      })
+      return newState
+    })
+  }, [setPublicStates])
+
+  useEffect(() => {
+    const intervalId = setInterval(doTick, tickspeed)
     return () => clearInterval(intervalId)
-  }, [tickspeed, connections, updateNodes])
+  }, [tickspeed, doTick])
 
   const onDeselect = useCallback(() => {
     setSelectedNodeId(-1)

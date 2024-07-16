@@ -1,5 +1,5 @@
 import { Zoom } from '@vx/zoom'
-import { Dispatch, MutableRefObject, SetStateAction } from 'react'
+import { MutableRefObject } from 'react'
 
 export type Point = { x: number; y: number }
 
@@ -39,6 +39,7 @@ export type PublicNodeState = {
   isSelected?: boolean
   target?: number
   money?: number
+  outgoingMoney?: number
 }
 
 export type FullNode = Node & PublicNodeState
