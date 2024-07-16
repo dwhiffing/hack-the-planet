@@ -21,6 +21,7 @@ export const MapControls = memo(
           <p>Money: ${worldState.money}</p>
           <p>SelectedNode: {worldState.selectedNode?.id}</p>
           <p>country: {worldState.selectedNode?.country}</p>
+          <p>money: {worldState.selectedNode?.money}</p>
           <p>
             coords:{' '}
             {worldState.selectedNode?.earthCoords

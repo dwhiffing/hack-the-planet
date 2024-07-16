@@ -1,6 +1,6 @@
 import React, { memo } from 'react'
 import { Graph } from '@visx/network'
-import { Node, IWorldState, Point, NodeState } from '@/constants'
+import { Node, IWorldState, Point, PublicNodeState } from '@/constants'
 
 export const NetworkGraph = memo(
   function NetworkGraph({ worldState }: { worldState: IWorldState }) {
@@ -82,7 +82,7 @@ const DefaultLink = ({
 )
 
 const DefaultNode = (props: {
-  node: Node & NodeState
+  node: Node & PublicNodeState
   onClick: () => void
 }) => {
   const fill = props.node.isHome
