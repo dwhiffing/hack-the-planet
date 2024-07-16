@@ -7,11 +7,10 @@ export type IWorldState = {
   money: number
   tickspeed: number
   actions: { label: string; onClick: () => void }[]
-  selectedNode: Node & PublicNodeState & PrivateNodeState
+  selectedNode: FullNode
   zoomRef: MutableRefObject<Zoom | null>
   worldSvgMountCallback: (node: SVGGElement) => void
-  renderedNodes: Node[]
-  statefulNodes: (Node & PublicNodeState & PrivateNodeState)[]
+  renderedNodes: FullNode[]
   connections: Connection[]
   allNodesObj: Record<number, Node>
   onClickNode: (id: number) => void
@@ -39,11 +38,10 @@ export type PublicNodeState = {
   isScanned?: boolean
   isSelected?: boolean
   target?: number
-}
-
-export type PrivateNodeState = {
   money?: number
 }
+
+export type FullNode = Node & PublicNodeState
 
 export const background = '#f9f7e8'
 export const land = '#aaa'

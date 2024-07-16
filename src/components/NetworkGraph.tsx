@@ -1,30 +1,35 @@
 import React, { memo } from 'react'
-import { Graph } from '@visx/network'
-import { Node, IWorldState, Point, PublicNodeState } from '@/constants'
+import { Group } from '@visx/group'
+import { IWorldState, FullNode } from '@/constants'
 
 export const NetworkGraph = memo(
   function NetworkGraph({ worldState }: { worldState: IWorldState }) {
-    const { renderedNodes, connections, allNodesObj, onClickNode } = worldState
+    const { renderedNodes, connections, onClickNode } = worldState
+
+    const graph = {
+      nodes: renderedNodes,
+      links: connections.map(({ source, target, type }) => ({
+        source: renderedNodes.find((n) => n.id === source)!,
+        target: renderedNodes.find((n) => n.id === target)!,
+        type,
+      })),
+    }
+
     return (
-      <Graph
-        graph={{
-          nodes: renderedNodes,
-          links: connections.map(({ source, target, type }) => ({
-            source: allNodesObj[source],
-            target: allNodesObj[target],
-            type,
-          })),
-        }}
-        linkComponent={(props) => (
-          <DefaultLink link={props.link} tickspeed={worldState.tickspeed} />
-        )}
-        nodeComponent={(props) => (
-          <DefaultNode
-            node={props.node}
-            onClick={() => onClickNode(props.node.id)}
+      <>
+        {graph.links.map((link, i) => (
+          <DefaultLink
+            key={i}
+            link={link}
+            tickspeed={worldState.tickspeed}
           />
-        )}
-      />
+        ))}
+        {graph.nodes.map((node, i) => (
+          <Group key={i} left={node.x} top={node.y}>
+            <DefaultNode node={node} onClick={() => onClickNode(node.id)} />
+          </Group>
+        ))}
+      </>
     )
   },
   (prevProps, nextProps) => {
@@ -33,7 +38,6 @@ export const NetworkGraph = memo(
     return (
       _p.renderedNodes === _n.renderedNodes &&
       _p.connections === _n.connections &&
-      _p.allNodesObj === _n.allNodesObj &&
       _p.onClickNode === _n.onClickNode
     )
   },
@@ -43,7 +47,7 @@ const DefaultLink = ({
   link: { source, target, type },
   tickspeed,
 }: {
-  link: { source: Point; target: Point; type: string }
+  link: { source: FullNode; target: FullNode; type: string }
   tickspeed: number
 }) => (
   <>
@@ -81,10 +85,7 @@ const DefaultLink = ({
   </>
 )
 
-const DefaultNode = (props: {
-  node: Node & PublicNodeState
-  onClick: () => void
-}) => {
+const DefaultNode = (props: { node: FullNode; onClick: () => void }) => {
   const fill = props.node.isHome
     ? '#f0f'
     : props.node.isOwned

@@ -1,4 +1,4 @@
-import { Node } from './getNodes'
+import { Node } from '@/constants'
 
 export function groupCoordinates(nodes: Node[], maxDistance: number) {
   const groups = []

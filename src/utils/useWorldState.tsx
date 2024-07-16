@@ -8,7 +8,7 @@ import {
   Connection,
   baseTickspeed,
   PublicNodeState,
-  PrivateNodeState,
+  FullNode,
 } from '@/constants'
 import { getNodes } from '@/utils/getNodes'
 import { haversineDistance as getDist } from '@/utils/groupCoordinates'
@@ -21,13 +21,9 @@ export const useWorldState = (width: number, height: number) => {
   const [publicStates, setPublicStates] = useState<
     Record<number, PublicNodeState>
   >({
-    [homeId]: { isOwned: true, isHome: true },
+    [homeId]: { ...initialNodeState, isOwned: true, isHome: true },
   })
-  const [privateStates, setPrivateStates] = useState<
-    Record<number, PrivateNodeState>
-  >({
-    [homeId]: { ...initialNodeState },
-  })
+
   const [selectedNodeId, setSelectedNodeId] = useState(-1)
   const [connections, setConnections] = useState<Connection[]>([])
 
@@ -50,21 +46,8 @@ export const useWorldState = (width: number, height: number) => {
           ...publicStates[+id],
           isSelected: selectedNodeId === +id,
         }))
-        .filter(Boolean),
+        .filter(Boolean) as FullNode[],
     [publicStates, selectedNodeId, allNodesObj],
-  )
-
-  const statefulNodes = useMemo(
-    () =>
-      Object.keys(publicStates)
-        .map((id) => ({
-          ...allNodesObj[+id],
-          ...publicStates[+id],
-          ...privateStates[+id],
-          isSelected: selectedNodeId === +id,
-        }))
-        .filter(Boolean),
-    [publicStates, selectedNodeId, privateStates, allNodesObj],
   )
 
   const updateConnection = useCallback(
@@ -88,7 +71,7 @@ export const useWorldState = (width: number, height: number) => {
     [setConnections],
   )
   const updateNodes = useCallback(
-    (ids: number[], changes: Partial<PublicNodeState>) =>
+    (ids: number[], changes: Partial<PublicNodeState>) => {
       setPublicStates((_state) =>
         ids.reduce(
           (state, id) => ({
@@ -97,7 +80,8 @@ export const useWorldState = (width: number, height: number) => {
           }),
           { ..._state },
         ),
-      ),
+      )
+    },
     [setPublicStates],
   )
 
@@ -145,17 +129,17 @@ export const useWorldState = (width: number, height: number) => {
 
   const onHack = useCallback(
     (id: number) => {
-      const node = statefulNodes.find((n) => n.id === id)
+      const node = renderedNodes.find((n) => n.id === id)
       if (node?.target) {
         updateNodes([id], { isOwned: true })
         updateConnection(id, node.target, { type: 'hacked' })
       }
     },
-    [statefulNodes, updateConnection, updateNodes],
+    [renderedNodes, updateConnection, updateNodes],
   )
 
   const actions = useMemo(() => {
-    const node = statefulNodes.find((n) => n.id === selectedNodeId)
+    const node = renderedNodes.find((n) => n.id === selectedNodeId)
     return [
       node &&
         node.isOwned && {
@@ -168,27 +152,39 @@ export const useWorldState = (width: number, height: number) => {
           onClick: () => onHack(selectedNodeId),
         },
     ].filter(Boolean)
-  }, [onHack, onScan, statefulNodes, selectedNodeId])
+  }, [onHack, onScan, renderedNodes, selectedNodeId])
 
   const tickspeed = baseTickspeed
 
   const selectedNode = useMemo(
-    () => statefulNodes.find((n) => n.isSelected),
-    [statefulNodes],
+    () => renderedNodes.find((n) => n.isSelected),
+    [renderedNodes],
   )
   const homeNode = useMemo(
-    () => statefulNodes.find((n) => n.id === homeId),
-    [statefulNodes],
+    () => renderedNodes.find((n) => n.id === homeId),
+    [renderedNodes],
   )
   const money = useMemo(() => homeNode?.money ?? 0, [homeNode])
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      setPrivateStates((state) => ({
-        ...state,
-        [homeId]: { ...state[homeId], money: (state[homeId]?.money ?? 0) + 1 },
-      }))
-      // setMoney((m) => m + connections.filter((c) => c.type === 'hacked').length)
+      setPublicStates((_state) => {
+        let newState = { ..._state }
+        const ids = Object.keys(newState)
+        ids.forEach((id) => {
+          const state = newState[+id]!
+          const target = newState[+(state.target ?? 0)]
+
+          if (target && state.isOwned && state.money && state.money > 0) {
+            newState[+id] = { ...state, money: (state?.money ?? 0) - 1 }
+            newState[+(state.target ?? 0)] = {
+              ...target,
+              money: (target?.money ?? 0) + 1,
+            }
+          }
+        })
+        return newState
+      })
     }, tickspeed)
 
     return () => clearInterval(intervalId)
@@ -203,7 +199,6 @@ export const useWorldState = (width: number, height: number) => {
     actions,
     zoomRef,
     worldSvgMountCallback,
-    statefulNodes: statefulNodes,
     renderedNodes,
     onDeselect,
     selectedNode,
