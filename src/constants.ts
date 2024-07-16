@@ -29,11 +29,15 @@ export type Node = {
   y: number
   country: string
   earthCoords?: [number, number]
-  isHome?: boolean
-  isSelected?: boolean
-  isOwned?: boolean
   id: number
   r?: number
+}
+
+export type NodeState = {
+  isHome?: boolean
+  isOwned?: boolean
+  isScanned?: boolean
+  isSelected?: boolean
 }
 
 export const background = '#f9f7e8'

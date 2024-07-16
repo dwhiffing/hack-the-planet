@@ -7,17 +7,19 @@ import {
   IWorldState,
   Connection,
   baseTickspeed,
+  NodeState,
 } from '@/constants'
 import { getNodes } from '@/utils/getNodes'
-import { haversineDistance } from '@/utils/groupCoordinates'
+import { haversineDistance as getDist } from '@/utils/groupCoordinates'
 import { transformToCoords, coordsToTransform } from '@/utils/coords'
 
 export const useWorldState = (width: number, height: number) => {
   const [money, setMoney] = useState<number>(100)
   const [nodes, setNodes] = useState<Node[]>([])
+  const [nodeStates, setNodeStates] = useState<Record<number, NodeState>>({
+    [homeId]: { isOwned: true, isHome: true },
+  })
   const [selectedNodeId, setSelectedNodeId] = useState(-1)
-  const [ownedNodeIds, setOwnedNodeIds] = useState([homeId])
-  const [scannedNodeIds, setScannedNodeIds] = useState([homeId])
   const [connections, setConnections] = useState<Connection[]>([])
 
   const zoomRef = useRef<Zoom | null>(null)
@@ -31,15 +33,45 @@ export const useWorldState = (width: number, height: number) => {
     [nodes],
   )
 
-  const renderedNodes = useMemo(
-    () => scannedNodeIds.map((id) => allNodesObj[id]).filter(Boolean),
-    [scannedNodeIds, allNodesObj],
+  const _nodes = useMemo(
+    () =>
+      Object.keys(nodeStates)
+        .map((id) => ({
+          ...allNodesObj[+id],
+          ...nodeStates[+id],
+          isSelected: selectedNodeId === +id,
+        }))
+        .filter(Boolean),
+    [nodeStates, selectedNodeId, allNodesObj],
   )
 
-  const owned = useMemo(
-    () => ownedNodeIds.map((id) => allNodesObj[id]).filter(Boolean),
-    [ownedNodeIds, allNodesObj],
-  )
+  const updateConnection = (
+    source: number,
+    target: number,
+    change: Partial<Connection>,
+  ) =>
+    setConnections((c) =>
+      c.map((c) => {
+        if (c.source === source && c.target === target)
+          return { ...c, ...change }
+        return c
+      }),
+    )
+  const addConnections = (target: number, nodeIds: number[]) =>
+    setConnections((c) => [
+      ...c,
+      ...nodeIds.map((source) => ({ source, target, type: 'scanned' })),
+    ])
+  const updateNodes = (ids: number[], changes: Partial<NodeState>) =>
+    setNodeStates((_nodeState) =>
+      ids.reduce(
+        (state, id) => ({
+          ...state,
+          [id]: { ...state[id], ...changes },
+        }),
+        { ..._nodeState },
+      ),
+    )
 
   useEffect(() => {
     const home = allNodesObj[homeId]
@@ -56,7 +88,7 @@ export const useWorldState = (width: number, height: number) => {
 
   const onClickNode = useCallback(
     (id: number) => {
-      console.log(allNodesObj[id])
+      console.log('clicked', allNodesObj[id])
 
       // if there's no selected node, select the clicked node
       if (selectedNodeId === -1) return setSelectedNodeId(id)
@@ -73,24 +105,15 @@ export const useWorldState = (width: number, height: number) => {
   const onScan = useCallback(
     (id: number) => {
       const node = allNodesObj[id]!
-      const scannedNodes = nodes.filter((n) => {
-        if (scannedNodeIds.includes(n.id) || ownedNodeIds.includes(n.id))
-          return false
+      const scanned = nodes
+        .filter((n) => !nodeStates[n.id] && getDist(node, n) < discoveryRange)
+        .map((n) => n.id)
 
-        return haversineDistance(node, n) < discoveryRange
-      })
+      updateNodes(scanned, { isScanned: true })
 
-      setScannedNodeIds((n) => [...n, ...scannedNodes.map((n) => n.id)])
-      setConnections((c) => [
-        ...c,
-        ...scannedNodes.map((n) => ({
-          source: n.id,
-          target: id,
-          type: 'scanned',
-        })),
-      ])
+      addConnections(id, scanned)
     },
-    [allNodesObj, nodes, ownedNodeIds, scannedNodeIds],
+    [allNodesObj, nodes, nodeStates],
   )
 
   const onHack = useCallback(
@@ -98,49 +121,31 @@ export const useWorldState = (width: number, height: number) => {
       const node = allNodesObj[id]!
 
       // find the closest owned node and connect it
-      const closest = owned.sort(
-        (a, b) => haversineDistance(node, a) - haversineDistance(node, b),
-      )[0]
+      const closest = _nodes
+        .filter((n) => n.isOwned)
+        .sort((a, b) => getDist(node, a) - getDist(node, b))[0]
 
-      setOwnedNodeIds((n) => [...n, id])
-      setConnections((c) =>
-        c.map((c) => {
-          if (c.source === id && c.target === closest.id)
-            return { ...c, type: 'hacked' }
-          return c
-        }),
-      )
+      updateNodes([id], { isOwned: true })
+      updateConnection(id, closest.id, { type: 'hacked' })
     },
-    [allNodesObj, owned],
+    [allNodesObj, _nodes],
   )
 
-  const actions = useMemo(
-    () =>
-      [
-        selectedNodeId !== -1 &&
-          ownedNodeIds.includes(selectedNodeId) && {
-            label: 'scan',
-            onClick: () => onScan(selectedNodeId),
-          },
-        selectedNodeId !== -1 &&
-          !ownedNodeIds.includes(selectedNodeId) && {
-            label: 'hack',
-            onClick: () => onHack(selectedNodeId),
-          },
-      ].filter(Boolean),
-    [onHack, onScan, ownedNodeIds, selectedNodeId],
-  )
-
-  const _nodes = useMemo(
-    () =>
-      renderedNodes.map((n) => ({
-        ...n,
-        isHome: homeId === n.id,
-        isOwned: ownedNodeIds.includes(n.id),
-        isSelected: selectedNodeId === n.id,
-      })),
-    [renderedNodes, ownedNodeIds, selectedNodeId],
-  )
+  const actions = useMemo(() => {
+    const node = _nodes.find((n) => n.id === selectedNodeId)
+    return [
+      node &&
+        node.isOwned && {
+          label: 'scan',
+          onClick: () => onScan(selectedNodeId),
+        },
+      node &&
+        !node?.isOwned && {
+          label: 'hack',
+          onClick: () => onHack(selectedNodeId),
+        },
+    ].filter(Boolean)
+  }, [onHack, onScan, _nodes, selectedNodeId])
 
   const selectedNode = useMemo(() => _nodes.find((n) => n.isSelected), [_nodes])
 
