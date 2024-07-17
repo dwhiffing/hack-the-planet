@@ -20,7 +20,6 @@ export const setToLocalStorage = (key: string, value: any) => {
 
 export const clearLocalStorage = () => {
   isDeletingSave = true
-  localStorage.removeItem('node-states')
-  localStorage.removeItem('node-connections')
+  localStorage.removeItem('app-cache')
   window.location.reload()
 }

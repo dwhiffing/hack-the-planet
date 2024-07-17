@@ -2,87 +2,118 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Zoom } from '@vx/zoom'
 import {
   homeId,
-  zoomScale,
   Node,
   IWorldState,
   baseTickspeed,
-  PublicNodeState,
   FullNode,
+  scanTime,
+  discoveryRange,
 } from '@/constants'
 import { getNodes } from '@/utils/getNodes'
 import { haversineDistance as getDist } from '@/utils/groupCoordinates'
-import { transformToCoords, coordsToTransform } from '@/utils/coords'
-import { getFromLocalStorage, setToLocalStorage } from './localStorage'
+import useSWRImmutable from 'swr/immutable'
+import { useSWRConfig } from 'swr'
+import { uniq } from 'lodash'
 
-const initialNodeState = { money: 10 }
+export const useSelectedNodeId = () => {
+  const { data, mutate } = useSWRImmutable<number>(`selected-node-id`, () => -1)
 
-export const useWorldState = (width: number, height: number) => {
-  const [nodes, setNodes] = useState<Node[]>([])
-  const [publicStates, setPublicStates] = useState<
-    Record<number, PublicNodeState>
-  >(
-    getFromLocalStorage('node-states', {
-      [homeId]: { ...initialNodeState, isOwned: true, isHome: true },
-    }),
+  const setSelectedNodeId = useCallback(
+    (nodeId: number) => mutate(nodeId, { revalidate: false }),
+    [mutate],
   )
 
-  const [selectedNodeId, setSelectedNodeId] = useState(-1)
+  return { selectedNodeId: data, setSelectedNodeId }
+}
+export const useRenderedNodeIds = () => {
+  const { data, mutate } = useSWRImmutable<number[]>(
+    `rendered-node-ids`,
+    () => [homeId],
+  )
 
+  const addRenderedNodes = useCallback(
+    (nodeId: number) =>
+      mutate((n) => uniq([...(n ?? []), nodeId]), { revalidate: false }),
+    [mutate],
+  )
+
+  return { renderedNodeIds: data ?? [], addRenderedNodes }
+}
+
+export const useMoney = () => {
+  const homeNode = useNodeState(homeId)
+  const money = useMemo(() => homeNode.node?.money ?? 0, [homeNode])
+  return money
+}
+
+export const useNodeState = (nodeId?: number) => {
+  // const { nodes } = useWorldState()
+  const { data } = useSWRImmutable<FullNode | null>(
+    nodeId && nodeId !== -1 ? `node-${nodeId}` : undefined,
+    () => null,
+  )
+  // const setNode = (changes: Partial<FullNode>) => {
+  //   mutate(
+  //     (node) => {
+  //       if (node) {
+  //         return { ...node, ...changes }
+  //       } else {
+  //         return {
+  //           ...nodes.find((n) => n.id === nodeId)!,
+  //           ...changes,
+  //         }
+  //       }
+  //     },
+  //     { revalidate: false },
+  //   )
+  // }
+  return { node: data }
+}
+
+export const useWorldState = () => {
+  const { mutate, cache } = useSWRConfig()
+  const [nodes, setNodes] = useState<Node[]>([])
+  const { renderedNodeIds, addRenderedNodes } = useRenderedNodeIds()
+  const { selectedNodeId, setSelectedNodeId } = useSelectedNodeId()
   const zoomRef = useRef<Zoom | null>(null)
   const worldSvgMountCallback = useCallback(
     (node: SVGGElement) => setNodes(getNodes(node)),
     [],
   )
 
-  const allNodesObj: Record<number, Node> = useMemo(
-    () => nodes.reduce((obj, n) => ({ ...obj, [n.id]: n }), {}),
-    [nodes],
+  const getNode = useCallback(
+    (id: number) => cache.get(`node-${id}`)?.data as FullNode | undefined,
+    [cache],
   )
-
-  const renderedNodes = useMemo(
-    () =>
-      Object.keys(publicStates)
-        .filter((id) => allNodesObj[+id])
-        .map((id) => ({
-          ...allNodesObj[+id],
-          ...publicStates[+id],
-          isSelected: selectedNodeId === +id,
-        })) as FullNode[],
-    [publicStates, selectedNodeId, allNodesObj],
-  )
-
-  const updateNodes = useCallback(
-    (ids: number[], changes: Partial<PublicNodeState>) => {
-      setPublicStates((_state) =>
-        ids.reduce(
-          (state, id) => ({
-            ...state,
-            [id]: { ...initialNodeState, ...state[id], ...changes },
-          }),
-          { ..._state },
-        ),
+  const updateNode = useCallback(
+    (nodeId: number, changes: Partial<FullNode>) => {
+      if (nodes.length === 0 || typeof nodeId !== 'number') return
+      mutate(
+        `node-${nodeId}`,
+        (node) => {
+          if (node) {
+            return { ...node, ...changes }
+          } else {
+            addRenderedNodes(nodeId)
+            const _node = nodes.find((n) => n.id === nodeId)!
+            return { ..._node, ...changes }
+          }
+        },
+        { revalidate: false },
       )
     },
-    [setPublicStates],
+    [nodes, mutate, addRenderedNodes],
   )
 
   useEffect(() => {
-    const home = allNodesObj[homeId]
-    if (home) {
-      const matrix = zoomRef.current!.state.transformMatrix
-      const [x, y] = transformToCoords(matrix, width, height)
-      if (x === 0 && y === 0) {
-        zoomRef.current?.setTransformMatrix(
-          coordsToTransform(...home.earthCoords!, zoomScale, width, height),
-        )
-      }
-    }
-  }, [allNodesObj, width, height])
+    if (nodes.length === 0) return
+
+    const home = getNode(homeId)
+    if (!home) updateNode(homeId, { money: 10, isOwned: true, isHome: true })
+  }, [updateNode, nodes, getNode])
 
   const onClickNode = useCallback(
     (id: number) => {
-      console.log('clicked', allNodesObj[id])
-
       // if there's no selected node, select the clicked node
       if (selectedNodeId === -1) return setSelectedNodeId(id)
 
@@ -92,104 +123,98 @@ export const useWorldState = (width: number, height: number) => {
       // otherwise, deselect the current node
       setSelectedNodeId(id)
     },
-    [allNodesObj, selectedNodeId],
+    [selectedNodeId, setSelectedNodeId],
   )
 
   const onScan = useCallback(
     (id: number) => {
       const node = nodes.find((n) => n.id === id)
       if (node) {
-        const scannedId = nodes
+        const closestNode = nodes
           .filter(
             (n) =>
-              !renderedNodes.find((_n) => n.id === _n.id) &&
+              !renderedNodeIds.includes(n.id) &&
               getDist(node, n) < discoveryRange,
           )
           .map((n) => ({ id: n.id, dist: getDist(node, n) }))
           .sort((a, b) => a.dist - b.dist)
-          .at(0)?.id
+          .at(0)
 
-        // updateNodes([id], { isScanning: true })
-        // setTimeout(() => {
-        //   updateNodes([id], { isScanning: false })
-        if (scannedId) {
-          updateNodes([scannedId], { isScanned: true, target: id })
-        }
-        // }, scanTime * ((scannedIds[0]?.dist ?? 1) / discoveryRange))
-        // }, 500)
+        updateNode(id, { isScanning: true })
+        const duration =
+          scanTime * ((closestNode?.dist ?? discoveryRange) / discoveryRange)
+        setTimeout(() => {
+          updateNode(id, { isScanning: false })
+          if (closestNode) {
+            updateNode(closestNode.id, {
+              isScanned: true,
+              target: id,
+              money: 10,
+            })
+          }
+        }, duration)
       }
     },
-    [nodes, renderedNodes, updateNodes],
+    [nodes, renderedNodeIds, updateNode],
   )
 
   const onHack = useCallback(
     (id: number) => {
-      const node = renderedNodes.find((n) => n.id === id)
-      if (node?.target) {
-        updateNodes([id], { isOwned: true })
+      const node = getNode(id)
+      if (node && node.isScanned && !node.isOwned) {
+        updateNode(id, { isOwned: true })
       }
     },
-    [renderedNodes, updateNodes],
+    [updateNode, getNode],
   )
 
   const actions = useMemo(() => {
-    const node = renderedNodes.find((n) => n.id === selectedNodeId)
     return [
-      node &&
-        node.isOwned && {
-          label: 'scan',
-          onClick: () => onScan(selectedNodeId),
-        },
-      node &&
-        !node?.isOwned && {
-          label: 'hack',
-          onClick: () => onHack(selectedNodeId),
-        },
+      {
+        label: 'scan',
+        getIsVisible: (node: FullNode) => node && node.isOwned,
+        onClick: (node: FullNode) => onScan(node.id),
+      },
+      {
+        label: 'hack',
+        getIsVisible: (node: FullNode) =>
+          node && node.isScanned && !node.isOwned,
+        onClick: (node: FullNode) => onHack(node.id),
+      },
     ].filter(Boolean)
-  }, [onHack, onScan, renderedNodes, selectedNodeId])
+  }, [onHack, onScan])
 
   const tickspeed = baseTickspeed
 
-  const selectedNode = useMemo(
-    () => renderedNodes.find((n) => n.isSelected),
-    [renderedNodes],
-  )
-  const homeNode = useMemo(
-    () => renderedNodes.find((n) => n.id === homeId),
-    [renderedNodes],
-  )
-  const money = useMemo(() => homeNode?.money ?? 0, [homeNode])
-
   const doTick = useCallback(() => {
-    setPublicStates((_state) => {
-      let newState = { ..._state }
-      const nodeIds = Object.keys(newState)
-      nodeIds.forEach((nodeId) => {
-        const state = newState[+nodeId]!
-        const targetId = +(state.target ?? 0)
-        const target = newState[targetId]
-
-        if (target && state.outgoingMoney) {
-          newState[targetId] = {
-            ...target,
-            money: (target?.money ?? 0) + state.outgoingMoney,
-          }
+    renderedNodeIds.forEach((nodeId) => {
+      const node = getNode(nodeId)
+      const target = getNode(node?.target ?? -1)
+      if (node && target && node.outgoingMoney) {
+        updateNode(node.target!, {
+          money: (target?.money ?? 0) + node.outgoingMoney,
+        })
+      }
+      if (node && target && node.isOwned) {
+        let outgoingMoney = 1
+        let currentMoney = node?.money ?? 0
+        if (currentMoney < outgoingMoney) {
+          outgoingMoney = currentMoney
         }
-
-        if (target && state.isOwned) {
-          let outgoingMoney = 1
-          let currentMoney = state?.money ?? 0
-          if (currentMoney < outgoingMoney) {
-            outgoingMoney = currentMoney
-          }
-          currentMoney -= outgoingMoney
-          newState[+nodeId] = { ...state, money: currentMoney, outgoingMoney }
-        }
-      })
-      setToLocalStorage('node-states', newState)
-      return newState
+        currentMoney -= outgoingMoney
+        updateNode(nodeId, {
+          money: currentMoney,
+          outgoingMoney,
+        })
+      }
     })
-  }, [setPublicStates])
+
+    const appCache = Array.from(cache.keys()).map((key) => [
+      key,
+      cache.get(key),
+    ])
+    localStorage.setItem('app-cache', JSON.stringify(appCache))
+  }, [renderedNodeIds, getNode, cache, updateNode])
 
   useEffect(() => {
     const intervalId = setInterval(doTick, tickspeed)
@@ -198,19 +223,17 @@ export const useWorldState = (width: number, height: number) => {
 
   const onDeselect = useCallback(() => {
     setSelectedNodeId(-1)
-  }, [])
+  }, [setSelectedNodeId])
 
   return {
-    money,
+    nodes,
+    renderedNodeIds,
     actions,
     zoomRef,
+    selectedNodeId,
     worldSvgMountCallback,
-    renderedNodes,
     onDeselect,
-    selectedNode,
-    allNodesObj,
     onClickNode,
     tickspeed,
   } as IWorldState
 }
-const discoveryRange = 25

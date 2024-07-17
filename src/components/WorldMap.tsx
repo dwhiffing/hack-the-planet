@@ -1,15 +1,27 @@
-import React, { useRef } from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 import { Zoom } from '@vx/zoom'
-import { background, maxZoom, minZoom } from '@/constants'
+import { background, homeId, maxZoom, minZoom, zoomScale } from '@/constants'
 import { WorldSvg } from './WorldSvg'
 import { NetworkGraph } from './NetworkGraph'
 import { coordsToTransform } from '@/utils/coords'
 import { MapControls } from './MapControls'
-import { useWorldState } from '../utils/useWorldState'
+import { useMoney, useWorldState } from '../utils/useWorldState'
 
 export function WorldMap({ width, height }: { width: number; height: number }) {
-  const worldState = useWorldState(width, height)
+  const worldState = useWorldState()
+  const money = useMoney()
   const mouseRef = useRef<{ x: number; y: number } | null>(null)
+  const onClickHome = useCallback(() => {
+    const home = worldState.nodes.find((n) => n.id == homeId)?.earthCoords
+    if (home)
+      worldState.zoomRef.current?.setTransformMatrix(
+        coordsToTransform(...home, zoomScale, width, height),
+      )
+  }, [width, height, worldState.zoomRef, worldState.nodes])
+
+  useEffect(() => {
+    onClickHome()
+  }, [onClickHome])
 
   if (width === 0 && height === 0) return null
 
@@ -39,7 +51,6 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
     >
       {(zoom) => (
         <>
-          {/* {console.log(...transformToCoords(zoom.transformMatrix, width, height))} */}
           <svg
             className="rounded-xl overflow-hidden"
             width={width}
@@ -77,15 +88,19 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
               style={{ pointerEvents: zoom.isDragging ? 'none' : 'auto' }}
               transform={zoom.toString()}
             >
-              <NetworkGraph worldState={worldState} />
+              <NetworkGraph
+                nodeIds={worldState.renderedNodeIds}
+                onClickNode={worldState.onClickNode}
+                tickspeed={worldState.tickspeed}
+              />
             </g>
           </svg>
 
           <MapControls
-            zoom={zoom}
-            worldState={worldState}
-            width={width}
-            height={height}
+            actions={worldState.actions}
+            selectedNodeId={worldState.selectedNodeId}
+            money={money}
+            onClickHome={onClickHome}
           />
         </>
       )}
