@@ -50,7 +50,7 @@ export const homeId = 9891
 export const baseScale = 200
 export const baseTickspeed = 1000
 export const discoveryRange = 25
-export const scanTime = 2000
+export const scanTime = 5000
 export const baseTranslate = [0, 0] as [number, number]
 export const countryConfigs = {
   default: {

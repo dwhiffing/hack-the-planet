@@ -172,7 +172,8 @@ export const useWorldState = () => {
     return [
       {
         label: 'scan',
-        getIsVisible: (node: FullNode) => node && node.isOwned,
+        getIsVisible: (node: FullNode) =>
+          node && node.isOwned && !node.isScanning,
         onClick: (node: FullNode) => onScan(node.id),
       },
       {
