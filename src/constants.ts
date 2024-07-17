@@ -11,16 +11,9 @@ export type IWorldState = {
   zoomRef: MutableRefObject<Zoom | null>
   worldSvgMountCallback: (node: SVGGElement) => void
   renderedNodes: FullNode[]
-  connections: Connection[]
   allNodesObj: Record<number, Node>
   onClickNode: (id: number) => void
   onDeselect: () => void
-}
-
-export type Connection = {
-  source: number
-  target: number
-  type: string
 }
 
 export type Node = {

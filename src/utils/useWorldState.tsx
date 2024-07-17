@@ -5,7 +5,6 @@ import {
   zoomScale,
   Node,
   IWorldState,
-  Connection,
   baseTickspeed,
   PublicNodeState,
   FullNode,
@@ -28,9 +27,6 @@ export const useWorldState = (width: number, height: number) => {
   )
 
   const [selectedNodeId, setSelectedNodeId] = useState(-1)
-  const [connections, setConnections] = useState<Connection[]>(
-    getFromLocalStorage('node-connections', []),
-  )
 
   const zoomRef = useRef<Zoom | null>(null)
   const worldSvgMountCallback = useCallback(
@@ -55,26 +51,6 @@ export const useWorldState = (width: number, height: number) => {
     [publicStates, selectedNodeId, allNodesObj],
   )
 
-  const updateConnection = useCallback(
-    (source: number, target: number, change: Partial<Connection>) =>
-      setConnections((c) =>
-        c.map((c) => {
-          if (c.source === source && c.target === target)
-            return { ...c, ...change }
-          return c
-        }),
-      ),
-    [setConnections],
-  )
-  const addConnections = useCallback(
-    (target: number, ids: number[]) => {
-      setConnections((c) => [
-        ...c,
-        ...ids.map((source) => ({ source, target, type: 'scanned' })),
-      ])
-    },
-    [setConnections],
-  )
   const updateNodes = useCallback(
     (ids: number[], changes: Partial<PublicNodeState>) => {
       setPublicStates((_state) =>
@@ -123,19 +99,27 @@ export const useWorldState = (width: number, height: number) => {
     (id: number) => {
       const node = nodes.find((n) => n.id === id)
       if (node) {
-        const scannedIds = nodes
+        const scannedId = nodes
           .filter(
             (n) =>
               !renderedNodes.find((_n) => n.id === _n.id) &&
               getDist(node, n) < discoveryRange,
           )
-          .map((n) => n.id)
+          .map((n) => ({ id: n.id, dist: getDist(node, n) }))
+          .sort((a, b) => a.dist - b.dist)
+          .at(0)?.id
 
-        updateNodes(scannedIds, { isScanned: true, target: id })
-        addConnections(id, scannedIds)
+        // updateNodes([id], { isScanning: true })
+        // setTimeout(() => {
+        //   updateNodes([id], { isScanning: false })
+        if (scannedId) {
+          updateNodes([scannedId], { isScanned: true, target: id })
+        }
+        // }, scanTime * ((scannedIds[0]?.dist ?? 1) / discoveryRange))
+        // }, 500)
       }
     },
-    [nodes, renderedNodes, addConnections, updateNodes],
+    [nodes, renderedNodes, updateNodes],
   )
 
   const onHack = useCallback(
@@ -143,10 +127,9 @@ export const useWorldState = (width: number, height: number) => {
       const node = renderedNodes.find((n) => n.id === id)
       if (node?.target) {
         updateNodes([id], { isOwned: true })
-        updateConnection(id, node.target, { type: 'hacked' })
       }
     },
-    [renderedNodes, updateConnection, updateNodes],
+    [renderedNodes, updateNodes],
   )
 
   const actions = useMemo(() => {
@@ -206,12 +189,7 @@ export const useWorldState = (width: number, height: number) => {
       setToLocalStorage('node-states', newState)
       return newState
     })
-
-    setConnections((_state) => {
-      setToLocalStorage('node-connections', _state)
-      return _state
-    })
-  }, [setPublicStates, setConnections])
+  }, [setPublicStates])
 
   useEffect(() => {
     const intervalId = setInterval(doTick, tickspeed)
@@ -230,7 +208,6 @@ export const useWorldState = (width: number, height: number) => {
     renderedNodes,
     onDeselect,
     selectedNode,
-    connections: nodes.length > 0 ? connections : [],
     allNodesObj,
     onClickNode,
     tickspeed,

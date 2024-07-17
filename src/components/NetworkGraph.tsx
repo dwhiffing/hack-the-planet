@@ -4,23 +4,21 @@ import { IWorldState, FullNode } from '@/constants'
 
 export const NetworkGraph = memo(
   function NetworkGraph({ worldState }: { worldState: IWorldState }) {
-    const { renderedNodes, connections, onClickNode } = worldState
+    const { renderedNodes, onClickNode } = worldState
 
-    const graph = {
-      nodes: renderedNodes,
-      links: connections.map(({ source, target, type }) => ({
-        source: renderedNodes.find((n) => n.id === source)!,
-        target: renderedNodes.find((n) => n.id === target)!,
-        type,
-      })),
-    }
+    const links = renderedNodes
+      .filter((node) => node.target)
+      .map((node) => ({
+        source: node,
+        target: renderedNodes.find((n) => n.id === node.target)!,
+      }))
 
     return (
       <>
-        {graph.links.map((link, i) => (
+        {links.map((link, i) => (
           <DefaultLink key={i} link={link} tickspeed={worldState.tickspeed} />
         ))}
-        {graph.nodes.map((node, i) => (
+        {renderedNodes.map((node, i) => (
           <Group key={i} left={node.x} top={node.y}>
             <DefaultNode node={node} onClick={() => onClickNode(node.id)} />
           </Group>
@@ -32,30 +30,25 @@ export const NetworkGraph = memo(
     const _p = prevProps.worldState
     const _n = nextProps.worldState
     return (
-      _p.renderedNodes === _n.renderedNodes &&
-      _p.connections === _n.connections &&
-      _p.onClickNode === _n.onClickNode
+      _p.renderedNodes === _n.renderedNodes && _p.onClickNode === _n.onClickNode
     )
   },
 )
 
 const baseLineWidth = 0.01
 const DefaultLink = ({
-  link: { source, target, type },
+  link: { source, target },
   tickspeed,
 }: {
-  link: { source: FullNode; target: FullNode; type: string }
+  link: { source: FullNode; target: FullNode }
   tickspeed: number
 }) => {
   const isTransfering = !!source.isOwned && !!source?.outgoingMoney
-  const lineWidth = type === 'scanned' ? baseLineWidth : baseLineWidth * 8
-  const strokeWidth = type === 'scanned' ? 0.01 : 0.02
-  const lineSpacing = type === 'scanned' ? 0.1 : 0.05
-  const strokeColor = isTransfering
-    ? 'red'
-    : type === 'scanned'
-    ? '#ccc'
-    : 'white'
+  const isScanned = !source.isOwned
+  const lineWidth = isScanned ? baseLineWidth : baseLineWidth * 8
+  const strokeWidth = isScanned ? 0.01 : 0.02
+  const lineSpacing = isScanned ? 0.1 : 0.05
+  const strokeColor = isTransfering ? 'red' : isScanned ? '#ccc' : 'white'
   return (
     <line
       style={{ pointerEvents: 'none' }}
