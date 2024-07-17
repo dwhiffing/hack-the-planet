@@ -53,6 +53,14 @@ const DefaultLink = ({
       className="pointer-events-none transition-colors duration-500"
       strokeDasharray={`${lineWidth} ${lineSpacing}`}
     >
+      {source.hackDuration && (
+        <animate
+          attributeName="stroke-dashoffset"
+          values={`${(lineWidth + lineSpacing) * -8};0`}
+          dur={`${tickspeed}ms`}
+          repeatCount="indefinite"
+        />
+      )}
       {!!source.isOwned && !!source?.outgoingMoney && (
         <animate
           attributeName="stroke-dashoffset"
@@ -75,7 +83,13 @@ const DefaultNode = (props: {
 
   if (!node) return null
 
-  const fill = node.isHome ? '#f0f' : node.isOwned ? '#ff0000' : '#999'
+  const fill = node.isHome
+    ? '#f0f'
+    : node.isOwned
+    ? '#ff0000'
+    : node.hackDuration
+    ? '#ccc'
+    : '#999'
   const s = selectedNodeId === props.nodeId ? 0.3 : 0.2
   const size = pxPerKM * discoveryRange
   return (
@@ -105,19 +119,19 @@ const DefaultNode = (props: {
         </path>
       </CSSTransition>
 
-      <rect
+      <circle
         x={s * -0.5}
         y={s * -0.5}
         onMouseDown={() => props.onClick(props.nodeId)}
-        width={s}
-        height={s}
+        r={s / 2}
         stroke="#fff"
         style={{
-          transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1), fill 1s linear',
+          transition:
+            'all 150ms cubic-bezier(0.4, 0, 0.2, 1), fill 300ms cubic-bezier(0.4, 0, 0.2, 1)',
         }}
         strokeWidth={selectedNodeId === props.nodeId ? 0.01 : 0}
         fill={fill}
-      ></rect>
+      />
     </Group>
   )
 }

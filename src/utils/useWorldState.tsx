@@ -8,6 +8,8 @@ import {
   FullNode,
   scanTime,
   discoveryRange,
+  hackTime,
+  initialMoney,
 } from '@/constants'
 import { getNodes } from '@/utils/getNodes'
 import { haversineDistance as getDist } from '@/utils/groupCoordinates'
@@ -109,7 +111,8 @@ export const useWorldState = () => {
     if (nodes.length === 0) return
 
     const home = getNode(homeId)
-    if (!home) updateNode(homeId, { money: 10, isOwned: true, isHome: true })
+    if (!home)
+      updateNode(homeId, { money: initialMoney, isOwned: true, isHome: true })
   }, [updateNode, nodes, getNode])
 
   const onClickNode = useCallback(
@@ -126,7 +129,14 @@ export const useWorldState = () => {
     [selectedNodeId, setSelectedNodeId],
   )
 
-  const onScan = useCallback(
+  const onScanStart = useCallback(
+    (id: number) => {
+      updateNode(id, { scanDuration: scanTime })
+    },
+    [updateNode],
+  )
+
+  const onScanFinish = useCallback(
     (id: number) => {
       const node = nodes.find((n) => n.id === id)
       if (node) {
@@ -140,25 +150,29 @@ export const useWorldState = () => {
           .sort((a, b) => a.dist - b.dist)
           .at(0)
 
-        updateNode(id, { isScanning: true })
-        const duration =
-          scanTime * ((closestNode?.dist ?? discoveryRange) / discoveryRange)
-        setTimeout(() => {
-          updateNode(id, { isScanning: false })
-          if (closestNode) {
-            updateNode(closestNode.id, {
-              isScanned: true,
-              target: id,
-              money: 10,
-            })
-          }
-        }, duration)
+        if (closestNode) {
+          updateNode(closestNode.id, {
+            isScanned: true,
+            target: id,
+            money: initialMoney,
+          })
+        }
       }
     },
     [nodes, renderedNodeIds, updateNode],
   )
 
-  const onHack = useCallback(
+  const onHackStart = useCallback(
+    (id: number) => {
+      const node = getNode(id)
+      if (node && node.isScanned && !node.isOwned) {
+        updateNode(id, { hackDuration: hackTime })
+      }
+    },
+    [updateNode, getNode],
+  )
+
+  const onHackFinish = useCallback(
     (id: number) => {
       const node = getNode(id)
       if (node && node.isScanned && !node.isOwned) {
@@ -173,17 +187,17 @@ export const useWorldState = () => {
       {
         label: 'scan',
         getIsVisible: (node: FullNode) =>
-          node && node.isOwned && !node.isScanning,
-        onClick: (node: FullNode) => onScan(node.id),
+          node && node.isOwned && !node.scanDuration,
+        onClick: (node: FullNode) => onScanStart(node.id),
       },
       {
         label: 'hack',
         getIsVisible: (node: FullNode) =>
           node && node.isScanned && !node.isOwned,
-        onClick: (node: FullNode) => onHack(node.id),
+        onClick: (node: FullNode) => onHackStart(node.id),
       },
     ].filter(Boolean)
-  }, [onHack, onScan])
+  }, [onHackStart, onScanStart])
 
   const tickspeed = baseTickspeed
 
@@ -191,22 +205,43 @@ export const useWorldState = () => {
     renderedNodeIds.forEach((nodeId) => {
       const node = getNode(nodeId)
       const target = getNode(node?.target ?? -1)
-      if (node && target && node.outgoingMoney) {
-        updateNode(node.target!, {
-          money: (target?.money ?? 0) + node.outgoingMoney,
-        })
-      }
-      if (node && target && node.isOwned) {
-        let outgoingMoney = 1
-        let currentMoney = node?.money ?? 0
-        if (currentMoney < outgoingMoney) {
-          outgoingMoney = currentMoney
+      if (node && target) {
+        let update: Partial<FullNode> = {}
+        if (target && node.outgoingMoney) {
+          update.money = (target?.money ?? 0) + node.outgoingMoney
         }
-        currentMoney -= outgoingMoney
-        updateNode(nodeId, {
-          money: currentMoney,
-          outgoingMoney,
-        })
+
+        updateNode(node.target!, update)
+      }
+
+      if (node) {
+        let update: Partial<FullNode> = {}
+        if (target && node.isOwned) {
+          let outgoingMoney = 1
+          let currentMoney = node?.money ?? 0
+          if (currentMoney < outgoingMoney) {
+            outgoingMoney = currentMoney
+          }
+          currentMoney -= outgoingMoney
+          update.money = currentMoney
+          update.outgoingMoney = outgoingMoney
+        }
+
+        if (node.scanDuration) {
+          update.scanDuration = node.scanDuration - 1
+          if (update.scanDuration === 0) {
+            onScanFinish(nodeId)
+          }
+        }
+
+        if (node.hackDuration) {
+          update.hackDuration = node.hackDuration - 1
+          if (update.hackDuration === 0) {
+            onHackFinish(nodeId)
+          }
+        }
+
+        updateNode(nodeId, update)
       }
     })
 
@@ -215,7 +250,7 @@ export const useWorldState = () => {
       cache.get(key),
     ])
     localStorage.setItem('app-cache', JSON.stringify(appCache))
-  }, [renderedNodeIds, getNode, cache, updateNode])
+  }, [renderedNodeIds, getNode, cache, onScanFinish, updateNode])
 
   useEffect(() => {
     const intervalId = setInterval(doTick, tickspeed)

@@ -32,7 +32,8 @@ export type PublicNodeState = {
   isHome?: boolean
   isOwned?: boolean
   isScanned?: boolean
-  isScanning?: boolean
+  scanDuration?: number
+  hackDuration?: number
   target?: number
   money?: number
   outgoingMoney?: number
@@ -44,13 +45,16 @@ export const background = '#111'
 export const land = '#333'
 export const pxPerKM = 0.04356460038551915
 export const zoomScale = 200
+export const initialMoney = 10
 export const maxZoom = 500
 export const minZoom = 1
 export const homeId = 9891
 export const baseScale = 200
 export const baseTickspeed = 1000
 export const discoveryRange = 25
-export const scanTime = 5000
+export const fastMode = false
+export const scanTime = fastMode ? 1 : 5
+export const hackTime = fastMode ? 1 : 5
 export const baseTranslate = [0, 0] as [number, number]
 export const countryConfigs = {
   default: {
