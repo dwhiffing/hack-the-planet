@@ -1,8 +1,8 @@
-import React, { memo } from 'react'
+import React, { memo, useRef } from 'react'
 import { Group } from '@visx/group'
 import { pxPerKM, discoveryRange } from '@/constants'
 import { useNodeState, useSelectedNodeId } from '@/utils/useWorldState'
-import { Fade } from './Fade'
+import { CSSTransition } from 'react-transition-group'
 
 export const NetworkGraph = memo(function NetworkGraph({
   nodeIds,
@@ -71,6 +71,7 @@ const DefaultNode = (props: {
 }) => {
   const { selectedNodeId } = useSelectedNodeId()
   const { node } = useNodeState(props.nodeId)
+  const nodeRef = useRef(null)
 
   if (!node) return null
 
@@ -79,8 +80,15 @@ const DefaultNode = (props: {
   const size = pxPerKM * discoveryRange
   return (
     <Group left={node.x} top={node.y}>
-      <Fade show={!!node.isScanning}>
+      <CSSTransition
+        nodeRef={nodeRef}
+        in={(node.scanDuration ?? 0) > 0}
+        timeout={300}
+        classNames="fade"
+        unmountOnExit
+      >
         <path
+          ref={nodeRef}
           className={`pointer-events-none`}
           d={describeArc(0, 0, size, 0, 40)}
           fill="#ff000033"
@@ -95,7 +103,7 @@ const DefaultNode = (props: {
             repeatCount="indefinite"
           />
         </path>
-      </Fade>
+      </CSSTransition>
 
       <rect
         x={s * -0.5}
