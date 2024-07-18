@@ -9,72 +9,23 @@ import {
   discoveryRange,
   hackTime,
   initialMoney,
+  zoomScale,
 } from '@/constants'
 import { getNodes } from '@/utils/getNodes'
 import { haversineDistance as getDist } from '@/utils/groupCoordinates'
-import useSWRImmutable from 'swr/immutable'
 import { useSWRConfig } from 'swr'
-import { sample, uniq } from 'lodash'
+import { sample } from 'lodash'
+import { coordsToTransform } from './coords'
+import { clearLocalStorage, isDeletingSave } from './localStorage'
+import { useMoney } from './useMoney'
+import { calculateNextCost, UPGRADES, useUpgrades } from './useUpgrades'
+import { useRenderedNodeIds, useSelectedNodeId } from './useNodeState'
 
-export const useSelectedNodeId = () => {
-  const { data, mutate } = useSWRImmutable<number>(`selected-node-id`, () => -1)
-
-  const setSelectedNodeId = useCallback(
-    (nodeId: number) => mutate(nodeId, { revalidate: false }),
-    [mutate],
-  )
-
-  return { selectedNodeId: data, setSelectedNodeId }
-}
-export const useRenderedNodeIds = () => {
-  const { data, mutate } = useSWRImmutable<number[]>(
-    `rendered-node-ids`,
-    () => [homeId],
-  )
-
-  const addRenderedNodes = useCallback(
-    (nodeId: number) =>
-      mutate((n) => uniq([...(n ?? []), nodeId]), { revalidate: false }),
-    [mutate],
-  )
-
-  return { renderedNodeIds: data ?? [], addRenderedNodes }
-}
-
-export const useMoney = () => {
-  const homeNode = useNodeState(homeId)
-  const money = useMemo(() => homeNode.node?.money ?? 0, [homeNode])
-  return money
-}
-
-export const useNodeState = (nodeId?: number) => {
-  // const { nodes } = useWorldState()
-  const { data } = useSWRImmutable<FullNode | null>(
-    nodeId && nodeId !== -1 ? `node-${nodeId}` : undefined,
-    () => null,
-  )
-  // const setNode = (changes: Partial<FullNode>) => {
-  //   mutate(
-  //     (node) => {
-  //       if (node) {
-  //         return { ...node, ...changes }
-  //       } else {
-  //         return {
-  //           ...nodes.find((n) => n.id === nodeId)!,
-  //           ...changes,
-  //         }
-  //       }
-  //     },
-  //     { revalidate: false },
-  //   )
-  // }
-  return { node: data }
-}
-
-export const useWorldState = () => {
+export const useWorldState = (width: number, height: number) => {
+  const { money } = useMoney()
+  const { upgradeStates, buyUpgrade } = useUpgrades()
   const { mutate, cache } = useSWRConfig()
   const [nodes, setNodes] = useState<Node[]>([])
-  const [isAutoHackEnabled, setIsAutoHackEnabled] = useState(false)
   const { renderedNodeIds, addRenderedNodes } = useRenderedNodeIds()
   const { selectedNodeId, setSelectedNodeId } = useSelectedNodeId()
   const zoomRef = useRef<Zoom | null>(null)
@@ -182,20 +133,18 @@ export const useWorldState = () => {
     [updateNode, getNode],
   )
 
-  const onToggleAutohack = useCallback(() => {
-    setIsAutoHackEnabled((h) => !h)
-  }, [])
-
-  const actions = useMemo(() => {
+  const selectedNodeActions = useMemo(() => {
     return [
       {
         label: 'scan',
         getIsVisible: (node: FullNode) =>
           node && node.isOwned && !node.scanDuration,
+        getIsDisabled: (node: FullNode) => false,
         onClick: (node: FullNode) => onScanStart(node.id),
       },
       {
         label: 'hack',
+        getIsDisabled: (node: FullNode) => false,
         getIsVisible: (node: FullNode) =>
           node && node.isScanned && !node.isOwned,
         onClick: (node: FullNode) => onHackStart(node.id),
@@ -203,10 +152,52 @@ export const useWorldState = () => {
     ].filter(Boolean)
   }, [onHackStart, onScanStart])
 
-  const tickspeed = baseTickspeed
+  const onClickHome = useCallback(() => {
+    const home = nodes.find((n) => n.id == homeId)?.earthCoords
+    if (home)
+      zoomRef.current?.setTransformMatrix(
+        coordsToTransform(...home, zoomScale, width, height),
+      )
+  }, [width, height, zoomRef, nodes])
+
+  const globalActions = useMemo(() => {
+    return [
+      {
+        label: 'Home',
+        getIsVisible: () => true,
+        getIsDisabled: () => false,
+        onClick: onClickHome,
+      },
+      {
+        label: 'Reset',
+        getIsVisible: () => true,
+        getIsDisabled: () => false,
+        onClick: () => {
+          const confirmed = confirm(
+            'Are you sure you what to clear your save and restart?',
+          )
+          if (confirmed) clearLocalStorage()
+        },
+      },
+      ...UPGRADES.map((upgrade) => {
+        const state = upgradeStates?.[upgrade.key]
+        const level = state?.level ?? 0
+        const cost = state ? calculateNextCost(state.key, level) : 0
+        const isMaxed = level === upgrade.maxLevel
+        return {
+          label: isMaxed
+            ? `${upgrade.name} maxed`
+            : `Upgrade ${upgrade.name} to level ${level + 1} $${cost}`,
+          getIsVisible: () => true,
+          getIsDisabled: () => money < cost || isMaxed,
+          onClick: () => buyUpgrade(upgrade.key),
+        }
+      }),
+    ]
+  }, [onClickHome, buyUpgrade, money, upgradeStates])
 
   const onAutohack = useCallback(() => {
-    if (!isAutoHackEnabled) return
+    if (!upgradeStates || upgradeStates.autohack.level === 0) return
     const nodes = renderedNodeIds.map(getNode)
     const possibleScanNodes = nodes.filter((n) => n?.isOwned && !n.scanDuration)
     const possibleHackNodes = nodes.filter(
@@ -219,7 +210,7 @@ export const useWorldState = () => {
     } else if (nodeToScan) {
       onScanStart(nodeToScan.id)
     }
-  }, [getNode, isAutoHackEnabled, onHackStart, onScanStart, renderedNodeIds])
+  }, [getNode, onHackStart, onScanStart, renderedNodeIds, upgradeStates])
 
   const doTick = useCallback(() => {
     renderedNodeIds.forEach((nodeId) => {
@@ -286,9 +277,9 @@ export const useWorldState = () => {
   ])
 
   useEffect(() => {
-    const intervalId = setInterval(doTick, tickspeed)
+    const intervalId = setInterval(doTick, baseTickspeed)
     return () => clearInterval(intervalId)
-  }, [tickspeed, doTick])
+  }, [doTick])
 
   const onDeselect = useCallback(() => {
     setSelectedNodeId(-1)
@@ -297,13 +288,14 @@ export const useWorldState = () => {
   return {
     nodes,
     renderedNodeIds,
-    actions,
+    selectedNodeActions,
+    onClickHome,
+    globalActions,
     zoomRef,
     selectedNodeId,
     worldSvgMountCallback,
     onDeselect,
     onClickNode,
-    tickspeed,
-    onToggleAutohack,
+    tickspeed: baseTickspeed,
   }
 }

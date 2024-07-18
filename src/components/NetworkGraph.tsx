@@ -1,8 +1,8 @@
 import React, { memo, useRef } from 'react'
 import { Group } from '@visx/group'
 import { pxPerKM, discoveryRange } from '@/constants'
-import { useNodeState, useSelectedNodeId } from '@/utils/useWorldState'
 import { CSSTransition } from 'react-transition-group'
+import { useNodeState, useSelectedNodeId } from '@/utils/useNodeState'
 
 export const NetworkGraph = memo(function NetworkGraph({
   nodeIds,

@@ -1,24 +1,25 @@
 import React, { memo } from 'react'
 import { FullNode } from '@/constants'
-
-import { useNodeState } from '@/utils/useWorldState'
+import { useNodeState } from '@/utils/useNodeState'
 
 export const MapControls = memo(
   function MapControls({
     money,
     selectedNodeId,
-    actions,
+    selectedNodeActions,
     globalActions,
   }: {
     money: number
-    actions: {
+    selectedNodeActions: {
       label: string
       getIsVisible: (node: FullNode) => boolean | undefined
+      getIsDisabled: (node: FullNode) => boolean | undefined
       onClick: (node: FullNode) => void
     }[]
     globalActions: {
       label: string
       getIsVisible: () => boolean
+      getIsDisabled: () => boolean
       onClick: () => void
     }[]
     selectedNodeId?: number
@@ -42,12 +43,13 @@ export const MapControls = memo(
               </p>
               <div className="flex gap-2">
                 {selectedNodeId &&
-                  actions
+                  selectedNodeActions
                     .filter((a) => a.getIsVisible(selectedNode))
                     .map((a) => (
                       <button
                         key={a.label}
                         className="pointer-events-auto"
+                        disabled={a.getIsDisabled(selectedNode)}
                         onClick={() => a.onClick(selectedNode)}
                       >
                         {a.label}
@@ -57,18 +59,24 @@ export const MapControls = memo(
             </div>
           )}
         </div>
-        <div className="flex flex-row items-start gap-2">
+        <div className="flex flex-col items-end">
           {globalActions
             .filter((a) => a.getIsVisible())
-            .map((a) => (
-              <button
-                key={a.label}
-                className="pointer-events-auto"
-                onClick={a.onClick}
-              >
-                {a.label}
-              </button>
-            ))}
+            .map((a) => {
+              const disabled = a.getIsDisabled()
+              return (
+                <button
+                  key={a.label}
+                  disabled={disabled}
+                  className={`pointer-events-auto ${
+                    disabled ? 'cursor-not-allowed' : ''
+                  }`}
+                  onClick={a.onClick}
+                >
+                  {a.label}
+                </button>
+              )
+            })}
         </div>
       </div>
     )
@@ -77,7 +85,7 @@ export const MapControls = memo(
     return (
       prev.money === next.money &&
       prev.selectedNodeId === next.selectedNodeId &&
-      prev.actions === next.actions
+      prev.selectedNodeActions === next.selectedNodeActions
     )
   },
 )

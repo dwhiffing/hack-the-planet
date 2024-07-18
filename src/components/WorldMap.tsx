@@ -1,45 +1,19 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { Zoom } from '@vx/zoom'
-import { background, homeId, maxZoom, minZoom, zoomScale } from '@/constants'
+import { background, maxZoom, minZoom } from '@/constants'
 import { WorldSvg } from './WorldSvg'
 import { NetworkGraph } from './NetworkGraph'
 import { coordsToTransform } from '@/utils/coords'
 import { MapControls } from './MapControls'
-import { useMoney, useWorldState } from '../utils/useWorldState'
-import { clearLocalStorage } from '@/utils/localStorage'
+import { useWorldState } from '../utils/useWorldState'
+import { useMoney } from '@/utils/useMoney'
 
 export function WorldMap({ width, height }: { width: number; height: number }) {
-  const worldState = useWorldState()
-  const money = useMoney()
+  const worldState = useWorldState(width, height)
+  const { money } = useMoney()
   const mouseRef = useRef<{ x: number; y: number } | null>(null)
-  const onClickHome = useCallback(() => {
-    const home = worldState.nodes.find((n) => n.id == homeId)?.earthCoords
-    if (home)
-      worldState.zoomRef.current?.setTransformMatrix(
-        coordsToTransform(...home, zoomScale, width, height),
-      )
-  }, [width, height, worldState.zoomRef, worldState.nodes])
 
-  const globalActions = useMemo(() => {
-    return [
-      {
-        label: 'Home',
-        getIsVisible: () => true,
-        onClick: onClickHome,
-      },
-      {
-        label: 'Reset',
-        getIsVisible: () => true,
-        onClick: clearLocalStorage,
-      },
-      {
-        label: 'Toggle Autohack',
-        getIsVisible: () => true,
-        onClick: worldState.onToggleAutohack,
-      },
-    ]
-  }, [onClickHome, worldState.onToggleAutohack])
-
+  const onClickHome = worldState.onClickHome
   useEffect(() => {
     onClickHome()
   }, [onClickHome])
@@ -118,8 +92,8 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
           </svg>
 
           <MapControls
-            actions={worldState.actions}
-            globalActions={globalActions}
+            selectedNodeActions={worldState.selectedNodeActions}
+            globalActions={worldState.globalActions}
             selectedNodeId={worldState.selectedNodeId}
             money={money}
           />
