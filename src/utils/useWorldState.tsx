@@ -14,7 +14,7 @@ import { getNodes } from '@/utils/getNodes'
 import { haversineDistance as getDist } from '@/utils/groupCoordinates'
 import useSWRImmutable from 'swr/immutable'
 import { useSWRConfig } from 'swr'
-import { uniq } from 'lodash'
+import { sample, uniq } from 'lodash'
 
 export const useSelectedNodeId = () => {
   const { data, mutate } = useSWRImmutable<number>(`selected-node-id`, () => -1)
@@ -74,6 +74,7 @@ export const useNodeState = (nodeId?: number) => {
 export const useWorldState = () => {
   const { mutate, cache } = useSWRConfig()
   const [nodes, setNodes] = useState<Node[]>([])
+  const [isAutoHackEnabled, setIsAutoHackEnabled] = useState(false)
   const { renderedNodeIds, addRenderedNodes } = useRenderedNodeIds()
   const { selectedNodeId, setSelectedNodeId } = useSelectedNodeId()
   const zoomRef = useRef<Zoom | null>(null)
@@ -181,6 +182,10 @@ export const useWorldState = () => {
     [updateNode, getNode],
   )
 
+  const onToggleAutohack = useCallback(() => {
+    setIsAutoHackEnabled((h) => !h)
+  }, [])
+
   const actions = useMemo(() => {
     return [
       {
@@ -199,6 +204,22 @@ export const useWorldState = () => {
   }, [onHackStart, onScanStart])
 
   const tickspeed = baseTickspeed
+
+  const onAutohack = useCallback(() => {
+    if (!isAutoHackEnabled) return
+    const nodes = renderedNodeIds.map(getNode)
+    const possibleScanNodes = nodes.filter((n) => n?.isOwned && !n.scanDuration)
+    const possibleHackNodes = nodes.filter(
+      (n) => !n?.isOwned && !n?.hackDuration,
+    )
+    const nodeToScan = sample(possibleScanNodes)
+    const nodeToHack = sample(possibleHackNodes)
+    if (nodeToHack) {
+      onHackStart(nodeToHack.id)
+    } else if (nodeToScan) {
+      onScanStart(nodeToScan.id)
+    }
+  }, [getNode, isAutoHackEnabled, onHackStart, onScanStart, renderedNodeIds])
 
   const doTick = useCallback(() => {
     renderedNodeIds.forEach((nodeId) => {
@@ -244,12 +265,23 @@ export const useWorldState = () => {
       }
     })
 
+    onAutohack()
+
+    // autosave each tick
     const appCache = Array.from(cache.keys()).map((key) => [
       key,
       cache.get(key),
     ])
     localStorage.setItem('app-cache', JSON.stringify(appCache))
-  }, [renderedNodeIds, getNode, cache, onScanFinish, updateNode])
+  }, [
+    renderedNodeIds,
+    getNode,
+    cache,
+    onHackFinish,
+    onAutohack,
+    onScanFinish,
+    updateNode,
+  ])
 
   useEffect(() => {
     const intervalId = setInterval(doTick, tickspeed)
@@ -270,5 +302,6 @@ export const useWorldState = () => {
     onDeselect,
     onClickNode,
     tickspeed,
+    onToggleAutohack,
   }
 }
