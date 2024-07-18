@@ -268,11 +268,13 @@ export const useWorldState = () => {
     onAutohack()
 
     // autosave each tick
-    const appCache = Array.from(cache.keys()).map((key) => [
-      key,
-      cache.get(key),
-    ])
-    localStorage.setItem('app-cache', JSON.stringify(appCache))
+    if (!isDeletingSave) {
+      const appCache = Array.from(cache.keys()).map((key) => [
+        key,
+        cache.get(key),
+      ])
+      localStorage.setItem('app-cache', JSON.stringify(appCache))
+    }
   }, [
     renderedNodeIds,
     getNode,

@@ -9,7 +9,7 @@ export const getFromLocalStorage = (key: string, defaultValue: any) => {
   }
 }
 
-let isDeletingSave = false
+export let isDeletingSave = false
 export const setToLocalStorage = (key: string, value: any) => {
   if (isDeletingSave) return
   if (typeof value === 'object' && value) {
