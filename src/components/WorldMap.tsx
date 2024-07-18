@@ -7,9 +7,11 @@ import { coordsToTransform } from '@/utils/coords'
 import { MapControls } from './MapControls'
 import { useWorldState } from '../utils/useWorldState'
 import { useMoney } from '@/utils/useMoney'
+import { useSelectedNodeId } from '@/utils/useNodeState'
 
 export function WorldMap({ width, height }: { width: number; height: number }) {
   const worldState = useWorldState(width, height)
+  const { onClickNode } = useSelectedNodeId()
   const { money } = useMoney()
   const mouseRef = useRef<{ x: number; y: number } | null>(null)
 
@@ -85,7 +87,7 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
             >
               <NetworkGraph
                 nodeIds={worldState.renderedNodeIds}
-                onClickNode={worldState.onClickNode}
+                onClickNode={onClickNode}
                 tickspeed={worldState.tickspeed}
               />
             </g>

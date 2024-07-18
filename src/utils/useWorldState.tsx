@@ -66,20 +66,6 @@ export const useWorldState = (width: number, height: number) => {
       updateNode(homeId, { money: initialMoney, isOwned: true, isHome: true })
   }, [updateNode, nodes, getNode])
 
-  const onClickNode = useCallback(
-    (id: number) => {
-      // if there's no selected node, select the clicked node
-      if (selectedNodeId === -1) return setSelectedNodeId(id)
-
-      // if we click the currently selected node, deselect it
-      if (id === selectedNodeId) return setSelectedNodeId(-1)
-
-      // otherwise, deselect the current node
-      setSelectedNodeId(id)
-    },
-    [selectedNodeId, setSelectedNodeId],
-  )
-
   const onScanStart = useCallback(
     (id: number) => {
       updateNode(id, { scanDuration: scanTime })
@@ -295,7 +281,6 @@ export const useWorldState = (width: number, height: number) => {
     selectedNodeId,
     worldSvgMountCallback,
     onDeselect,
-    onClickNode,
     tickspeed: baseTickspeed,
   }
 }
