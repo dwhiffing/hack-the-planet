@@ -3,7 +3,6 @@ import { Zoom } from '@vx/zoom'
 import {
   homeId,
   Node,
-  IWorldState,
   baseTickspeed,
   FullNode,
   scanTime,
@@ -271,5 +270,5 @@ export const useWorldState = () => {
     onDeselect,
     onClickNode,
     tickspeed,
-  } as IWorldState
+  }
 }

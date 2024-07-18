@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { Zoom } from '@vx/zoom'
 import { background, homeId, maxZoom, minZoom, zoomScale } from '@/constants'
 import { WorldSvg } from './WorldSvg'
@@ -6,6 +6,7 @@ import { NetworkGraph } from './NetworkGraph'
 import { coordsToTransform } from '@/utils/coords'
 import { MapControls } from './MapControls'
 import { useMoney, useWorldState } from '../utils/useWorldState'
+import { clearLocalStorage } from '@/utils/localStorage'
 
 export function WorldMap({ width, height }: { width: number; height: number }) {
   const worldState = useWorldState()
@@ -18,6 +19,26 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
         coordsToTransform(...home, zoomScale, width, height),
       )
   }, [width, height, worldState.zoomRef, worldState.nodes])
+
+  const globalActions = useMemo(() => {
+    return [
+      {
+        label: 'Home',
+        getIsVisible: () => true,
+        onClick: onClickHome,
+      },
+      {
+        label: 'Reset',
+        getIsVisible: () => true,
+        onClick: clearLocalStorage,
+      },
+      {
+        label: 'Toggle Autohack',
+        getIsVisible: () => true,
+        onClick: worldState.onToggleAutohack,
+      },
+    ]
+  }, [onClickHome, worldState.onToggleAutohack])
 
   useEffect(() => {
     onClickHome()
@@ -98,9 +119,9 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
 
           <MapControls
             actions={worldState.actions}
+            globalActions={globalActions}
             selectedNodeId={worldState.selectedNodeId}
             money={money}
-            onClickHome={onClickHome}
           />
         </>
       )}

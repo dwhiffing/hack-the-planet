@@ -1,24 +1,27 @@
 import React, { memo } from 'react'
 import { FullNode } from '@/constants'
 
-import { clearLocalStorage } from '@/utils/localStorage'
 import { useNodeState } from '@/utils/useWorldState'
 
 export const MapControls = memo(
   function MapControls({
     money,
     selectedNodeId,
-    onClickHome,
     actions,
+    globalActions,
   }: {
     money: number
     actions: {
       label: string
-      getIsVisible: (node: FullNode) => boolean
+      getIsVisible: (node: FullNode) => boolean | undefined
       onClick: (node: FullNode) => void
     }[]
+    globalActions: {
+      label: string
+      getIsVisible: () => boolean
+      onClick: () => void
+    }[]
     selectedNodeId?: number
-    onClickHome: () => void
   }) {
     const { node: selectedNode } = useNodeState(selectedNodeId)
 
@@ -55,14 +58,17 @@ export const MapControls = memo(
           )}
         </div>
         <div className="flex flex-row items-start gap-2">
-          {/* <button onClick={() => zoom.scale({ scaleX: 1.2 })}>+</button>
-          <button onClick={() => zoom.scale({ scaleX: 0.8 })}>-</button> */}
-          <button className="pointer-events-auto" onClick={onClickHome}>
-            Home
-          </button>
-          <button className="pointer-events-auto" onClick={clearLocalStorage}>
-            Reset
-          </button>
+          {globalActions
+            .filter((a) => a.getIsVisible())
+            .map((a) => (
+              <button
+                key={a.label}
+                className="pointer-events-auto"
+                onClick={a.onClick}
+              >
+                {a.label}
+              </button>
+            ))}
         </div>
       </div>
     )

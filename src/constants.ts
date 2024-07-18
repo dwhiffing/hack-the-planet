@@ -3,22 +3,6 @@ import { MutableRefObject } from 'react'
 
 export type Point = { x: number; y: number }
 
-export type IWorldState = {
-  tickspeed: number
-  renderedNodeIds: number[]
-  selectedNodeId: number
-  nodes: Node[]
-  actions: {
-    label: string
-    getIsVisible: (node: FullNode) => boolean
-    onClick: (node: FullNode) => void
-  }[]
-  zoomRef: MutableRefObject<Zoom | null>
-  worldSvgMountCallback: (node: SVGGElement) => void
-  onClickNode: (id: number) => void
-  onDeselect: () => void
-}
-
 export type Node = {
   x: number
   y: number

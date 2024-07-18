@@ -19,7 +19,12 @@ export const NetworkGraph = memo(function NetworkGraph({
         <DefaultLink key={nodeId} nodeId={nodeId} tickspeed={tickspeed} />
       ))}
       {nodeIds.map((nodeId) => (
-        <DefaultNode key={nodeId} nodeId={nodeId} onClick={onClickNode} />
+        <DefaultNode
+          key={nodeId}
+          nodeId={nodeId}
+          onClick={onClickNode}
+          tickspeed={tickspeed}
+        />
       ))}
     </>
   )
@@ -76,6 +81,7 @@ const DefaultLink = ({
 const DefaultNode = (props: {
   nodeId: number
   onClick: (nodeId: number) => void
+  tickspeed: number
 }) => {
   const { selectedNodeId } = useSelectedNodeId()
   const { node } = useNodeState(props.nodeId)
@@ -113,7 +119,7 @@ const DefaultNode = (props: {
             type="rotate"
             from="0"
             to="-360"
-            dur="2s"
+            dur={`${props.tickspeed}ms`}
             repeatCount="indefinite"
           />
         </path>
