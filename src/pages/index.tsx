@@ -14,7 +14,9 @@ export default function Home() {
     </SWRConfig>
   )
 }
-const localStorageProvider = () =>
+
+export const cache =
   typeof localStorage === 'undefined'
     ? new Map()
     : new Map(JSON.parse(localStorage.getItem('app-cache') || '[]'))
+const localStorageProvider = () => cache

@@ -1,8 +1,8 @@
-export const fastMode = true
+export const fastMode = false
 
 export const baseTickspeed = fastMode ? 100 : 1000
-export const scanTime = fastMode ? 1 : 5
-export const hackTime = fastMode ? 1 : 5
+export const baseScanTime = 5
+export const baseHackTime = 5
 
 export const initialMoney = 10
 export const homeId = 9891

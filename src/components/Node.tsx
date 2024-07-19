@@ -4,7 +4,7 @@ import { CSSTransition } from 'react-transition-group'
 
 import { pxPerKM } from '@/constants'
 import { useNodeState, useSelectedNodeId } from '@/utils/hooks/useNodeState'
-import { useStats } from '@/utils/hooks/useUpgrades'
+import { getDiscoveryRange } from '@/utils/hooks/useUpgrades'
 
 export const Node = (props: {
   nodeId: number
@@ -14,7 +14,6 @@ export const Node = (props: {
   const { selectedNodeId } = useSelectedNodeId()
   const { node } = useNodeState(props.nodeId)
   const nodeRef = useRef(null)
-  const { getDiscoveryRange } = useStats()
 
   if (!node) return null
 

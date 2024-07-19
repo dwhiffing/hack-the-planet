@@ -1,49 +1,24 @@
 import { useCallback, useMemo } from 'react'
 import useSWRImmutable from 'swr/immutable'
 import { useMoney } from './useMoney'
-import { Cache, useSWRConfig } from 'swr'
 import { baseDiscoveryRange } from '@/constants'
+import { cache } from '@/pages'
 
-const getUpgradeLevel = (cache: Cache<any>, key: IUpgradeKey) => {
-  const state = cache?.get('upgrades') as {
+const getLevel = (key: IUpgradeKey) => {
+  const state = cache.get('upgrades') as {
     data: IUpgradeState[]
   }
 
   return state?.data?.find((u) => u.key === key)?.level ?? 0
 }
 
-export const useStats = () => {
-  const { cache } = useSWRConfig()
-
-  const getDiscoveryRange = useCallback(
-    () => baseDiscoveryRange + getUpgradeLevel(cache, 'scan-range') * 20,
-    [cache],
-  )
-  const getScanEfficiency = useCallback(
-    () => 1 + getUpgradeLevel(cache, 'scan-efficiency'),
-    [cache],
-  )
-  const getScanSpeed = useCallback(
-    () => getUpgradeLevel(cache, 'scan-speed'),
-    [cache],
-  )
-  const getHackSpeed = useCallback(
-    () => getUpgradeLevel(cache, 'hack-speed'),
-    [cache],
-  )
-  const getAutoHack = useCallback(
-    () => 1 + getUpgradeLevel(cache, 'autohack'),
-    [cache],
-  )
-
-  return {
-    getDiscoveryRange,
-    getScanEfficiency,
-    getScanSpeed,
-    getHackSpeed,
-    getAutoHack,
-  }
-}
+export const getDiscoveryRange = () =>
+  baseDiscoveryRange + getLevel('scan-range') * 20
+export const getScanEfficiency = () => 1 + getLevel('scan-efficiency')
+export const getScanSpeed = () => getLevel('scan-speed')
+export const getHackSpeed = () => getLevel('hack-speed')
+export const getTransferRate = () => 1 + getLevel('transfer-rate')
+export const getAutoHack = () => 1 + getLevel('autohack')
 
 export const useUpgrades = () => {
   const { money, setMoney } = useMoney()
@@ -103,41 +78,49 @@ type IUpgradeKey =
   | 'scan-efficiency'
   | 'scan-speed'
   | 'hack-speed'
+  | 'transfer-rate'
 export const UPGRADES: IUpgrade[] = [
   {
     name: 'Scan Range',
     key: 'scan-range',
     maxLevel: 4,
     costExponent: 1.5,
-    baseCost: 10,
+    baseCost: 1,
   },
   {
     name: 'Scan Efficiency',
     key: 'scan-efficiency',
     maxLevel: 4,
     costExponent: 1.5,
-    baseCost: 10,
+    baseCost: 1,
   },
   {
     name: 'Scan Speed',
     key: 'scan-speed',
     maxLevel: 4,
     costExponent: 1.5,
-    baseCost: 10,
+    baseCost: 1,
   },
   {
     name: 'Hack Speed',
     key: 'hack-speed',
     maxLevel: 4,
     costExponent: 1.5,
-    baseCost: 10,
+    baseCost: 1,
+  },
+  {
+    name: 'Transfer Rate',
+    key: 'transfer-rate',
+    maxLevel: 4,
+    costExponent: 1.5,
+    baseCost: 1,
   },
   {
     name: 'Autohack',
     key: 'autohack',
     maxLevel: 1,
     costExponent: 1.08,
-    baseCost: 10,
+    baseCost: 1,
   },
 ]
 

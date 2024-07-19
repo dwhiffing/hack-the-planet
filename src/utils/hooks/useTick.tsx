@@ -7,6 +7,7 @@ import { useAutoHack } from './useAutoHack'
 import { useHack } from './useHack'
 import { useScan } from './useScan'
 import { onAutoSave } from '../localStorage'
+import { getTransferRate } from './useUpgrades'
 
 export const useTick = () => {
   const { updateNode, getNode, renderedNodeIds } = useNodes()
@@ -15,6 +16,7 @@ export const useTick = () => {
   const { onAutohack } = useAutoHack()
   const { cache } = useSWRConfig()
 
+  const transferRate = getTransferRate()
   const doTick = useCallback(() => {
     renderedNodeIds.forEach((nodeId) => {
       const node = getNode(nodeId)
@@ -31,8 +33,7 @@ export const useTick = () => {
       // send new money to outgoing money for target
       let update: Partial<FullNode> = {}
       if (target && node.isOwned) {
-        // TODO: way to upgrade outgoing money
-        let outgoingMoney = 1
+        let outgoingMoney = transferRate
         let currentMoney = node?.money ?? 0
         if (currentMoney < outgoingMoney) {
           outgoingMoney = currentMoney
@@ -71,6 +72,7 @@ export const useTick = () => {
     onAutohack,
     onScanFinish,
     updateNode,
+    transferRate,
   ])
 
   useEffect(() => {

@@ -1,12 +1,11 @@
 import { baseHackTime } from '@/constants'
 import { useCallback } from 'react'
 import { useNodes } from './useNodeState'
-import { useStats } from './useUpgrades'
+import { getHackSpeed } from './useUpgrades'
 
 export const useHack = () => {
   const { updateNode, getNode } = useNodes()
 
-  const { getHackSpeed } = useStats()
   const hackDuration = baseHackTime - getHackSpeed()
   const onHackStart = useCallback(
     (id: number) => {
