@@ -19,6 +19,8 @@ export const getScanSpeed = () => getLevel('scan-speed')
 export const getHackSpeed = () => getLevel('hack-speed')
 export const getTransferRate = () => 1 + getLevel('transfer-rate')
 export const getAutoHackTime = () => 10 - getLevel('autohack') * 2
+// TODO: add upgrade for this
+export const getSuspicionDecay = () => 0.01
 
 export const useUpgrades = () => {
   const { money, setMoney } = useMoney()

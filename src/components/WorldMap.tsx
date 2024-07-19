@@ -11,6 +11,7 @@ import { useTick } from '@/utils/hooks/useTick'
 import { ProvidedZoom } from '@vx/zoom/lib/types'
 import { useGlobalActions, useNodeActions } from '@/utils/hooks/useActions'
 import { useZoom } from '@/utils/hooks/useZoom'
+import { useSuspicion } from '@/utils/hooks/useSuspicion'
 
 export function WorldMap({ width, height }: { width: number; height: number }) {
   const { renderedNodeIds, worldSvgMountCallback } = useNodes()
@@ -18,6 +19,7 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
   const { selectedNodeActions } = useNodeActions()
   const { selectedNodeId, onClickNode, onDeselect } = useSelectedNodeId()
   const { money } = useMoney()
+  const { suspicion } = useSuspicion()
   const { onClickHome, zoomRef, mouseRef } = useZoom(width, height)
 
   useTick()
@@ -104,6 +106,7 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
             globalActions={globalActions}
             selectedNodeId={selectedNodeId}
             money={money}
+            suspicion={suspicion}
           />
         </>
       )}

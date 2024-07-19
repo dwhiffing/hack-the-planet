@@ -19,13 +19,13 @@ export const useNodeActions = () => {
       {
         label: 'scan',
         getIsVisible: (node: FullNode) => node && node.isOwned,
-        getIsDisabled: (node: FullNode) => node.scanDuration,
+        getIsDisabled: (node: FullNode) => !!node.scanDuration,
         onClick: (node: FullNode) => onScanStart(node.id),
       },
       {
         label: 'hack',
         getIsDisabled: () => false,
-        getIsVisible: (node: FullNode) => getIsNodeHackable(node.id),
+        getIsVisible: (node: FullNode) => !!getIsNodeHackable(node.id),
         onClick: (node: FullNode) => onHackStart(node.id),
       },
       {

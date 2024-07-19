@@ -7,12 +7,16 @@ import { useAutoHack } from './useAutoHack'
 import { useHack } from './useHack'
 import { useScan } from './useScan'
 import { onAutoSave } from '../localStorage'
-import { getTransferRate } from './useUpgrades'
+import { getSuspicionDecay, getTransferRate } from './useUpgrades'
+import { useSuspicion } from './useSuspicion'
+import { useFBIInvestigation } from './useFBIInvestigation'
 
 export const useTick = () => {
   const { updateNode, getNode, renderedNodeIds } = useNodes()
   const { onScanFinish } = useScan()
   const { onHackFinish } = useHack()
+  const { setSuspicion } = useSuspicion()
+  const { onInvestigate } = useFBIInvestigation()
   const { onAutohack } = useAutoHack()
   const { cache } = useSWRConfig()
 
@@ -62,6 +66,15 @@ export const useTick = () => {
       updateNode(nodeId, update)
     })
 
+    setSuspicion(getSuspicionDecay())
+
+    const suspicion = cache.get('suspicion')?.data ?? 0
+    if (suspicion >= 10000) {
+      console.log('triggered')
+      setSuspicion(-99999)
+      onInvestigate()
+    }
+
     onAutohack()
     onAutoSave(cache)
   }, [
@@ -73,6 +86,8 @@ export const useTick = () => {
     onScanFinish,
     updateNode,
     transferRate,
+    setSuspicion,
+    onInvestigate,
   ])
 
   useEffect(() => {

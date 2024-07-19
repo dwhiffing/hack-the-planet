@@ -64,3 +64,8 @@ export const getIsNodeHackable = (nodeId: number) => {
   const target = nodes.find((_n) => _n?.id === n.target)
   return !n?.isOwned && !n?.hackDuration && target && target.isOwned
 }
+
+// TODO: make dynamic
+export const getNodeSuspicion = (nodeId: number) => {
+  return 100
+}

@@ -1,5 +1,6 @@
 export type IMapProps = {
   money: number
+  suspicion: number
   selectedNodeActions: INodeAction[]
   globalActions: IGlobalAction[]
   selectedNodeId?: number
