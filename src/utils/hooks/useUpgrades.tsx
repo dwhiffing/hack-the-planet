@@ -46,7 +46,13 @@ export const useUpgrades = () => {
           mutate(
             (upgradeStates) => {
               // if upgrade not present in upgradeStates, need to add it
-              return [...initialUpgrades, ...(upgradeStates ?? [])]?.map((us) =>
+              const currentState = upgradeStates ?? []
+              return [
+                ...initialUpgrades.filter(
+                  (u) => !currentState.some((s) => s.key === u.key),
+                ),
+                ...(upgradeStates ?? []),
+              ]?.map((us) =>
                 us.key === key ? { ...us, level: us.level + 1 } : us,
               )
             },
