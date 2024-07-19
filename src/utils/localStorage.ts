@@ -15,7 +15,6 @@ let isDeletingSave = false
 
 export const onAutoSave = (cache: Cache<any>) => {
   if (isDeletingSave) return
-  console.log('save')
   const appCache = Array.from(cache.keys())
     .filter((key) => key !== 'all-node-data')
     .map((key) => [key, cache.get(key)])

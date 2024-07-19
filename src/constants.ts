@@ -1,4 +1,4 @@
-export const fastMode = false
+export const fastMode = true
 
 export const baseTickspeed = fastMode ? 100 : 1000
 export const scanTime = fastMode ? 1 : 5
@@ -6,7 +6,7 @@ export const hackTime = fastMode ? 1 : 5
 
 export const initialMoney = 10
 export const homeId = 9891
-export const discoveryRange = 25
+export const baseDiscoveryRange = 25
 
 export const background = '#111'
 export const land = '#333'

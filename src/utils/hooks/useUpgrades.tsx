@@ -1,6 +1,31 @@
 import { useCallback, useMemo } from 'react'
 import useSWRImmutable from 'swr/immutable'
 import { useMoney } from './useMoney'
+import { Cache, useSWRConfig } from 'swr'
+import { baseDiscoveryRange } from '@/constants'
+
+const getUpgradeLevel = (cache: Cache<any>, key: IUpgradeKey) => {
+  const state = cache?.get('upgrades') as {
+    data: IUpgradeState[]
+  }
+
+  return state?.data?.find((u) => u.key === key)?.level ?? 0
+}
+
+export const useStats = () => {
+  const { cache } = useSWRConfig()
+
+  const getDiscoveryRange = useCallback(
+    () => baseDiscoveryRange + getUpgradeLevel(cache, 'scan-range') * 20,
+    [cache],
+  )
+  const getScanEfficiency = useCallback(
+    () => 1 + getUpgradeLevel(cache, 'scan-efficiency'),
+    [cache],
+  )
+
+  return { getDiscoveryRange, getScanEfficiency }
+}
 
 export const useUpgrades = () => {
   const { money, setMoney } = useMoney()
@@ -52,11 +77,18 @@ type IUpgradeState = {
   key: string
   level: number
 }
-type IUpgradeKey = 'scan-range' | 'autohack'
+type IUpgradeKey = 'scan-range' | 'autohack' | 'scan-efficiency'
 export const UPGRADES: IUpgrade[] = [
   {
     name: 'Scan Range',
     key: 'scan-range',
+    maxLevel: 4,
+    costExponent: 1.5,
+    baseCost: 10,
+  },
+  {
+    name: 'Scan Efficiency',
+    key: 'scan-efficiency',
     maxLevel: 4,
     costExponent: 1.5,
     baseCost: 10,

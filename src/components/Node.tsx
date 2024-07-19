@@ -1,9 +1,10 @@
-import React, { useRef } from 'react'
+import React, { useMemo, useRef } from 'react'
 import { Group } from '@visx/group'
 import { CSSTransition } from 'react-transition-group'
 
-import { pxPerKM, discoveryRange } from '@/constants'
+import { pxPerKM } from '@/constants'
 import { useNodeState, useSelectedNodeId } from '@/utils/hooks/useNodeState'
+import { useStats } from '@/utils/hooks/useUpgrades'
 
 export const Node = (props: {
   nodeId: number
@@ -13,6 +14,7 @@ export const Node = (props: {
   const { selectedNodeId } = useSelectedNodeId()
   const { node } = useNodeState(props.nodeId)
   const nodeRef = useRef(null)
+  const { getDiscoveryRange } = useStats()
 
   if (!node) return null
 
@@ -24,7 +26,7 @@ export const Node = (props: {
     ? '#ccc'
     : '#999'
   const s = selectedNodeId === props.nodeId ? 0.3 : 0.2
-  const size = pxPerKM * discoveryRange
+
   return (
     <Group left={node.x} top={node.y}>
       <CSSTransition
@@ -37,7 +39,7 @@ export const Node = (props: {
         <path
           ref={nodeRef}
           className={`pointer-events-none`}
-          d={drawScan(0, 0, size, 0, 40)}
+          d={drawScan(0, 0, pxPerKM * getDiscoveryRange(), 0, 40)}
           fill="#ff000033"
         >
           <animateTransform
@@ -46,7 +48,7 @@ export const Node = (props: {
             type="rotate"
             from="0"
             to="-360"
-            dur={`${props.tickspeed}ms`}
+            dur={`${props.tickspeed * 5}ms`}
             repeatCount="indefinite"
           />
         </path>
