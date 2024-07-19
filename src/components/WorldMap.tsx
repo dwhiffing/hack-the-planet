@@ -1,21 +1,27 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect } from 'react'
 import { Zoom } from '@vx/zoom'
-import { background, maxZoom, minZoom } from '@/constants'
+import { background, baseTickspeed, maxZoom, minZoom } from '@/constants'
 import { WorldSvg } from './WorldSvg'
-import { NetworkGraph } from './NetworkGraph'
-import { coordsToTransform } from '@/utils/coords'
-import { MapControls } from './MapControls'
-import { useWorldState } from '../utils/useWorldState'
-import { useMoney } from '@/utils/useMoney'
-import { useSelectedNodeId } from '@/utils/useNodeState'
+import { BotNet } from './WorldBotNet'
+import { coordsToTransform } from '@/utils/geo'
+import { MapControls } from './WorldControls'
+import { useMoney } from '@/utils/hooks/useMoney'
+import { useNodes, useSelectedNodeId } from '@/utils/hooks/useNodeState'
+import { useTick } from '@/utils/hooks/useTick'
+import { ProvidedZoom } from '@vx/zoom/lib/types'
+import { useGlobalActions, useNodeActions } from '@/utils/hooks/useActions'
+import { useZoom } from '@/utils/hooks/useZoom'
 
 export function WorldMap({ width, height }: { width: number; height: number }) {
-  const worldState = useWorldState(width, height)
-  const { onClickNode } = useSelectedNodeId()
+  const { renderedNodeIds, worldSvgMountCallback } = useNodes()
+  const { globalActions } = useGlobalActions(width, height)
+  const { selectedNodeActions } = useNodeActions()
+  const { selectedNodeId, onClickNode, onDeselect } = useSelectedNodeId()
   const { money } = useMoney()
-  const mouseRef = useRef<{ x: number; y: number } | null>(null)
+  const { onClickHome, zoomRef, mouseRef } = useZoom(width, height)
 
-  const onClickHome = worldState.onClickHome
+  useTick()
+
   useEffect(() => {
     onClickHome()
   }, [onClickHome])
@@ -28,14 +34,25 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
   }
 
   const onMouseLeave = () => {
-    if (worldState.zoomRef.current?.state.isDragging)
-      worldState.zoomRef.current?.dragEnd()
+    if (zoomRef.current?.state.isDragging) zoomRef.current?.dragEnd()
+  }
+
+  const onMouseUp = (zoom: ProvidedZoom) => (e: React.MouseEvent) => {
+    const xDiff = Math.abs(e.screenX - (mouseRef.current?.x ?? 0))
+    const yDiff = Math.abs(e.screenY - (mouseRef.current?.y ?? 0))
+    if (xDiff + yDiff < 1) onDeselect()
+    zoom.dragEnd()
+  }
+
+  const onMouseDown = (zoom: ProvidedZoom) => (e: React.MouseEvent) => {
+    mouseRef.current = { x: e.screenX, y: e.screenY }
+    zoom.dragStart(e)
   }
 
   return (
     // @ts-ignore
     <Zoom
-      ref={worldState.zoomRef}
+      ref={zoomRef}
       className="relative"
       width={width}
       height={height}
@@ -56,47 +73,36 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
           >
             <rect x={0} y={0} width={width} height={height} fill={background} />
 
-            <g
-              ref={worldState.worldSvgMountCallback}
-              transform={zoom.toString()}
-            >
+            <g ref={worldSvgMountCallback} transform={zoom.toString()}>
               <WorldSvg />
             </g>
 
             <rect
+              className="relative z-10"
+              fill="transparent"
               width={width}
               height={height}
-              fill="transparent"
-              className="relative z-10"
-              onMouseDown={(e) => {
-                mouseRef.current = { x: e.screenX, y: e.screenY }
-                zoom.dragStart(e)
-              }}
               onMouseMove={zoom.dragMove}
-              onMouseUp={(e) => {
-                const xDiff = Math.abs(e.screenX - (mouseRef.current?.x ?? 0))
-                const yDiff = Math.abs(e.screenY - (mouseRef.current?.y ?? 0))
-                if (xDiff + yDiff < 1) worldState.onDeselect()
-                zoom.dragEnd()
-              }}
               onMouseLeave={onMouseLeave}
+              onMouseUp={onMouseUp(zoom)}
+              onMouseDown={onMouseDown(zoom)}
             />
             <g
               style={{ pointerEvents: zoom.isDragging ? 'none' : 'auto' }}
               transform={zoom.toString()}
             >
-              <NetworkGraph
-                nodeIds={worldState.renderedNodeIds}
+              <BotNet
+                nodeIds={renderedNodeIds}
                 onClickNode={onClickNode}
-                tickspeed={worldState.tickspeed}
+                tickspeed={baseTickspeed}
               />
             </g>
           </svg>
 
           <MapControls
-            selectedNodeActions={worldState.selectedNodeActions}
-            globalActions={worldState.globalActions}
-            selectedNodeId={worldState.selectedNodeId}
+            selectedNodeActions={selectedNodeActions}
+            globalActions={globalActions}
+            selectedNodeId={selectedNodeId}
             money={money}
           />
         </>

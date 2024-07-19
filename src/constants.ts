@@ -1,45 +1,22 @@
-import { Zoom } from '@vx/zoom'
-import { MutableRefObject } from 'react'
+export const fastMode = false
 
-export type Point = { x: number; y: number }
+export const baseTickspeed = fastMode ? 100 : 1000
+export const scanTime = fastMode ? 1 : 5
+export const hackTime = fastMode ? 1 : 5
 
-export type Node = {
-  x: number
-  y: number
-  country: string
-  earthCoords?: [number, number]
-  id: number
-  r?: number
-}
-
-export type PublicNodeState = {
-  isHome?: boolean
-  isOwned?: boolean
-  isScanned?: boolean
-  scanDuration?: number
-  hackDuration?: number
-  target?: number
-  money?: number
-  outgoingMoney?: number
-}
-
-export type FullNode = Node & PublicNodeState
+export const initialMoney = 10
+export const homeId = 9891
+export const discoveryRange = 25
 
 export const background = '#111'
 export const land = '#333'
 export const pxPerKM = 0.04356460038551915
-export const zoomScale = 200
-export const initialMoney = 10
-export const maxZoom = 500
-export const minZoom = 1
-export const homeId = 9891
 export const baseScale = 200
-export const baseTickspeed = 1000
-export const discoveryRange = 25
-export const fastMode = false
-export const scanTime = fastMode ? 1 : 5
-export const hackTime = fastMode ? 1 : 5
+export const zoomScale = 200
+export const minZoom = 1
+export const maxZoom = 500
 export const baseTranslate = [0, 0] as [number, number]
+
 export const countryConfigs = {
   default: {
     densityFactor: 200,

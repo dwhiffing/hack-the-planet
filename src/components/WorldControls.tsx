@@ -1,35 +1,16 @@
 import React, { memo } from 'react'
-import { FullNode } from '@/constants'
-import { useNodeState } from '@/utils/useNodeState'
+
+import { IMapProps } from '@/types'
+import { useNodeState } from '@/utils/hooks/useNodeState'
 
 export const MapControls = memo(
-  function MapControls({
-    money,
-    selectedNodeId,
-    selectedNodeActions,
-    globalActions,
-  }: {
-    money: number
-    selectedNodeActions: {
-      label: string
-      getIsVisible: (node: FullNode) => boolean | undefined
-      getIsDisabled: (node: FullNode) => boolean | undefined
-      onClick: (node: FullNode) => void
-    }[]
-    globalActions: {
-      label: string
-      getIsVisible: () => boolean
-      getIsDisabled: () => boolean
-      onClick: () => void
-    }[]
-    selectedNodeId?: number
-  }) {
-    const { node: selectedNode } = useNodeState(selectedNodeId)
+  function MapControls(props: IMapProps) {
+    const { node: selectedNode } = useNodeState(props.selectedNodeId)
 
     return (
       <div className="absolute top-0 p-4 inset-x-0 flex justify-between pointer-events-none">
         <div className="">
-          <p>Money: ${money}</p>
+          <p>Money: ${props.money}</p>
           {selectedNode && (
             <div className="border border-[#555] my-2 p-2">
               <p>id: {selectedNode?.id}</p>
@@ -42,8 +23,8 @@ export const MapControls = memo(
                   ?.join(', ')}
               </p>
               <div className="flex gap-2">
-                {selectedNodeId &&
-                  selectedNodeActions
+                {props.selectedNodeId &&
+                  props.selectedNodeActions
                     .filter((a) => a.getIsVisible(selectedNode))
                     .map((a) => (
                       <button
@@ -60,7 +41,7 @@ export const MapControls = memo(
           )}
         </div>
         <div className="flex flex-col items-end">
-          {globalActions
+          {props.globalActions
             .filter((a) => a.getIsVisible())
             .map((a) => {
               const disabled = a.getIsDisabled()

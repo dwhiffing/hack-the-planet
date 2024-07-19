@@ -1,3 +1,5 @@
+import { Cache } from 'swr'
+
 export const getFromLocalStorage = (key: string, defaultValue: any) => {
   if (typeof localStorage === 'undefined') return defaultValue
   const value = localStorage.getItem(key)
@@ -9,13 +11,15 @@ export const getFromLocalStorage = (key: string, defaultValue: any) => {
   }
 }
 
-export let isDeletingSave = false
-export const setToLocalStorage = (key: string, value: any) => {
+let isDeletingSave = false
+
+export const onAutoSave = (cache: Cache<any>) => {
   if (isDeletingSave) return
-  if (typeof value === 'object' && value) {
-    value = JSON.stringify(value)
-  }
-  localStorage.setItem(key, value)
+  console.log('save')
+  const appCache = Array.from(cache.keys())
+    .filter((key) => key !== 'all-node-data')
+    .map((key) => [key, cache.get(key)])
+  localStorage.setItem('app-cache', JSON.stringify(appCache))
 }
 
 export const clearLocalStorage = () => {

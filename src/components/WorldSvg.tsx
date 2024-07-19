@@ -1,9 +1,10 @@
 import React, { memo } from 'react'
-import { CustomProjection } from '@visx/geo'
-import * as topojson from 'topojson-client'
-import topology from '../assets/world-topo.json'
 import { geoMercator } from 'd3-geo'
+import * as topojson from 'topojson-client'
+import { CustomProjection } from '@visx/geo'
+
 import { background, baseScale, baseTranslate, land } from '@/constants'
+import topology from '../assets/world-topo.json'
 
 export const WorldSvg = memo(function WorldSvg() {
   return (
