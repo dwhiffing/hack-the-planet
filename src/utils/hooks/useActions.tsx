@@ -2,13 +2,14 @@ import { useMemo } from 'react'
 import { FullNode } from '@/types'
 import { clearLocalStorage } from '../localStorage'
 import { useMoney } from './useMoney'
-import { calculateNextCost, UPGRADES, useUpgrades } from './useUpgrades'
+import { calculateNextCost, useUpgrades } from './useUpgrades'
 import { useZoom } from './useZoom'
 import { useScan } from './useScan'
 import { useHack } from './useHack'
 import { getIsNodeHackable } from '../nodes'
 import { useDisconnectNode } from './useFBIInvestigation'
 import { useAutoHack } from './useAutoHack'
+import { UPGRADES } from '@/constants'
 
 export const useNodeActions = () => {
   const { onScanStart } = useScan()
@@ -20,7 +21,7 @@ export const useNodeActions = () => {
       {
         label: 'scan',
         getIsVisible: (node: FullNode) => node && node.isOwned,
-        getIsDisabled: (node: FullNode) => !!node.scanDuration,
+        getIsDisabled: (node: FullNode) => (node.scanDuration ?? 0) > 0,
         onClick: (node: FullNode) => onScanStart(node.id),
       },
       {

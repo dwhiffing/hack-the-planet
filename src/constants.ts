@@ -1,4 +1,4 @@
-import { INodeConfig, INodeType } from './types'
+import { INodeConfig, INodeType, IUpgrade } from './types'
 
 export const fastMode = false
 
@@ -7,9 +7,70 @@ export const baseScanTime = 5
 export const baseHackTime = 5
 
 export const initialMoney = 10
-export const incomeRate = 5
+export const incomeRate = 10
 export const homeId = 9891
 export const baseDiscoveryRange = 25
+
+export const background = '#111'
+export const land = '#333'
+export const pxPerKM = 0.04356460038551915
+export const baseScale = 200
+export const zoomScale = 200
+export const minZoom = 1
+export const maxZoom = 500
+export const baseTranslate = [0, 0] as [number, number]
+
+export const UPGRADES: IUpgrade[] = [
+  {
+    name: 'Scan Range',
+    key: 'scan-range',
+    maxLevel: 8,
+    costExponent: 3,
+    baseCost: 1,
+  },
+  {
+    name: 'Scan Efficiency',
+    key: 'scan-efficiency',
+    maxLevel: 8,
+    costExponent: 3,
+    baseCost: 1,
+  },
+  {
+    name: 'Scan Speed',
+    key: 'scan-speed',
+    maxLevel: 8,
+    costExponent: 3,
+    baseCost: 1,
+  },
+  {
+    name: 'Hack Speed',
+    key: 'hack-speed',
+    maxLevel: 8,
+    costExponent: 3,
+    baseCost: 1,
+  },
+  {
+    name: 'Hack Efficiency',
+    key: 'hack-efficiency',
+    maxLevel: 8,
+    costExponent: 3,
+    baseCost: 1,
+  },
+  {
+    name: 'Transfer Rate',
+    key: 'transfer-rate',
+    maxLevel: 8,
+    costExponent: 3,
+    baseCost: 1,
+  },
+  {
+    name: 'Autohack',
+    key: 'autohack',
+    maxLevel: 8,
+    costExponent: 3,
+    baseCost: 1,
+  },
+]
 export const NODE_CONFIGS: Record<INodeType, INodeConfig> = {
   home: {
     startingMoneyMin: 10,
@@ -42,16 +103,6 @@ export const NODE_CONFIGS: Record<INodeType, INodeConfig> = {
     hackDifficultyMax: 20,
   },
 }
-
-export const background = '#111'
-export const land = '#333'
-export const pxPerKM = 0.04356460038551915
-export const baseScale = 200
-export const zoomScale = 200
-export const minZoom = 1
-export const maxZoom = 500
-export const baseTranslate = [0, 0] as [number, number]
-
 export const countryConfigs = {
   default: {
     densityFactor: 200,

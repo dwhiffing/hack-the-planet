@@ -60,17 +60,19 @@ export const useTick = () => {
       }
 
       // update scan duration
-      if (node.scanDuration) {
-        update.scanDuration = node.scanDuration - getScanSpeed()
-        if (update.scanDuration === 0) {
+      const scanDuration = node.scanDuration ?? 0
+      if ((scanDuration ?? 0) > 0) {
+        update.scanDuration = scanDuration - getScanSpeed()
+        if (update.scanDuration <= 0) {
           onScanFinish(nodeId)
         }
       }
 
+      const hackDuration = node.hackDuration ?? 0
       // update hack duration
-      if (node.hackDuration) {
-        update.hackDuration = node.hackDuration - getHackSpeed()
-        if (update.hackDuration === 0) {
+      if ((hackDuration ?? 0) > 0) {
+        update.hackDuration = hackDuration - getHackSpeed()
+        if (update.hackDuration <= 0) {
           onHackFinish(nodeId)
         }
       }

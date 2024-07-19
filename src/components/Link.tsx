@@ -30,7 +30,7 @@ export const Link = ({
       className="pointer-events-none transition-colors duration-500"
       strokeDasharray={`${lineWidth} ${lineSpacing}`}
     >
-      {source.hackDuration && (
+      {(source.hackDuration ?? 0) > 0 && (
         <animate
           attributeName="stroke-dashoffset"
           values={`${(lineWidth + lineSpacing) * -8};0`}

@@ -1,8 +1,9 @@
 import { useCallback, useMemo } from 'react'
 import useSWRImmutable from 'swr/immutable'
 import { useMoney } from './useMoney'
-import { baseDiscoveryRange } from '@/constants'
+import { baseDiscoveryRange, UPGRADES } from '@/constants'
 import { cache } from '@/pages'
+import { IUpgradeKey, IUpgradeState } from '@/types'
 
 const getLevel = (key: IUpgradeKey) => {
   const state = cache.get('upgrades') as {
@@ -17,6 +18,7 @@ export const getDiscoveryRange = () =>
 export const getScanEfficiency = () => 1 + getLevel('scan-efficiency')
 export const getScanSpeed = () => 1 + getLevel('scan-speed')
 export const getHackSpeed = () => 1 + getLevel('hack-speed')
+export const getHackEfficiency = () => 1 + getLevel('hack-efficiency')
 export const getTransferRate = () => 1 + getLevel('transfer-rate')
 export const getAutoHackTime = () => 10 - getLevel('autohack') * 2
 // TODO: add upgrade for this
@@ -67,70 +69,6 @@ export const useUpgrades = () => {
   )
   return { upgradeStates, buyUpgrade }
 }
-
-type IUpgrade = {
-  name: string
-  key: IUpgradeKey
-  maxLevel: number
-  costExponent: number
-  baseCost: number
-}
-
-type IUpgradeState = {
-  key: string
-  level: number
-}
-type IUpgradeKey =
-  | 'scan-range'
-  | 'autohack'
-  | 'scan-efficiency'
-  | 'scan-speed'
-  | 'hack-speed'
-  | 'transfer-rate'
-export const UPGRADES: IUpgrade[] = [
-  {
-    name: 'Scan Range',
-    key: 'scan-range',
-    maxLevel: 4,
-    costExponent: 3,
-    baseCost: 1,
-  },
-  {
-    name: 'Scan Efficiency',
-    key: 'scan-efficiency',
-    maxLevel: 4,
-    costExponent: 3,
-    baseCost: 1,
-  },
-  {
-    name: 'Scan Speed',
-    key: 'scan-speed',
-    maxLevel: 4,
-    costExponent: 3,
-    baseCost: 1,
-  },
-  {
-    name: 'Hack Speed',
-    key: 'hack-speed',
-    maxLevel: 4,
-    costExponent: 3,
-    baseCost: 1,
-  },
-  {
-    name: 'Transfer Rate',
-    key: 'transfer-rate',
-    maxLevel: 4,
-    costExponent: 3,
-    baseCost: 1,
-  },
-  {
-    name: 'Autohack',
-    key: 'autohack',
-    maxLevel: 4,
-    costExponent: 1.08,
-    baseCost: 1,
-  },
-]
 
 export const calculateNextCost = (key: string, owned: number) => {
   const upgrade = UPGRADES.find((u) => u.key === key)!

@@ -55,3 +55,24 @@ export type INodeConfig = {
   hackDifficultyMin: number
   hackDifficultyMax: number
 }
+
+export type IUpgrade = {
+  name: string
+  key: IUpgradeKey
+  maxLevel: number
+  costExponent: number
+  baseCost: number
+}
+
+export type IUpgradeState = {
+  key: string
+  level: number
+}
+export type IUpgradeKey =
+  | 'scan-range'
+  | 'autohack'
+  | 'scan-efficiency'
+  | 'scan-speed'
+  | 'hack-efficiency'
+  | 'hack-speed'
+  | 'transfer-rate'
