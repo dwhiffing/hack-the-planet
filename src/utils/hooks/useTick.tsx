@@ -27,6 +27,7 @@ export const useTick = () => {
     let incomeCounter = (cache.get('income-counter') ?? incomeRate) as number
     incomeCounter = Math.max(0, incomeCounter - 1)
 
+    console.time('update nodes')
     renderedNodeIds.forEach((nodeId) => {
       const node = getNode(nodeId)
       const target = getNode(node?.target ?? -1)
@@ -41,9 +42,9 @@ export const useTick = () => {
 
       // send new money to outgoing money for target
       let update: Partial<FullNode> = {}
-      if (target && node.isOwned) {
+      let currentMoney = node?.money ?? 0
+      if (target && node.isOwned && currentMoney > 0) {
         let outgoingMoney = transferRate
-        let currentMoney = node?.money ?? 0
         if (currentMoney < outgoingMoney) {
           outgoingMoney = currentMoney
         }
@@ -77,13 +78,17 @@ export const useTick = () => {
         }
       }
 
-      updateNode(nodeId, update)
+      if (Object.keys(update).length > 0) {
+        updateNode(nodeId, update)
+      }
     })
+    console.timeEnd('update nodes')
 
     setSuspicion(getSuspicionDecay())
 
     if (incomeCounter === 0) {
       incomeCounter = incomeRate
+      onAutoSave(cache)
     }
     cache.set('income-counter', incomeCounter as State<any, any>)
 
@@ -94,7 +99,6 @@ export const useTick = () => {
     }
 
     onAutohack()
-    onAutoSave(cache)
   }, [
     renderedNodeIds,
     getNode,

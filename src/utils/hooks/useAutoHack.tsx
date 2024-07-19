@@ -3,9 +3,9 @@ import { useCallback, useMemo } from 'react'
 import { useHack } from './useHack'
 import { useNodes } from './useNodeState'
 import { useScan } from './useScan'
-import { getAutoHackTime, useUpgrades } from './useUpgrades'
+import { getAutoHackTime, getHackEfficiency, useUpgrades } from './useUpgrades'
 import { cache } from '@/pages'
-import { getIsNodeHackable } from '../nodes'
+import { getEdgeNodes, getIsNodeHackable } from '../nodes'
 import useSWRImmutable from 'swr/immutable'
 
 export const useAutoHack = () => {
@@ -37,18 +37,27 @@ export const useAutoHack = () => {
     const time = cache.get('auto-hack-time') ?? maxTime
     cache.set('auto-hack-time', time - 1)
 
-    if (time) return
+    if (time > 0) return
     cache.set('auto-hack-time', maxTime)
 
     const nodes = renderedNodeIds.map((n) => getNode(n)!)
-    const possibleScanNodes = nodes.filter((n) => n?.isOwned && !n.scanDuration)
-    const possibleHackNodes = nodes.filter((n) => getIsNodeHackable(n.id))
+    const edgeNodes = getEdgeNodes(nodes)
+    const possibleScanNodes = edgeNodes.filter(
+      (n) => n?.isOwned && (n.scanDuration ?? 0) <= 0,
+    )
     const nodeToScan = sample(possibleScanNodes)
+    if (nodeToScan) {
+      onScanStart(nodeToScan.id)
+    }
+    const possibleHackNodes = nodes.filter((n) => getIsNodeHackable(n, nodes))
     const nodeToHack = sample(possibleHackNodes)
     if (nodeToHack) {
-      onHackStart(nodeToHack.id)
-    } else if (nodeToScan) {
-      onScanStart(nodeToScan.id)
+      const siblingNodes = nodes
+        .filter((n) => n.target === nodeToHack.target)
+        .slice(0, getHackEfficiency())
+      siblingNodes.forEach((node) => {
+        onHackStart(node.id)
+      })
     }
   }, [getNode, isUnlocked, onHackStart, enabled, onScanStart, renderedNodeIds])
 

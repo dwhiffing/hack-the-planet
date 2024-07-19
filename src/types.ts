@@ -37,6 +37,7 @@ export type PublicNodeState = {
   scanDuration?: number
   hackDuration?: number
   type?: INodeType
+  sources?: number[]
   target?: number
   money?: number
   outgoingMoney?: number

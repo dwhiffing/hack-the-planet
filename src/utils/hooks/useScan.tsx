@@ -1,9 +1,10 @@
 import { baseScanTime, NODE_CONFIGS } from '@/constants'
 import { useCallback } from 'react'
-import { haversineDistance as getDist } from '../geo'
+import { haversineDistance } from '../geo'
 import { useNodes } from './useNodeState'
 import { getDiscoveryRange, getScanEfficiency } from './useUpgrades'
 import { random, randomInRange } from '../random'
+import { getNode } from '../nodes'
 
 export const useScan = () => {
   const { nodes, updateNode, renderedNodeIds } = useNodes()
@@ -20,15 +21,18 @@ export const useScan = () => {
   const scanEfficiency = getScanEfficiency()
   const onScanFinish = useCallback(
     (id: number) => {
-      const node = nodes.find((n) => n.id === id)
+      const node = getNode(id)
       if (!node) return
+
       const closestNodes = nodes
+        .map((n) => ({
+          id: n.id,
+          dist: haversineDistance(node, n),
+        }))
+
         .filter(
-          (n) =>
-            !renderedNodeIds.includes(n.id) &&
-            getDist(node, n) < discoveryRange,
+          (n) => !renderedNodeIds?.includes(n.id) && n.dist < discoveryRange,
         )
-        .map((n) => ({ id: n.id, dist: getDist(node, n) }))
         .sort((a, b) => a.dist - b.dist)
         .slice(0, scanEfficiency)
 
@@ -41,6 +45,10 @@ export const useScan = () => {
           config.startingMoneyMin,
           config.startingMoneyMax,
         )
+
+        updateNode(id, {
+          sources: [...(getNode(id)?.sources ?? []), node.id],
+        })
 
         updateNode(node.id, {
           isScanned: true,

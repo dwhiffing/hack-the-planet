@@ -2,7 +2,7 @@ import { INodeConfig, INodeType, IUpgrade } from './types'
 
 export const fastMode = false
 
-export const baseTickspeed = fastMode ? 100 : 1000
+export const baseTickspeed = fastMode ? 250 : 1000
 export const baseScanTime = 5
 export const baseHackTime = 5
 

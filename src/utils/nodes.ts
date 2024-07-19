@@ -4,6 +4,11 @@ import { FullNode } from '@/types'
 import { haversineDistance } from './geo'
 import { randomInRange } from './random'
 
+export const getNode = (nodeId: number) => {
+  const node = cache.get(`node-${nodeId}`)?.data as FullNode
+  return node
+}
+
 export const getAllNodes = () => {
   const renderedNodeIds = cache.get('rendered-node-ids').data
   const nodes = renderedNodeIds.map(
@@ -53,17 +58,24 @@ export const getNodeTargets = (
 export const getEdgeNodes = (
   nodes = getAllNodes().filter((n) => n.isOwned),
 ) => {
-  const home = nodes.find((n) => n.id === homeId)!
+  const home = getNode(homeId)
   return nodes
-    .filter((n) => !nodes.some((_n) => _n.target === n.id))
+    .filter((n) => !n.sources?.length)
     .sort((a, b) => haversineDistance(b, home) - haversineDistance(a, home))
 }
 
-export const getIsNodeHackable = (nodeId: number) => {
-  const nodes = getAllNodes()
-  const n = nodes.find((n) => n.id === nodeId)!
-  const target = nodes.find((_n) => _n?.id === n.target)
-  return !n?.isOwned && !n?.hackDuration && target && target.isOwned
+export const getIsNodeHackable = (
+  nodeId: number | FullNode,
+  nodes = getAllNodes(),
+) => {
+  let node: FullNode
+  if (typeof nodeId === 'number') {
+    node = nodes.find((n) => n.id === nodeId)!
+  } else {
+    node = nodeId
+  }
+  const target = getNode(node?.target ?? -1)
+  return !node?.isOwned && !node?.hackDuration && target && target.isOwned
 }
 
 export const getNodeSuspicion = (nodeId: number) => {

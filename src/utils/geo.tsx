@@ -138,12 +138,14 @@ function groupCoordinates(nodes: Node[], maxDistance: number) {
 }
 
 const R = 6371 // Earth's radius in kilometers
+const toRadians = Math.PI / 180
+
 export function haversineDistance(node1: Node, node2: Node) {
   if (!node1.earthCoords || !node2.earthCoords) return -1
-  const x1 = node1.earthCoords[1] * (Math.PI / 180)
-  const y1 = node1.earthCoords[0] * (Math.PI / 180)
-  const x2 = node2.earthCoords[1] * (Math.PI / 180)
-  const y2 = node2.earthCoords[0] * (Math.PI / 180)
+  const x1 = node1.earthCoords[1] * toRadians
+  const y1 = node1.earthCoords[0] * toRadians
+  const x2 = node2.earthCoords[1] * toRadians
+  const y2 = node2.earthCoords[0] * toRadians
 
   const dx = x2 - x1
   const dy = y2 - y1
