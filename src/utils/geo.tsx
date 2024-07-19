@@ -6,6 +6,7 @@ import continents from '../assets/continents.json'
 import cities from '../assets/cities-pruned.json'
 import { groupBy } from 'lodash'
 import { Node } from '@/types'
+import { haversineDistance } from './getNodesWithDistance'
 
 const projection = geoMercator().translate(baseTranslate).scale(baseScale)
 
@@ -120,7 +121,14 @@ function groupCoordinates(nodes: Node[], maxDistance: number) {
 
     for (let group of groups) {
       for (let member of group) {
-        if (haversineDistance(node, member) <= maxDistance) {
+        if (
+          haversineDistance(
+            node.earthCoords![1],
+            node.earthCoords![0],
+            member.earthCoords![1],
+            member.earthCoords![0],
+          ) <= maxDistance
+        ) {
           group.push(node)
           added = true
           break
@@ -135,26 +143,6 @@ function groupCoordinates(nodes: Node[], maxDistance: number) {
   }
 
   return groups
-}
-
-const R = 6371 // Earth's radius in kilometers
-const toRadians = Math.PI / 180
-
-export function haversineDistance(node1: Node, node2: Node) {
-  if (!node1.earthCoords || !node2.earthCoords) return -1
-  const x1 = node1.earthCoords[1] * toRadians
-  const y1 = node1.earthCoords[0] * toRadians
-  const x2 = node2.earthCoords[1] * toRadians
-  const y2 = node2.earthCoords[0] * toRadians
-
-  const dx = x2 - x1
-  const dy = y2 - y1
-
-  const a =
-    Math.sin(dx / 2) * Math.sin(dx / 2) +
-    Math.cos(x1) * Math.cos(x2) * Math.sin(dy / 2) * Math.sin(dy / 2)
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-  return R * c
 }
 
 export const coordsToTransform = (

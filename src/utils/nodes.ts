@@ -1,8 +1,8 @@
 import { homeId, NODE_CONFIGS } from '@/constants'
 import { cache } from '@/pages'
 import { FullNode } from '@/types'
-import { haversineDistance } from './geo'
 import { randomInRange } from './random'
+import { getNodesWithDistance } from './getNodesWithDistance'
 
 export const getNode = (nodeId: number) => {
   const node = cache.get(`node-${nodeId}`)?.data as FullNode
@@ -59,9 +59,9 @@ export const getEdgeNodes = (
   nodes = getAllNodes().filter((n) => n.isOwned),
 ) => {
   const home = getNode(homeId)
-  return nodes
-    .filter((n) => !n.sources?.length)
-    .sort((a, b) => haversineDistance(b, home) - haversineDistance(a, home))
+  const _nodes = nodes.filter((n) => !n.sources?.length)
+  const nodes2 = getNodesWithDistance(_nodes, home)
+  return nodes2.sort((a, b) => b.dist - a.dist).map((n) => n.node) as FullNode[]
 }
 
 export const getIsNodeHackable = (
