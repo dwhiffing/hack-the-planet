@@ -1,3 +1,5 @@
+import { INodeConfig, INodeType } from './types'
+
 export const fastMode = false
 
 export const baseTickspeed = fastMode ? 100 : 1000
@@ -5,8 +7,41 @@ export const baseScanTime = 5
 export const baseHackTime = 5
 
 export const initialMoney = 10
+export const incomeRate = 5
 export const homeId = 9891
 export const baseDiscoveryRange = 25
+export const NODE_CONFIGS: Record<INodeType, INodeConfig> = {
+  home: {
+    startingMoneyMin: 10,
+    startingMoneyMax: 10,
+    incomeMin: 1,
+    incomeMax: 1,
+    suspicionMin: 0,
+    suspicionMax: 0,
+    hackDifficultyMin: 0,
+    hackDifficultyMax: 0,
+  },
+  basic: {
+    startingMoneyMin: 10,
+    startingMoneyMax: 100,
+    incomeMin: 1,
+    incomeMax: 10,
+    suspicionMin: 100,
+    suspicionMax: 200,
+    hackDifficultyMin: 1,
+    hackDifficultyMax: 2,
+  },
+  bank: {
+    startingMoneyMin: 100,
+    startingMoneyMax: 1000,
+    incomeMin: 10,
+    incomeMax: 100,
+    suspicionMin: 1000,
+    suspicionMax: 2000,
+    hackDifficultyMin: 10,
+    hackDifficultyMax: 20,
+  },
+}
 
 export const background = '#111'
 export const land = '#333'

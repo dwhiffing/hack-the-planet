@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react'
+import React, { useRef } from 'react'
 import { Group } from '@visx/group'
 import { CSSTransition } from 'react-transition-group'
 
@@ -20,11 +20,15 @@ export const Node = (props: {
   const fill = node.isHome
     ? '#f0f'
     : node.isOwned
-    ? '#ff0000'
+    ? node.type === 'bank'
+      ? '#0000ff'
+      : '#ff0000'
     : node.hackDuration
     ? '#ccc'
     : '#999'
-  const s = selectedNodeId === props.nodeId ? 0.3 : 0.2
+
+  const size = node.type === 'bank' ? 0.3 : 0.2
+  const s = selectedNodeId === props.nodeId ? size * 1.5 : size
 
   return (
     <Group left={node.x} top={node.y}>

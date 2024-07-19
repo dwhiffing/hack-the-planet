@@ -124,7 +124,12 @@ export const useNodes = () => {
 
     const home = getNode(homeId)
     if (!home)
-      updateNode(homeId, { money: initialMoney, isOwned: true, isHome: true })
+      updateNode(homeId, {
+        money: initialMoney,
+        isOwned: true,
+        isHome: true,
+        type: 'home',
+      })
   }, [updateNode, nodes, getNode])
 
   return {

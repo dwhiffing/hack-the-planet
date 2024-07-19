@@ -36,9 +36,22 @@ export type PublicNodeState = {
   isScanned?: boolean
   scanDuration?: number
   hackDuration?: number
+  type?: INodeType
   target?: number
   money?: number
   outgoingMoney?: number
 }
 
 export type FullNode = Node & PublicNodeState
+
+export type INodeType = 'basic' | 'bank' | 'home'
+export type INodeConfig = {
+  startingMoneyMin: number
+  startingMoneyMax: number
+  incomeMin: number
+  incomeMax: number
+  suspicionMin: number
+  suspicionMax: number
+  hackDifficultyMin: number
+  hackDifficultyMax: number
+}

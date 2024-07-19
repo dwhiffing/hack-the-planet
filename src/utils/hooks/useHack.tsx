@@ -1,23 +1,28 @@
-import { baseHackTime } from '@/constants'
+import { baseHackTime, NODE_CONFIGS } from '@/constants'
 import { useCallback } from 'react'
 import { useNodes } from './useNodeState'
-import { getHackSpeed } from './useUpgrades'
 import { useSuspicion } from './useSuspicion'
 import { getNodeSuspicion } from '../nodes'
+import { randomInRange } from '../random'
 
 export const useHack = () => {
   const { updateNode, getNode } = useNodes()
   const { setSuspicion } = useSuspicion()
 
-  const hackDuration = baseHackTime - getHackSpeed()
   const onHackStart = useCallback(
     (id: number) => {
-      const node = getNode(id)
+      const node = getNode(id)!
+      const config = NODE_CONFIGS[node.type!]
+      const hackDifficulty = randomInRange(
+        config.hackDifficultyMin,
+        config.hackDifficultyMax,
+      )
+      let hackDuration = baseHackTime + hackDifficulty
       if (node && node.isScanned && !node.isOwned) {
         updateNode(id, { hackDuration })
       }
     },
-    [updateNode, hackDuration, getNode],
+    [updateNode, getNode],
   )
 
   const onHackFinish = useCallback(

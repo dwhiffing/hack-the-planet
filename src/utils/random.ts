@@ -17,6 +17,7 @@ function sfc32(a: number, b: number, c: number, d: number) {
 const seedgen = () => (Math.random() * 2 ** 32) >>> 0
 const seed = [806692919, 1899394972, 1349728802, 3131459383]
 export const getRandom = () => sfc32(seed[0], seed[1], seed[2], seed[3])
+export const random = getRandom()
 
 export function weightedSample(arr: any[]) {
   if (arr.length === 0) return null
@@ -39,4 +40,7 @@ export function weightedSample(arr: any[]) {
   }
 
   return arr[arr.length - 1]
+}
+export function randomInRange(min: number, max: number) {
+  return Math.floor(Math.random() * (max - min + 1) + min)
 }

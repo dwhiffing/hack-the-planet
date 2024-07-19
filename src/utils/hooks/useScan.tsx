@@ -1,17 +1,14 @@
-import { baseScanTime, initialMoney } from '@/constants'
+import { baseScanTime, NODE_CONFIGS } from '@/constants'
 import { useCallback } from 'react'
 import { haversineDistance as getDist } from '../geo'
 import { useNodes } from './useNodeState'
-import {
-  getDiscoveryRange,
-  getScanEfficiency,
-  getScanSpeed,
-} from './useUpgrades'
+import { getDiscoveryRange, getScanEfficiency } from './useUpgrades'
+import { random, randomInRange } from '../random'
 
 export const useScan = () => {
   const { nodes, updateNode, renderedNodeIds } = useNodes()
 
-  const scanDuration = baseScanTime - getScanSpeed()
+  const scanDuration = baseScanTime
   const onScanStart = useCallback(
     (id: number) => {
       updateNode(id, { scanDuration })
@@ -36,10 +33,20 @@ export const useScan = () => {
         .slice(0, scanEfficiency)
 
       closestNodes.forEach((node) => {
+        // TODO: more consistent way to determine node type
+        const isBank = random() < 0.1
+        const type = isBank ? 'bank' : 'basic'
+        const config = NODE_CONFIGS[type]
+        const startingMoney = randomInRange(
+          config.startingMoneyMin,
+          config.startingMoneyMax,
+        )
+
         updateNode(node.id, {
           isScanned: true,
+          type,
           target: id,
-          money: initialMoney,
+          money: startingMoney,
         })
       })
     },

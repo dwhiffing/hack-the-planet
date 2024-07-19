@@ -1,7 +1,8 @@
-import { homeId } from '@/constants'
+import { homeId, NODE_CONFIGS } from '@/constants'
 import { cache } from '@/pages'
 import { FullNode } from '@/types'
 import { haversineDistance } from './geo'
+import { randomInRange } from './random'
 
 export const getAllNodes = () => {
   const renderedNodeIds = cache.get('rendered-node-ids').data
@@ -65,7 +66,9 @@ export const getIsNodeHackable = (nodeId: number) => {
   return !n?.isOwned && !n?.hackDuration && target && target.isOwned
 }
 
-// TODO: make dynamic
 export const getNodeSuspicion = (nodeId: number) => {
-  return 100
+  const node = cache.get(`node-${nodeId}`).data as FullNode
+  const config = NODE_CONFIGS[node.type!]
+  const suspicion = randomInRange(config.suspicionMin, config.suspicionMax)
+  return suspicion
 }

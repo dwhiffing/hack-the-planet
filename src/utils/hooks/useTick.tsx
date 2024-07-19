@@ -1,15 +1,17 @@
 import { useCallback, useEffect } from 'react'
 import { FullNode } from '@/types'
-import { baseTickspeed } from '@/constants'
-import { useSWRConfig } from 'swr'
+import { baseTickspeed, incomeRate, NODE_CONFIGS } from '@/constants'
+import { State, useSWRConfig } from 'swr'
 import { useNodes } from './useNodeState'
 import { useAutoHack } from './useAutoHack'
 import { useHack } from './useHack'
 import { useScan } from './useScan'
 import { onAutoSave } from '../localStorage'
-import { getSuspicionDecay, getTransferRate } from './useUpgrades'
+import { getScanSpeed, getSuspicionDecay, getTransferRate } from './useUpgrades'
+import { getHackSpeed } from './useUpgrades'
 import { useSuspicion } from './useSuspicion'
 import { useFBIInvestigation } from './useFBIInvestigation'
+import { randomInRange } from '../random'
 
 export const useTick = () => {
   const { updateNode, getNode, renderedNodeIds } = useNodes()
@@ -22,6 +24,9 @@ export const useTick = () => {
 
   const transferRate = getTransferRate()
   const doTick = useCallback(() => {
+    let incomeCounter = (cache.get('income-counter') ?? incomeRate) as number
+    incomeCounter = Math.max(0, incomeCounter - 1)
+
     renderedNodeIds.forEach((nodeId) => {
       const node = getNode(nodeId)
       const target = getNode(node?.target ?? -1)
@@ -47,9 +52,16 @@ export const useTick = () => {
         update.outgoingMoney = outgoingMoney
       }
 
+      // track income
+      if (incomeCounter === 0) {
+        const config = NODE_CONFIGS[node.type!]
+        const income = randomInRange(config.incomeMin, config.incomeMax)
+        update.money = (node.money ?? 0) + income
+      }
+
       // update scan duration
       if (node.scanDuration) {
-        update.scanDuration = node.scanDuration - 1
+        update.scanDuration = node.scanDuration - getScanSpeed()
         if (update.scanDuration === 0) {
           onScanFinish(nodeId)
         }
@@ -57,7 +69,7 @@ export const useTick = () => {
 
       // update hack duration
       if (node.hackDuration) {
-        update.hackDuration = node.hackDuration - 1
+        update.hackDuration = node.hackDuration - getHackSpeed()
         if (update.hackDuration === 0) {
           onHackFinish(nodeId)
         }
@@ -68,9 +80,13 @@ export const useTick = () => {
 
     setSuspicion(getSuspicionDecay())
 
+    if (incomeCounter === 0) {
+      incomeCounter = incomeRate
+    }
+    cache.set('income-counter', incomeCounter as State<any, any>)
+
     const suspicion = cache.get('suspicion')?.data ?? 0
     if (suspicion >= 10000) {
-      console.log('triggered')
       setSuspicion(-99999)
       onInvestigate()
     }
