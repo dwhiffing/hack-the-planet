@@ -8,7 +8,7 @@ export const baseHackTime = 5
 
 export const initialMoney = 10
 export const incomeRate = 10
-export const homeId = 9891
+export const homeId = 1547
 export const baseDiscoveryRange = 25
 
 export const background = '#111'
@@ -108,76 +108,100 @@ export const countryConfigs = {
     densityFactor: 200,
     maxDensity: 17,
     maxNodes: 100,
-    popFactor: 400000,
+    popFactor: 500000,
   },
 
   // continent
 
   Asia: {
-    densityFactor: 160,
-    maxDensity: 12,
-    maxNodes: 100,
-    popFactor: 50000,
+    densityFactor: 200,
+    maxDensity: 4,
+    maxNodes: 50,
+    popFactor: 200000,
   },
   China: {
     densityFactor: 160,
-    maxDensity: 12,
+    maxDensity: 8,
     maxNodes: 100,
-    popFactor: 350000,
+    popFactor: 1000000,
+  },
+  India: {
+    densityFactor: 160,
+    maxDensity: 8,
+    maxNodes: 100,
+    popFactor: 2000000,
   },
   Oceania: {
-    densityFactor: 55,
-    maxDensity: 20,
+    densityFactor: 120,
+    maxDensity: 8,
     maxNodes: 100,
     popFactor: 10000,
   },
   'Europe/Asia': {
-    densityFactor: 240,
+    densityFactor: 200,
     maxDensity: 12,
-    maxNodes: 1500,
-    popFactor: 160000,
+    maxNodes: 100,
+    popFactor: 250000,
   },
   Europe: {
     densityFactor: 140,
     maxDensity: 12,
-    maxNodes: 1500,
-    popFactor: 40000,
+    maxNodes: 100,
+    popFactor: 130000,
   },
   'South America': {
-    densityFactor: 55,
-    maxDensity: 8,
-    maxNodes: 200,
-    popFactor: 50000,
+    densityFactor: 240,
+    maxDensity: 6,
+    maxNodes: 100,
+    popFactor: 250000,
   },
   Africa: {
-    densityFactor: 55,
-    maxDensity: 8,
+    densityFactor: 240,
+    maxDensity: 5,
     maxNodes: 50,
-    popFactor: 100000,
+    popFactor: 300000,
   },
   // country
   'United Kingdom': {
     densityFactor: 180,
     maxDensity: 15,
-    maxNodes: 500,
-    popFactor: 15000,
+    maxNodes: 100,
+    popFactor: 125000,
   },
   Australia: {
-    densityFactor: 40,
-    maxDensity: 22,
-    maxNodes: 500,
-    popFactor: 25000,
+    densityFactor: 180,
+    maxDensity: 12,
+    maxNodes: 100,
+    popFactor: 45000,
+  },
+  'New Zealand': {
+    densityFactor: 180,
+    maxDensity: 12,
+    maxNodes: 100,
+    popFactor: 45000,
   },
   Canada: {
-    densityFactor: 220,
-    maxDensity: 20,
-    maxNodes: 1000,
-    popFactor: 18000,
+    densityFactor: 190,
+    maxDensity: 8,
+    maxNodes: 60,
+    popFactor: 10000,
   },
   'United States': {
-    densityFactor: 250,
-    maxDensity: 10,
-    maxNodes: 1000,
-    popFactor: 30000,
+    densityFactor: 280,
+    maxDensity: 5,
+    maxNodes: 50,
+    popFactor: 40000,
+  },
+  Iceland: {
+    densityFactor: 100,
+    maxDensity: 1,
+    maxNodes: 100,
+    popFactor: 55000,
+  },
+  Greenland: {
+    densityFactor: 100,
+    maxDensity: 1,
+    maxNodes: 100,
+    popFactor: 55000,
   },
 }

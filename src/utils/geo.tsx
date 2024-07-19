@@ -70,7 +70,7 @@ function getRandomNonUniformPointsInCircle(
   const { densityFactor, maxDensity, maxNodes, popFactor } = config
   const radius = densityFactor / Math.min(maxDensity, city.density)
   const numberOfPoints = Math.floor(
-    Math.min(maxNodes, Math.max(1, city.population / popFactor)),
+    Math.min(maxNodes, Math.max(1, city.population / (popFactor * 4))),
   )
   let points: { x: number; y: number; country: string }[] = []
   let fails = 0

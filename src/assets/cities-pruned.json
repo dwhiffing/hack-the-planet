@@ -300,6 +300,26 @@
     "density": 25
   },
   {
+    "name": "Reykjavik",
+    "country": "Iceland",
+    "earthCoords": [
+      -21.89541,
+      64.13548
+    ],
+    "population": 10000000,
+    "density": 5
+  },
+  {
+    "name": "Nuuk",
+    "country": "Greenland",
+    "earthCoords": [
+      -51.72157,
+      64.18347
+    ],
+    "population": 5000000,
+    "density": 5
+  },
+  {
     "name": "Istanbul",
     "country": "Turkey",
     "earthCoords": [
@@ -2526,7 +2546,7 @@
       18.06871,
       59.32938
     ],
-    "population": 1831697,
+    "population": 9831697,
     "density": 3
   },
   {
@@ -4206,7 +4226,7 @@
       10.74609,
       59.91273
     ],
-    "population": 683007,
+    "population": 1583007,
     "density": 2
   },
   {
