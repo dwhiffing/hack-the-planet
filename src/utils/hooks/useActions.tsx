@@ -7,7 +7,8 @@ import { useZoom } from './useZoom'
 import { useScan } from './useScan'
 import { useHack } from './useHack'
 import { getIsNodeHackable } from '../nodes'
-import { useDisconnectNode, useFBIInvestigation } from './useFBIInvestigation'
+import { useDisconnectNode } from './useFBIInvestigation'
+import { useAutoHack } from './useAutoHack'
 
 export const useNodeActions = () => {
   const { onScanStart } = useScan()
@@ -45,7 +46,7 @@ export const useGlobalActions = (width: number, height: number) => {
   const { money } = useMoney()
   const { upgradeStates, buyUpgrade } = useUpgrades()
   const { onClickHome } = useZoom(width, height)
-  const { onInvestigate } = useFBIInvestigation()
+  const { enabled, isUnlocked, setEnabled } = useAutoHack()
 
   const globalActions = useMemo(() => {
     return [
@@ -54,12 +55,6 @@ export const useGlobalActions = (width: number, height: number) => {
         getIsVisible: () => true,
         getIsDisabled: () => false,
         onClick: onClickHome,
-      },
-      {
-        label: 'Investigate',
-        getIsVisible: () => true,
-        getIsDisabled: () => false,
-        onClick: onInvestigate,
       },
       {
         label: 'Reset',
@@ -71,6 +66,12 @@ export const useGlobalActions = (width: number, height: number) => {
           )
           if (confirmed) clearLocalStorage()
         },
+      },
+      {
+        label: `${enabled ? 'disable' : 'enable'} autohack`,
+        getIsVisible: () => isUnlocked,
+        getIsDisabled: () => false,
+        onClick: () => setEnabled(!enabled),
       },
       ...UPGRADES.map((upgrade) => {
         const state = upgradeStates?.[upgrade.key]
@@ -87,7 +88,15 @@ export const useGlobalActions = (width: number, height: number) => {
         }
       }),
     ]
-  }, [onClickHome, buyUpgrade, money, onInvestigate, upgradeStates])
+  }, [
+    onClickHome,
+    isUnlocked,
+    buyUpgrade,
+    money,
+    upgradeStates,
+    enabled,
+    setEnabled,
+  ])
 
   return {
     globalActions,

@@ -1,20 +1,37 @@
 import { sample } from 'lodash'
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useHack } from './useHack'
 import { useNodes } from './useNodeState'
 import { useScan } from './useScan'
 import { getAutoHackTime, useUpgrades } from './useUpgrades'
 import { cache } from '@/pages'
 import { getIsNodeHackable } from '../nodes'
+import useSWRImmutable from 'swr/immutable'
 
 export const useAutoHack = () => {
   const { getNode, renderedNodeIds } = useNodes()
   const { onScanStart } = useScan()
   const { onHackStart } = useHack()
   const { upgradeStates } = useUpgrades()
+  const { data: enabled, mutate: _setEnabled } = useSWRImmutable<boolean>(
+    `auto-hack-enabled`,
+    () => true,
+  )
+
+  const setEnabled = useCallback(
+    (value: boolean) => {
+      _setEnabled(value, { revalidate: false })
+    },
+    [_setEnabled],
+  )
+
+  const isUnlocked = useMemo(
+    () => upgradeStates?.autohack.level !== 0,
+    [upgradeStates],
+  )
 
   const onAutohack = useCallback(() => {
-    if (!upgradeStates || upgradeStates.autohack.level === 0) return
+    if (!isUnlocked || !enabled) return
 
     const maxTime = getAutoHackTime()
     const time = cache.get('auto-hack-time') ?? maxTime
@@ -33,9 +50,12 @@ export const useAutoHack = () => {
     } else if (nodeToScan) {
       onScanStart(nodeToScan.id)
     }
-  }, [getNode, onHackStart, onScanStart, renderedNodeIds, upgradeStates])
+  }, [getNode, isUnlocked, onHackStart, enabled, onScanStart, renderedNodeIds])
 
   return {
+    enabled,
+    isUnlocked,
+    setEnabled,
     onAutohack,
   }
 }
