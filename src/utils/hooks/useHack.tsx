@@ -1,18 +1,21 @@
-import { hackTime } from '@/constants'
+import { baseHackTime } from '@/constants'
 import { useCallback } from 'react'
 import { useNodes } from './useNodeState'
+import { useStats } from './useUpgrades'
 
 export const useHack = () => {
   const { updateNode, getNode } = useNodes()
 
+  const { getHackSpeed } = useStats()
+  const hackDuration = baseHackTime - getHackSpeed()
   const onHackStart = useCallback(
     (id: number) => {
       const node = getNode(id)
       if (node && node.isScanned && !node.isOwned) {
-        updateNode(id, { hackDuration: hackTime })
+        updateNode(id, { hackDuration })
       }
     },
-    [updateNode, getNode],
+    [updateNode, hackDuration, getNode],
   )
 
   const onHackFinish = useCallback(

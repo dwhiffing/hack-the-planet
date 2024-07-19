@@ -1,4 +1,4 @@
-import { scanTime, initialMoney } from '@/constants'
+import { baseScanTime, initialMoney } from '@/constants'
 import { useCallback } from 'react'
 import { haversineDistance as getDist } from '../geo'
 import { useNodes } from './useNodeState'
@@ -6,13 +6,14 @@ import { useStats } from './useUpgrades'
 
 export const useScan = () => {
   const { nodes, updateNode, renderedNodeIds } = useNodes()
-  const { getDiscoveryRange, getScanEfficiency } = useStats()
+  const { getDiscoveryRange, getScanEfficiency, getScanSpeed } = useStats()
 
+  const scanDuration = baseScanTime - getScanSpeed()
   const onScanStart = useCallback(
     (id: number) => {
-      updateNode(id, { scanDuration: scanTime })
+      updateNode(id, { scanDuration })
     },
-    [updateNode],
+    [scanDuration, updateNode],
   )
 
   const discoveryRange = getDiscoveryRange()

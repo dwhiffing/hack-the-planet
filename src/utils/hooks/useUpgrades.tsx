@@ -23,14 +23,33 @@ export const useStats = () => {
     () => 1 + getUpgradeLevel(cache, 'scan-efficiency'),
     [cache],
   )
+  const getScanSpeed = useCallback(
+    () => getUpgradeLevel(cache, 'scan-speed'),
+    [cache],
+  )
+  const getHackSpeed = useCallback(
+    () => getUpgradeLevel(cache, 'hack-speed'),
+    [cache],
+  )
+  const getAutoHack = useCallback(
+    () => 1 + getUpgradeLevel(cache, 'autohack'),
+    [cache],
+  )
 
-  return { getDiscoveryRange, getScanEfficiency }
+  return {
+    getDiscoveryRange,
+    getScanEfficiency,
+    getScanSpeed,
+    getHackSpeed,
+    getAutoHack,
+  }
 }
 
 export const useUpgrades = () => {
   const { money, setMoney } = useMoney()
-  const { data, mutate } = useSWRImmutable<IUpgradeState[]>('upgrades', () =>
-    UPGRADES.map((u) => ({ key: u.key, level: 0, nextCost: u.baseCost })),
+  const { data, mutate } = useSWRImmutable<IUpgradeState[]>(
+    'upgrades',
+    () => initialUpgrades,
   )
 
   const upgradeStates = useMemo(
@@ -45,13 +64,14 @@ export const useUpgrades = () => {
   const buyUpgrade = useCallback(
     (key: IUpgradeKey) => {
       {
-        const currentLevel = upgradeStates?.[key].level ?? 0
+        const currentLevel = upgradeStates?.[key]?.level ?? 0
         const cost = calculateNextCost(key, currentLevel)
         if (money >= cost) {
           setMoney(-cost)
           mutate(
             (upgradeStates) => {
-              return upgradeStates?.map((us) =>
+              // if upgrade not present in upgradeStates, need to add it
+              return [...initialUpgrades, ...(upgradeStates ?? [])]?.map((us) =>
                 us.key === key ? { ...us, level: us.level + 1 } : us,
               )
             },
@@ -77,7 +97,12 @@ type IUpgradeState = {
   key: string
   level: number
 }
-type IUpgradeKey = 'scan-range' | 'autohack' | 'scan-efficiency'
+type IUpgradeKey =
+  | 'scan-range'
+  | 'autohack'
+  | 'scan-efficiency'
+  | 'scan-speed'
+  | 'hack-speed'
 export const UPGRADES: IUpgrade[] = [
   {
     name: 'Scan Range',
@@ -89,6 +114,20 @@ export const UPGRADES: IUpgrade[] = [
   {
     name: 'Scan Efficiency',
     key: 'scan-efficiency',
+    maxLevel: 4,
+    costExponent: 1.5,
+    baseCost: 10,
+  },
+  {
+    name: 'Scan Speed',
+    key: 'scan-speed',
+    maxLevel: 4,
+    costExponent: 1.5,
+    baseCost: 10,
+  },
+  {
+    name: 'Hack Speed',
+    key: 'hack-speed',
     maxLevel: 4,
     costExponent: 1.5,
     baseCost: 10,
@@ -106,3 +145,9 @@ export const calculateNextCost = (key: string, owned: number) => {
   const upgrade = UPGRADES.find((u) => u.key === key)!
   return Math.round(upgrade.baseCost * Math.pow(upgrade.costExponent, owned))
 }
+
+const initialUpgrades = UPGRADES.map((u) => ({
+  key: u.key,
+  level: 0,
+  nextCost: u.baseCost,
+}))
