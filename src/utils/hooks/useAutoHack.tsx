@@ -5,6 +5,7 @@ import { useNodes } from './useNodeState'
 import { useScan } from './useScan'
 import { getAutoHackTime, useUpgrades } from './useUpgrades'
 import { cache } from '@/pages'
+import { getIsNodeHackable } from '../nodes'
 
 export const useAutoHack = () => {
   const { getNode, renderedNodeIds } = useNodes()
@@ -22,11 +23,9 @@ export const useAutoHack = () => {
     if (time) return
     cache.set('auto-hack-time', maxTime)
 
-    const nodes = renderedNodeIds.map(getNode)
+    const nodes = renderedNodeIds.map((n) => getNode(n)!)
     const possibleScanNodes = nodes.filter((n) => n?.isOwned && !n.scanDuration)
-    const possibleHackNodes = nodes.filter(
-      (n) => !n?.isOwned && !n?.hackDuration,
-    )
+    const possibleHackNodes = nodes.filter((n) => getIsNodeHackable(n.id))
     const nodeToScan = sample(possibleScanNodes)
     const nodeToHack = sample(possibleHackNodes)
     if (nodeToHack) {

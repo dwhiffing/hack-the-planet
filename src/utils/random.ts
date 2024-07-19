@@ -17,3 +17,26 @@ function sfc32(a: number, b: number, c: number, d: number) {
 const seedgen = () => (Math.random() * 2 ** 32) >>> 0
 const seed = [806692919, 1899394972, 1349728802, 3131459383]
 export const getRandom = () => sfc32(seed[0], seed[1], seed[2], seed[3])
+
+export function weightedSample(arr: any[]) {
+  if (arr.length === 0) return null
+
+  let totalWeight = 0
+  const weights = arr.map((_, index) => {
+    const weight = 1 / (index + 1)
+    totalWeight += weight
+    return weight
+  })
+
+  const random = Math.random() * totalWeight
+
+  let cumulativeWeight = 0
+  for (let i = 0; i < arr.length; i++) {
+    cumulativeWeight += weights[i]
+    if (random < cumulativeWeight) {
+      return arr[i]
+    }
+  }
+
+  return arr[arr.length - 1]
+}

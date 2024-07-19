@@ -6,29 +6,37 @@ import { calculateNextCost, UPGRADES, useUpgrades } from './useUpgrades'
 import { useZoom } from './useZoom'
 import { useScan } from './useScan'
 import { useHack } from './useHack'
+import { getIsNodeHackable } from '../nodes'
+import { useDisconnectNode, useFBIInvestigation } from './useFBIInvestigation'
 
 export const useNodeActions = () => {
   const { onScanStart } = useScan()
   const { onHackStart } = useHack()
+  const { onDisconnect } = useDisconnectNode()
 
   const selectedNodeActions = useMemo(() => {
     return [
       {
         label: 'scan',
-        getIsVisible: (node: FullNode) =>
-          node && node.isOwned && !node.scanDuration,
-        getIsDisabled: () => false,
+        getIsVisible: (node: FullNode) => node && node.isOwned,
+        getIsDisabled: (node: FullNode) => node.scanDuration,
         onClick: (node: FullNode) => onScanStart(node.id),
       },
       {
         label: 'hack',
         getIsDisabled: () => false,
-        getIsVisible: (node: FullNode) =>
-          node && node.isScanned && !node.isOwned,
+        getIsVisible: (node: FullNode) => getIsNodeHackable(node.id),
         onClick: (node: FullNode) => onHackStart(node.id),
       },
-    ].filter(Boolean)
-  }, [onHackStart, onScanStart])
+      {
+        label: 'disconnect',
+        getIsDisabled: () => false,
+        getIsVisible: (node: FullNode) =>
+          node && node.isScanned && node.isOwned,
+        onClick: (node: FullNode) => onDisconnect(node.id),
+      },
+    ]
+  }, [onHackStart, onScanStart, onDisconnect])
 
   return { selectedNodeActions }
 }
@@ -37,6 +45,7 @@ export const useGlobalActions = (width: number, height: number) => {
   const { money } = useMoney()
   const { upgradeStates, buyUpgrade } = useUpgrades()
   const { onClickHome } = useZoom(width, height)
+  const { onInvestigate } = useFBIInvestigation()
 
   const globalActions = useMemo(() => {
     return [
@@ -45,6 +54,12 @@ export const useGlobalActions = (width: number, height: number) => {
         getIsVisible: () => true,
         getIsDisabled: () => false,
         onClick: onClickHome,
+      },
+      {
+        label: 'Investigate',
+        getIsVisible: () => true,
+        getIsDisabled: () => false,
+        onClick: onInvestigate,
       },
       {
         label: 'Reset',
@@ -72,7 +87,7 @@ export const useGlobalActions = (width: number, height: number) => {
         }
       }),
     ]
-  }, [onClickHome, buyUpgrade, money, upgradeStates])
+  }, [onClickHome, buyUpgrade, money, onInvestigate, upgradeStates])
 
   return {
     globalActions,

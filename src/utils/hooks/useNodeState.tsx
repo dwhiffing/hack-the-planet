@@ -9,7 +9,7 @@ import { getNodes } from '../geo'
 export const useSelectedNodeId = () => {
   const { data: selectedNodeId, mutate } = useSWRImmutable<number>(
     `selected-node-id`,
-    () => -1,
+    () => homeId,
   )
 
   const setSelectedNodeId = useCallback(
