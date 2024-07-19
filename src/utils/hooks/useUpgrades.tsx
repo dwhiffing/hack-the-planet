@@ -18,7 +18,7 @@ export const getScanEfficiency = () => 1 + getLevel('scan-efficiency')
 export const getScanSpeed = () => getLevel('scan-speed')
 export const getHackSpeed = () => getLevel('hack-speed')
 export const getTransferRate = () => 1 + getLevel('transfer-rate')
-export const getAutoHack = () => 1 + getLevel('autohack')
+export const getAutoHackTime = () => 10 - getLevel('autohack') * 2
 
 export const useUpgrades = () => {
   const { money, setMoney } = useMoney()
@@ -84,41 +84,41 @@ export const UPGRADES: IUpgrade[] = [
     name: 'Scan Range',
     key: 'scan-range',
     maxLevel: 4,
-    costExponent: 1.5,
+    costExponent: 3,
     baseCost: 1,
   },
   {
     name: 'Scan Efficiency',
     key: 'scan-efficiency',
     maxLevel: 4,
-    costExponent: 1.5,
+    costExponent: 3,
     baseCost: 1,
   },
   {
     name: 'Scan Speed',
     key: 'scan-speed',
     maxLevel: 4,
-    costExponent: 1.5,
+    costExponent: 3,
     baseCost: 1,
   },
   {
     name: 'Hack Speed',
     key: 'hack-speed',
     maxLevel: 4,
-    costExponent: 1.5,
+    costExponent: 3,
     baseCost: 1,
   },
   {
     name: 'Transfer Rate',
     key: 'transfer-rate',
     maxLevel: 4,
-    costExponent: 1.5,
+    costExponent: 3,
     baseCost: 1,
   },
   {
     name: 'Autohack',
     key: 'autohack',
-    maxLevel: 1,
+    maxLevel: 4,
     costExponent: 1.08,
     baseCost: 1,
   },
