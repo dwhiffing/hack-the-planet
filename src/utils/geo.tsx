@@ -84,6 +84,7 @@ function getRandomNonUniformPointsInCircle(
       borders.includes(p.getAttribute('name') ?? '') ||
       p.getAttribute('name') === city.country,
   )
+  // we are reseting the rng each time, maybe we shouldnt?
   const random = getRandom()
 
   while (points.length < numberOfPoints && fails < 1000) {
