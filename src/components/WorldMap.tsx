@@ -15,12 +15,12 @@ import { useSuspicion } from '@/utils/hooks/useSuspicion'
 
 export function WorldMap({ width, height }: { width: number; height: number }) {
   const { renderedNodeIds, worldSvgMountCallback } = useNodes()
-  const { globalActions } = useGlobalActions(width, height)
+  const { onClickHome, zoomRef, mouseRef } = useZoom(width, height)
+  const { globalActions } = useGlobalActions(onClickHome)
   const { selectedNodeActions } = useNodeActions()
   const { selectedNodeId, onClickNode, onDeselect } = useSelectedNodeId()
   const { money } = useMoney()
   const { suspicion } = useSuspicion()
-  const { onClickHome, zoomRef, mouseRef } = useZoom(width, height)
 
   useTick()
 

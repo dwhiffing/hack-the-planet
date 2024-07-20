@@ -3,7 +3,6 @@ import { FullNode } from '@/types'
 import { clearLocalStorage } from '../localStorage'
 import { useMoney } from './useMoney'
 import { calculateNextCost, useUpgrades } from './useUpgrades'
-import { useZoom } from './useZoom'
 import { useScan } from './useScan'
 import { useHack } from './useHack'
 import { getIsNodeHackable } from '../nodes'
@@ -43,10 +42,9 @@ export const useNodeActions = () => {
   return { selectedNodeActions }
 }
 
-export const useGlobalActions = (width: number, height: number) => {
+export const useGlobalActions = (onClickHome: () => void) => {
   const { money } = useMoney()
   const { upgradeStates, buyUpgrade } = useUpgrades()
-  const { onClickHome } = useZoom(width, height)
   const { enabled, isUnlocked, setEnabled } = useAutoHack()
 
   const globalActions = useMemo(() => {
@@ -78,7 +76,7 @@ export const useGlobalActions = (width: number, height: number) => {
         const state = upgradeStates?.[upgrade.key]
         const level = state?.level ?? 0
         const cost = state ? calculateNextCost(state.key, level) : 0
-        const isMaxed = level === upgrade.maxLevel
+        const isMaxed = level === upgrade.costs.length
         return {
           label: isMaxed
             ? `${upgrade.name} maxed`
