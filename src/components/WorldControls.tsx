@@ -9,16 +9,17 @@ export const MapControls = memo(function MapControls(props: IMapProps) {
   return (
     <div className="absolute top-0 p-4 inset-x-0 flex justify-between pointer-events-none">
       <div className="">
-        <p>Money: ${props.money}</p>
+        <p>Money: {formatMoney(props.money)}</p>
         <p>Suspicion: {(props.suspicion / 100).toFixed(2)}%</p>
         {selectedNode && (
           <div className="border border-[#555] my-2 p-2">
-            <p>id: {selectedNode?.id}</p>
+            {/* <p>id: {selectedNode?.id}</p> */}
+            <p>type: {selectedNode?.type}</p>
             <p>country: {selectedNode?.country}</p>
-            <p>money: {selectedNode?.money}</p>
+            <p>money: {formatMoney(selectedNode?.money ?? 0)}</p>
             <p>
               coords:{' '}
-              {selectedNode?.earthCoords?.map((n) => n.toFixed(4))?.join(', ')}
+              {selectedNode?.earthCoords?.map((n) => n.toFixed(1))?.join(', ')}
             </p>
             <div className="flex gap-2">
               {props.selectedNodeId &&
@@ -58,3 +59,6 @@ export const MapControls = memo(function MapControls(props: IMapProps) {
     </div>
   )
 })
+function formatMoney(number: number) {
+  return number.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+}
