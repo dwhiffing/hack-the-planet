@@ -7,6 +7,7 @@ export type IMapProps = {
 }
 export type INodeAction = {
   label: string
+  description: string
   getIsVisible: (node: FullNode) => boolean | undefined
   getIsDisabled: (node: FullNode) => boolean | undefined
   onClick: (node: FullNode) => void
@@ -14,6 +15,7 @@ export type INodeAction = {
 
 export type IGlobalAction = {
   label: string
+  description: string
   getIsVisible: () => boolean | undefined
   getIsDisabled: () => boolean | undefined
   onClick: () => void
@@ -60,9 +62,13 @@ export type INodeConfig = {
 
 export type IUpgrade = {
   name: string
+  description: string
   key: IUpgradeKey
   requiredNodes: number
-  costs: number[]
+  costs?: number[]
+  maxLevel?: number
+  costExponent?: number
+  baseCost?: number
 }
 
 export type IUpgradeState = {
@@ -76,4 +82,5 @@ export type IUpgradeKey =
   | 'scan-speed'
   | 'hack-efficiency'
   | 'hack-speed'
-  | 'transfer-rate'
+  | 'steal-amount'
+  | 'auto-steal-amount'

@@ -4,7 +4,7 @@ import { CSSTransition } from 'react-transition-group'
 
 import { pxPerKM } from '@/constants'
 import { useNodeState, useSelectedNodeId } from '@/utils/hooks/useNodeState'
-import { getDiscoveryRange } from '@/utils/hooks/useUpgrades'
+import { getUpgradeEffect } from '@/utils/hooks/useUpgrades'
 
 export const Node = (props: {
   nodeId: number
@@ -44,7 +44,7 @@ export const Node = (props: {
         <path
           ref={nodeRef}
           className={`pointer-events-none`}
-          d={drawScan(0, 0, pxPerKM * getDiscoveryRange(), 0, 40)}
+          d={drawScan(0, 0, pxPerKM * getUpgradeEffect('scan-range'), 0, 40)}
           fill="#ff000033"
         >
           <animateTransform

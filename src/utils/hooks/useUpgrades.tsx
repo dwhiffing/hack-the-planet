@@ -5,22 +5,41 @@ import { baseDiscoveryRange, UPGRADES } from '@/constants'
 import { cache } from '@/pages'
 import { IUpgradeKey, IUpgradeState } from '@/types'
 
-const getLevel = (key: IUpgradeKey) => {
+const getLevel = (key: IUpgradeKey, nextLevel?: boolean) => {
   const state = cache.get('upgrades') as {
     data: IUpgradeState[]
   }
 
-  return state?.data?.find((u) => u.key === key)?.level ?? 0
+  return (
+    (state?.data?.find((u) => u.key === key)?.level ?? 0) + (nextLevel ? 1 : 0)
+  )
 }
 
-export const getDiscoveryRange = () =>
-  baseDiscoveryRange + getLevel('scan-range') * 20
-export const getScanEfficiency = () => 1 + getLevel('scan-efficiency')
-export const getScanSpeed = () => 1 + getLevel('scan-speed')
-export const getHackSpeed = () => 1 + getLevel('hack-speed')
-export const getHackEfficiency = () => 1 + getLevel('hack-efficiency')
-export const getTransferRate = () => 1 + getLevel('transfer-rate')
-export const getAutoHackTime = () => 10 - getLevel('autohack') * 2
+export const getUpgradeEffect = (key: IUpgradeKey, nextLevel?: boolean) => {
+  if (key === 'scan-range')
+    return baseDiscoveryRange + getLevel('scan-range', nextLevel) * 10
+
+  if (key === 'scan-efficiency')
+    return 1 + getLevel('scan-efficiency', nextLevel)
+
+  if (key === 'scan-speed') return 1 + getLevel('scan-speed', nextLevel)
+
+  if (key === 'hack-speed') return 1 + getLevel('hack-speed', nextLevel)
+
+  if (key === 'hack-efficiency')
+    return 1 + getLevel('hack-efficiency', nextLevel)
+
+  if (key === 'steal-amount')
+    return 0.1 + getLevel('steal-amount', nextLevel) * 0.1
+
+  if (key === 'auto-steal-amount')
+    return getLevel('auto-steal-amount', nextLevel) * 0.1
+
+  if (key === 'autohack') return 10 - getLevel('autohack', nextLevel) * 2
+
+  return 0
+}
+
 // TODO: add upgrade for this
 export const getSuspicionDecay = () => -0.33
 
@@ -72,11 +91,16 @@ export const useUpgrades = () => {
 
 export const calculateNextCost = (key: string, owned: number) => {
   const upgrade = UPGRADES.find((u) => u.key === key)!
-  return upgrade.costs[owned]
+  if (upgrade.costs) return upgrade.costs[owned]
+
+  if (upgrade.costExponent && upgrade.baseCost)
+    return Math.round(upgrade.baseCost * Math.pow(upgrade.costExponent, owned))
+
+  return 0
 }
 
 const initialUpgrades = UPGRADES.map((u) => ({
   key: u.key,
   level: 0,
-  nextCost: u.costs[0],
+  nextCost: u.baseCost ?? u.costs?.[0] ?? 0,
 }))

@@ -7,8 +7,8 @@ import { useAutoHack } from './useAutoHack'
 import { useHack } from './useHack'
 import { useScan } from './useScan'
 import { onAutoSave } from '../localStorage'
-import { getScanSpeed, getSuspicionDecay, getTransferRate } from './useUpgrades'
-import { getHackSpeed } from './useUpgrades'
+import { getUpgradeEffect, getSuspicionDecay } from './useUpgrades'
+
 import { useSuspicion } from './useSuspicion'
 import { useFBIInvestigation } from './useFBIInvestigation'
 import { randomInRange } from '../random'
@@ -22,35 +22,43 @@ export const useTick = () => {
   const { onAutohack } = useAutoHack()
   const { cache } = useSWRConfig()
 
-  const transferRate = getTransferRate()
   const doTick = useCallback(() => {
     let incomeCounter = (cache.get('income-counter') ?? incomeRate) as number
     incomeCounter = Math.max(0, incomeCounter - 1)
 
-    console.time('update nodes')
+    // console.time('update nodes')
     renderedNodeIds.forEach((nodeId) => {
       const node = getNode(nodeId)
       const target = getNode(node?.target ?? -1)
 
       if (!node) return
+      let update: Partial<FullNode> = {}
 
       // send outgoing money on each node to target node
-      if (target && node.outgoingMoney) {
-        const money = (target.money ?? 0) + node.outgoingMoney
+      let transferRate = getUpgradeEffect('steal-amount')
+      const outgoing = node.outgoingMoney ?? 0
+      if (target && outgoing >= 0) {
+        let incomingMoney = transferRate
+        if (outgoing < incomingMoney) {
+          incomingMoney = outgoing
+        }
+
+        const money = (target.money ?? 0) + incomingMoney
+        update.outgoingMoney = Math.max(0, outgoing - incomingMoney)
         updateNode(node.target!, { money })
       }
 
       // send new money to outgoing money for target
-      let update: Partial<FullNode> = {}
       let currentMoney = node?.money ?? 0
-      if (target && node.isOwned && currentMoney > 0) {
-        let outgoingMoney = transferRate
-        if (currentMoney < outgoingMoney) {
-          outgoingMoney = currentMoney
+      let autoStealAmount = getUpgradeEffect('auto-steal-amount')
+      if (target && node.isOwned && currentMoney > 0 && autoStealAmount > 0) {
+        let outgoing = update.outgoingMoney ?? node.outgoingMoney ?? 0
+        if (currentMoney < autoStealAmount) {
+          autoStealAmount = currentMoney
         }
-        currentMoney -= outgoingMoney
+        currentMoney -= autoStealAmount
         update.money = currentMoney
-        update.outgoingMoney = outgoingMoney
+        update.outgoingMoney = outgoing + autoStealAmount
       }
 
       // track income
@@ -63,7 +71,7 @@ export const useTick = () => {
       // update scan duration
       const scanDuration = node.scanDuration ?? 0
       if ((scanDuration ?? 0) > 0) {
-        update.scanDuration = scanDuration - getScanSpeed()
+        update.scanDuration = scanDuration - getUpgradeEffect('scan-speed')
         if (update.scanDuration <= 0) {
           onScanFinish(nodeId)
         }
@@ -72,7 +80,7 @@ export const useTick = () => {
       const hackDuration = node.hackDuration ?? 0
       // update hack duration
       if ((hackDuration ?? 0) > 0) {
-        update.hackDuration = hackDuration - getHackSpeed()
+        update.hackDuration = hackDuration - getUpgradeEffect('hack-speed')
         if (update.hackDuration <= 0) {
           onHackFinish(nodeId)
         }
@@ -82,7 +90,7 @@ export const useTick = () => {
         updateNode(nodeId, update)
       }
     })
-    console.timeEnd('update nodes')
+    // console.timeEnd('update nodes')
 
     setSuspicion(getSuspicionDecay())
 
@@ -107,7 +115,6 @@ export const useTick = () => {
     onAutohack,
     onScanFinish,
     updateNode,
-    transferRate,
     setSuspicion,
     onInvestigate,
   ])

@@ -1,8 +1,8 @@
 import { baseScanTime, NODE_CONFIGS } from '@/constants'
 import { useCallback } from 'react'
 import { useNodes } from './useNodeState'
-import { getDiscoveryRange, getScanEfficiency } from './useUpgrades'
-import { random, randomInRange } from '../random'
+import { getUpgradeEffect } from './useUpgrades'
+import { randomInRange } from '../random'
 import { getNode } from '../nodes'
 import {
   getAdjacentGroups,
@@ -22,8 +22,8 @@ export const useScan = () => {
     [scanDuration, updateNode],
   )
 
-  const discoveryRange = getDiscoveryRange()
-  const scanEfficiency = getScanEfficiency()
+  const discoveryRange = getUpgradeEffect('scan-range')
+  const scanEfficiency = getUpgradeEffect('scan-efficiency')
   const onScanFinish = useCallback(
     (id: number) => {
       const node = getNode(id)

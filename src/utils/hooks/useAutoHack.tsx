@@ -3,7 +3,7 @@ import { useCallback, useMemo } from 'react'
 import { useHack } from './useHack'
 import { useNodes } from './useNodeState'
 import { useScan } from './useScan'
-import { getAutoHackTime, getHackEfficiency, useUpgrades } from './useUpgrades'
+import { getUpgradeEffect, useUpgrades } from './useUpgrades'
 import { cache } from '@/pages'
 import { getEdgeNodes, getIsNodeHackable } from '../nodes'
 import useSWRImmutable from 'swr/immutable'
@@ -33,7 +33,7 @@ export const useAutoHack = () => {
   const onAutohack = useCallback(() => {
     if (!isUnlocked || !enabled) return
 
-    const maxTime = getAutoHackTime()
+    const maxTime = getUpgradeEffect('autohack')
     const time = cache.get('auto-hack-time') ?? maxTime
     cache.set('auto-hack-time', time - 1)
 
@@ -54,7 +54,7 @@ export const useAutoHack = () => {
     if (nodeToHack) {
       const siblingNodes = nodes
         .filter((n) => n.target === nodeToHack.target)
-        .slice(0, getHackEfficiency())
+        .slice(0, getUpgradeEffect('hack-efficiency'))
       siblingNodes.forEach((node) => {
         onHackStart(node.id)
       })

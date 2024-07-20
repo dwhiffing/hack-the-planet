@@ -33,7 +33,7 @@ body {
 }
 
 button {
-  @apply my-1 text-center border-none bg-black text-white py-1 px-2;
+  @apply text-center border-none bg-black text-white py-1 px-2;
 }
 
 button:disabled,
