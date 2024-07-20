@@ -36,6 +36,11 @@ button {
   @apply my-1 text-center border-none bg-black text-white py-1 px-2;
 }
 
+button:disabled,
+button[disabled] {
+  @apply opacity-30 cursor-not-allowed;
+}
+
 .controls {
   @apply absolute top-4 right-4 flex flex-col items-end;
 }

@@ -47,9 +47,7 @@ export const MapControls = memo(function MapControls(props: IMapProps) {
               <button
                 key={a.label}
                 disabled={disabled}
-                className={`pointer-events-auto ${
-                  disabled ? 'cursor-not-allowed' : ''
-                }`}
+                className={`pointer-events-auto`}
                 onClick={a.onClick}
               >
                 {a.label}
