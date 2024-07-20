@@ -16,7 +16,7 @@ let isDeletingSave = false
 export const onAutoSave = (cache: Cache<any>) => {
   if (isDeletingSave) return
   const appCache = Array.from(cache.keys())
-    .filter((key) => key !== 'all-node-data')
+    .filter((key) => key !== 'all-node-data' && key !== 'grouped-node-data')
     .map((key) => [key, cache.get(key)])
   localStorage.setItem('app-cache', JSON.stringify(appCache))
 }

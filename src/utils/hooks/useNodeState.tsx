@@ -5,6 +5,7 @@ import { uniq } from 'lodash'
 import { FullNode, Node } from '@/types'
 import { homeId, initialMoney } from '@/constants'
 import { getNodes } from '../geo'
+import { Group, groupNodes } from '../getNodesWithDistance'
 
 export const useSelectedNodeId = () => {
   const { data: selectedNodeId, mutate } = useSWRImmutable<number>(
@@ -65,6 +66,10 @@ export const useNodes = () => {
     'all-node-data',
     () => [],
   )
+  const { data: groupedNodes, mutate: setGroupedNodes } = useSWRImmutable<
+    Record<string, Group>
+  >('grouped-node-data', () => ({}))
+
   const nodes = useMemo(() => _nodes ?? [], [_nodes])
 
   const { data: _renderedNodeIds, mutate: mutateRenderedNodeIds } =
@@ -90,8 +95,12 @@ export const useNodes = () => {
   )
 
   const worldSvgMountCallback = useCallback(
-    (node: SVGGElement) => setNodes(getNodes(node)),
-    [setNodes],
+    (node: SVGGElement) => {
+      const _nodes = getNodes(node)
+      setNodes(_nodes)
+      setGroupedNodes(groupNodes(_nodes), { revalidate: false })
+    },
+    [setNodes, setGroupedNodes],
   )
 
   const getNode = useCallback(
@@ -134,6 +143,7 @@ export const useNodes = () => {
 
   return {
     nodes,
+    groupedNodes: groupedNodes ?? {},
     renderedNodeIds,
     addRenderedNodes,
     setNodes,
