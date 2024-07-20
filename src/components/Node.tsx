@@ -27,7 +27,7 @@ export const Node = (props: {
     ? '#ccc'
     : '#999'
 
-  const size = node.type === 'bank' ? 0.3 : 0.2
+  const size = node.type === 'bank' ? 0.4 : 0.2
   const s = selectedNodeId === props.nodeId ? size * 1.5 : size
 
   return (

@@ -47,10 +47,7 @@ export const useScan = () => {
         .slice(0, scanEfficiency)
 
       closestNodes.forEach((node) => {
-        // TODO: more consistent way to determine node type
-        const isBank = random() < 0.1
-        const type = isBank ? 'bank' : 'basic'
-        const config = NODE_CONFIGS[type]
+        const config = NODE_CONFIGS[node.node.type]
         const startingMoney = randomInRange(
           config.startingMoneyMin,
           config.startingMoneyMax,
@@ -62,7 +59,6 @@ export const useScan = () => {
 
         updateNode(node.id, {
           isScanned: true,
-          type,
           target: id,
           money: startingMoney,
         })

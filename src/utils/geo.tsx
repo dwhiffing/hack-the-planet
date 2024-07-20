@@ -5,7 +5,7 @@ import bordersJson from '../assets/borders.json'
 import continents from '../assets/continents.json'
 import cities from '../assets/cities-pruned.json'
 import { groupBy } from 'lodash'
-import { Node } from '@/types'
+import { INodeType, Node } from '@/types'
 import { haversineDistance } from './getNodesWithDistance'
 
 const projection = geoMercator().translate(baseTranslate).scale(baseScale)
@@ -72,7 +72,7 @@ function getRandomNonUniformPointsInCircle(
   const numberOfPoints = Math.floor(
     Math.min(maxNodes, Math.max(1, city.population / (popFactor * 4))),
   )
-  let points: { x: number; y: number; country: string }[] = []
+  let points: { x: number; y: number; country: string; type: INodeType }[] = []
   let fails = 0
   const angleMultiplier = 2 * Math.PI
 
@@ -103,6 +103,7 @@ function getRandomNonUniformPointsInCircle(
       points.push({
         x,
         y,
+        type: points.length === 0 && city.density > 3 ? 'bank' : 'basic',
         country: containingCountry.getAttribute('name') ?? 'Unknown',
       })
     } else {

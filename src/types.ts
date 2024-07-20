@@ -26,6 +26,7 @@ export type Node = {
   y: number
   country: string
   earthCoords?: [number, number]
+  type: INodeType
   id: number
   r?: number
 }
