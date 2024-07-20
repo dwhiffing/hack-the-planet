@@ -18,5 +18,7 @@ export default function Home() {
 export const cache =
   typeof localStorage === 'undefined'
     ? new Map()
-    : new Map(JSON.parse(localStorage.getItem('app-cache') || '[]'))
+    : new Map(
+        JSON.parse(localStorage.getItem('hack-the-planet-app-cache') || '[]'),
+      )
 const localStorageProvider = () => cache

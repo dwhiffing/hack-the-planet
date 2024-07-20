@@ -18,11 +18,11 @@ export const onAutoSave = (cache: Cache<any>) => {
   const appCache = Array.from(cache.keys())
     .filter((key) => key !== 'all-node-data' && key !== 'grouped-node-data')
     .map((key) => [key, cache.get(key)])
-  localStorage.setItem('app-cache', JSON.stringify(appCache))
+  localStorage.setItem('hack-the-planet-app-cache', JSON.stringify(appCache))
 }
 
 export const clearLocalStorage = () => {
   isDeletingSave = true
-  localStorage.removeItem('app-cache')
+  localStorage.removeItem('hack-the-planet-app-cache')
   window.location.reload()
 }
