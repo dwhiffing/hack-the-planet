@@ -2,7 +2,7 @@ import { INodeConfig, INodeType, IUpgrade } from './types'
 
 export const fastMode = false
 
-export const baseTickspeed = fastMode ? 250 : 1000
+export const baseTickspeed = fastMode ? 500 : 1000
 export const baseScanTime = 5
 export const baseHackTime = 5
 
@@ -28,15 +28,8 @@ export const UPGRADES: IUpgrade[] = [
       'How much money you steal per click and transfer between nodes per tick',
     requiredNodes: 3,
     maxLevel: 100,
-    costExponent: 1.2,
+    costExponent: 1.23,
     baseCost: 5,
-  },
-  {
-    name: 'Scan Range',
-    key: 'scan-range',
-    description: 'How far you can scan in kilometers',
-    requiredNodes: 3,
-    costs: [25, 100, 1000, 5000, 10000, 50000, 100000, 500000, 1000000],
   },
   {
     name: 'Auto Steal',
@@ -49,26 +42,31 @@ export const UPGRADES: IUpgrade[] = [
     baseCost: 25,
   },
   {
-    name: 'Autoscan',
-    key: 'autoscan',
-    description: 'Automatically scans for nodes occasionally',
-    requiredNodes: 8,
-    costs: [100, 1000, 10000, 100000, 1000000],
+    name: 'Scan Range',
+    key: 'scan-range',
+    description: 'How far you can scan in kilometers',
+    requiredNodes: 3,
+    costs: [25, 100, 1000, 5000, 10000, 50000, 100000, 500000, 1000000],
   },
   {
     name: 'Proxy Servers',
     key: 'suspicion-decay',
     description: 'Reduces your suspicion every tick',
     requiredNodes: 16,
-    maxLevel: 100,
-    costExponent: 1.2,
-    baseCost: 500,
+    costs: [100, 500, 1000, 5000, 10000, 50000],
+  },
+  {
+    name: 'Autoscan',
+    key: 'autoscan',
+    description: 'Automatically scans for nodes occasionally',
+    requiredNodes: 32,
+    costs: [500, 1000, 5000, 10000, 50000],
   },
   {
     name: 'Scan Efficiency',
     key: 'scan-efficiency',
     description: 'How many nodes can be found per scan',
-    requiredNodes: 32,
+    requiredNodes: 64,
     maxLevel: 100,
     costExponent: 1.2,
     baseCost: 500,
@@ -110,8 +108,8 @@ export const NODE_CONFIGS: Record<INodeType, INodeConfig> = {
   basic: {
     startingMoneyMin: 50,
     startingMoneyMax: 100,
-    incomeMin: 1,
-    incomeMax: 5,
+    incomeMin: 10,
+    incomeMax: 20,
     suspicionMin: 300,
     suspicionMax: 600,
     hackDifficultyMin: 1,
@@ -120,8 +118,8 @@ export const NODE_CONFIGS: Record<INodeType, INodeConfig> = {
   rich: {
     startingMoneyMin: 100,
     startingMoneyMax: 1000,
-    incomeMin: 100,
-    incomeMax: 500,
+    incomeMin: 50,
+    incomeMax: 100,
     suspicionMin: 900,
     suspicionMax: 1200,
     hackDifficultyMin: 5,
@@ -130,8 +128,8 @@ export const NODE_CONFIGS: Record<INodeType, INodeConfig> = {
   bank: {
     startingMoneyMin: 5000,
     startingMoneyMax: 10000,
-    incomeMin: 1000,
-    incomeMax: 5000,
+    incomeMin: 100,
+    incomeMax: 500,
     suspicionMin: 2000,
     suspicionMax: 3000,
     hackDifficultyMin: 10,

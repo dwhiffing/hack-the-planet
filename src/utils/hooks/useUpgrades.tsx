@@ -32,13 +32,13 @@ export const getUpgradeEffect = (key: IUpgradeKey, nextLevel?: boolean) => {
   if (key === 'steal-amount') {
     const level = getLevel('steal-amount', nextLevel)
     const milestone = Math.floor(level / 10) + 1
-    return 0.1 + level * 0.1 * Math.pow(milestone, 2)
+    return 0.1 + level * 0.1 * Math.pow(milestone, 1.5)
   }
 
   if (key === 'auto-steal-amount') {
     const level = getLevel('auto-steal-amount', nextLevel)
     const milestone = Math.floor(level / 10) + 1
-    return 0.1 + level * 0.1 * Math.pow(milestone, 2)
+    return level * 0.1 * Math.pow(milestone, 1.5)
   }
 
   if (key === 'autoscan') {
