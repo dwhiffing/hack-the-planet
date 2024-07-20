@@ -72,11 +72,11 @@ export const useUpgrades = () => {
 
 export const calculateNextCost = (key: string, owned: number) => {
   const upgrade = UPGRADES.find((u) => u.key === key)!
-  return Math.round(upgrade.baseCost * Math.pow(upgrade.costExponent, owned))
+  return upgrade.costs[owned]
 }
 
 const initialUpgrades = UPGRADES.map((u) => ({
   key: u.key,
   level: 0,
-  nextCost: u.baseCost,
+  nextCost: u.costs[0],
 }))

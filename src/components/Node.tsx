@@ -24,7 +24,7 @@ export const Node = (props: {
       ? '#0000ff'
       : '#ff0000'
     : node.hackDuration
-    ? '#ccc'
+    ? '#ffff00'
     : '#999'
 
   const size = node.type === 'bank' ? 0.4 : 0.2

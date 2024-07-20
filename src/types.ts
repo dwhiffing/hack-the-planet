@@ -61,9 +61,8 @@ export type INodeConfig = {
 export type IUpgrade = {
   name: string
   key: IUpgradeKey
-  maxLevel: number
-  costExponent: number
-  baseCost: number
+  requiredNodes: number
+  costs: number[]
 }
 
 export type IUpgradeState = {

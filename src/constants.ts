@@ -6,7 +6,7 @@ export const baseTickspeed = fastMode ? 250 : 1000
 export const baseScanTime = 5
 export const baseHackTime = 5
 
-export const initialMoney = 10
+export const initialMoney = 0
 export const incomeRate = 10
 export const homeId = 2065
 export const baseDiscoveryRange = 25
@@ -24,59 +24,52 @@ export const UPGRADES: IUpgrade[] = [
   {
     name: 'Scan Range',
     key: 'scan-range',
-    maxLevel: 8,
-    costExponent: 3,
-    baseCost: 1,
-  },
-  {
-    name: 'Scan Efficiency',
-    key: 'scan-efficiency',
-    maxLevel: 8,
-    costExponent: 3,
-    baseCost: 1,
-  },
-  {
-    name: 'Scan Speed',
-    key: 'scan-speed',
-    maxLevel: 8,
-    costExponent: 3,
-    baseCost: 1,
-  },
-  {
-    name: 'Hack Speed',
-    key: 'hack-speed',
-    maxLevel: 8,
-    costExponent: 3,
-    baseCost: 1,
-  },
-  {
-    name: 'Hack Efficiency',
-    key: 'hack-efficiency',
-    maxLevel: 8,
-    costExponent: 3,
-    baseCost: 1,
+    requiredNodes: 2,
+    costs: [10, 100, 1000, 10000, 100000],
   },
   {
     name: 'Transfer Rate',
     key: 'transfer-rate',
-    maxLevel: 8,
-    costExponent: 3,
-    baseCost: 1,
+    requiredNodes: 10,
+    costs: [10, 100, 1000, 10000, 100000],
+  },
+  {
+    name: 'Scan Efficiency',
+    key: 'scan-efficiency',
+    requiredNodes: 50,
+    costs: [10, 100, 1000, 10000, 100000],
+  },
+  {
+    name: 'Scan Speed',
+    key: 'scan-speed',
+    requiredNodes: 50,
+    costs: [10, 100, 1000, 10000, 100000],
+  },
+  {
+    name: 'Hack Speed',
+    key: 'hack-speed',
+    requiredNodes: 50,
+    costs: [10, 100, 1000, 10000, 100000],
+  },
+  {
+    name: 'Hack Efficiency',
+    key: 'hack-efficiency',
+    requiredNodes: 50,
+    costs: [10, 100, 1000, 10000, 100000],
   },
   {
     name: 'Autohack',
     key: 'autohack',
-    maxLevel: 8,
-    costExponent: 3,
-    baseCost: 1,
+    requiredNodes: 50,
+    costs: [10, 100, 1000, 10000, 100000],
   },
 ]
 export const NODE_CONFIGS: Record<INodeType, INodeConfig> = {
   home: {
-    startingMoneyMin: 10,
-    startingMoneyMax: 10,
-    incomeMin: 1,
-    incomeMax: 1,
+    startingMoneyMin: 0,
+    startingMoneyMax: 0,
+    incomeMin: 0,
+    incomeMax: 0,
     suspicionMin: 0,
     suspicionMax: 0,
     hackDifficultyMin: 0,

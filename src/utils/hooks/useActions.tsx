@@ -9,6 +9,7 @@ import { getIsNodeHackable } from '../nodes'
 import { useDisconnectNode } from './useFBIInvestigation'
 import { useAutoHack } from './useAutoHack'
 import { UPGRADES } from '@/constants'
+import { useNodes } from './useNodeState'
 
 export const useNodeActions = () => {
   const { onScanStart } = useScan()
@@ -46,7 +47,9 @@ export const useGlobalActions = (onClickHome: () => void) => {
   const { money } = useMoney()
   const { upgradeStates, buyUpgrade } = useUpgrades()
   const { enabled, isUnlocked, setEnabled } = useAutoHack()
+  const { renderedNodeIds } = useNodes()
 
+  const nodeCount = renderedNodeIds.length
   const globalActions = useMemo(() => {
     return [
       {
@@ -81,7 +84,7 @@ export const useGlobalActions = (onClickHome: () => void) => {
           label: isMaxed
             ? `${upgrade.name} maxed`
             : `Upgrade ${upgrade.name} to level ${level + 1} $${cost}`,
-          getIsVisible: () => true,
+          getIsVisible: () => nodeCount >= upgrade.requiredNodes,
           getIsDisabled: () => money < cost || isMaxed,
           onClick: () => buyUpgrade(upgrade.key),
         }
@@ -89,6 +92,7 @@ export const useGlobalActions = (onClickHome: () => void) => {
     ]
   }, [
     onClickHome,
+    nodeCount,
     isUnlocked,
     buyUpgrade,
     money,
