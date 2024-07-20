@@ -7,9 +7,9 @@ import { useScan } from './useScan'
 import { useHack } from './useHack'
 import { getIsNodeHackable } from '../nodes'
 import { useDisconnectNode } from './useFBIInvestigation'
-import { useAutoHack } from './useAutoHack'
 import { UPGRADES } from '@/constants'
 import { useNodes } from './useNodeState'
+import { formatMoney } from '@/components/WorldControls'
 
 export const useNodeActions = () => {
   const { onScanStart } = useScan()
@@ -56,7 +56,6 @@ export const useNodeActions = () => {
 export const useGlobalActions = (onClickHome: () => void) => {
   const { money } = useMoney()
   const { upgradeStates, buyUpgrade } = useUpgrades()
-  const { enabled, isUnlocked, setEnabled } = useAutoHack()
   const { renderedNodeIds } = useNodes()
 
   const nodeCount = renderedNodeIds.length
@@ -81,13 +80,13 @@ export const useGlobalActions = (onClickHome: () => void) => {
           if (confirmed) clearLocalStorage()
         },
       },
-      {
-        label: `${enabled ? 'disable' : 'enable'} autohack`,
-        description: 'Toggle autohack',
-        getIsVisible: () => isUnlocked,
-        getIsDisabled: () => false,
-        onClick: () => setEnabled(!enabled),
-      },
+      // {
+      //   label: `${enabled ? 'disable' : 'enable'} autohack`,
+      //   description: 'Toggle autohack',
+      //   getIsVisible: () => isUnlocked,
+      //   getIsDisabled: () => false,
+      //   onClick: () => setEnabled(!enabled),
+      // },
       ...UPGRADES.map((upgrade) => {
         const state = upgradeStates?.[upgrade.key]
         const level = state?.level ?? 0
@@ -101,7 +100,7 @@ export const useGlobalActions = (onClickHome: () => void) => {
                 2,
               )} to ${getUpgradeEffect(upgrade.key, true).toFixed(
                 2,
-              )}) - $${cost}`,
+              )}) - ${formatMoney(cost)}`,
           description: upgrade.description ?? 'Placeholder',
           getIsVisible: () => nodeCount >= upgrade.requiredNodes,
           getIsDisabled: () => money < cost || isMaxed,
@@ -110,16 +109,7 @@ export const useGlobalActions = (onClickHome: () => void) => {
       }),
     ]
     return globalAction
-  }, [
-    onClickHome,
-    nodeCount,
-    isUnlocked,
-    buyUpgrade,
-    money,
-    upgradeStates,
-    enabled,
-    setEnabled,
-  ])
+  }, [onClickHome, nodeCount, buyUpgrade, money, upgradeStates])
 
   return {
     globalActions,

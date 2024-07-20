@@ -72,6 +72,6 @@ export const MapControls = memo(function MapControls(props: IMapProps) {
     </div>
   )
 })
-function formatMoney(number: number) {
+export function formatMoney(number: number) {
   return number.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
 }

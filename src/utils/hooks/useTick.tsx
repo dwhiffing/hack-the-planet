@@ -7,7 +7,7 @@ import { useAutoHack } from './useAutoHack'
 import { useHack } from './useHack'
 import { useScan } from './useScan'
 import { onAutoSave } from '../localStorage'
-import { getUpgradeEffect, getSuspicionDecay } from './useUpgrades'
+import { getUpgradeEffect } from './useUpgrades'
 
 import { useSuspicion } from './useSuspicion'
 import { useFBIInvestigation } from './useFBIInvestigation'
@@ -92,7 +92,7 @@ export const useTick = () => {
     })
     // console.timeEnd('update nodes')
 
-    setSuspicion(getSuspicionDecay())
+    setSuspicion(getUpgradeEffect('suspicion-decay') * 100)
 
     if (incomeCounter === 0) {
       incomeCounter = incomeRate

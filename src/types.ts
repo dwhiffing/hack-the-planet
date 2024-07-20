@@ -77,10 +77,11 @@ export type IUpgradeState = {
 }
 export type IUpgradeKey =
   | 'scan-range'
-  | 'autohack'
+  | 'autoscan'
   | 'scan-efficiency'
   | 'scan-speed'
   | 'hack-efficiency'
   | 'hack-speed'
   | 'steal-amount'
   | 'auto-steal-amount'
+  | 'suspicion-decay'

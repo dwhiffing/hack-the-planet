@@ -1,20 +1,18 @@
 import { sample } from 'lodash'
 import { useCallback, useMemo } from 'react'
-import { useHack } from './useHack'
 import { useNodes } from './useNodeState'
 import { useScan } from './useScan'
 import { getUpgradeEffect, useUpgrades } from './useUpgrades'
 import { cache } from '@/pages'
-import { getEdgeNodes, getIsNodeHackable } from '../nodes'
+import { getEdgeNodes } from '../nodes'
 import useSWRImmutable from 'swr/immutable'
 
 export const useAutoHack = () => {
   const { getNode, renderedNodeIds } = useNodes()
   const { onScanStart } = useScan()
-  const { onHackStart } = useHack()
   const { upgradeStates } = useUpgrades()
   const { data: enabled, mutate: _setEnabled } = useSWRImmutable<boolean>(
-    `auto-hack-enabled`,
+    `auto-scan-enabled`,
     () => true,
   )
 
@@ -26,14 +24,14 @@ export const useAutoHack = () => {
   )
 
   const isUnlocked = useMemo(
-    () => upgradeStates?.autohack.level !== 0,
+    () => upgradeStates?.autoscan.level !== 0,
     [upgradeStates],
   )
 
   const onAutohack = useCallback(() => {
     if (!isUnlocked || !enabled) return
 
-    const maxTime = getUpgradeEffect('autohack')
+    const maxTime = getUpgradeEffect('autoscan')
     const time = cache.get('auto-hack-time') ?? maxTime
     cache.set('auto-hack-time', time - 1)
 
@@ -49,17 +47,17 @@ export const useAutoHack = () => {
     if (nodeToScan) {
       onScanStart(nodeToScan.id)
     }
-    const possibleHackNodes = nodes.filter((n) => getIsNodeHackable(n, nodes))
-    const nodeToHack = sample(possibleHackNodes)
-    if (nodeToHack) {
-      const siblingNodes = nodes
-        .filter((n) => n.target === nodeToHack.target)
-        .slice(0, getUpgradeEffect('hack-efficiency'))
-      siblingNodes.forEach((node) => {
-        onHackStart(node.id)
-      })
-    }
-  }, [getNode, isUnlocked, onHackStart, enabled, onScanStart, renderedNodeIds])
+    // const possibleHackNodes = nodes.filter((n) => getIsNodeHackable(n, nodes))
+    // const nodeToHack = sample(possibleHackNodes)
+    // if (!nodeToScan && nodeToHack) {
+    //   const siblingNodes = nodes
+    //     .filter((n) => n.target === nodeToHack.target)
+    //     .slice(0, getUpgradeEffect('hack-efficiency'))
+    //   siblingNodes.forEach((node) => {
+    //     onHackStart(node.id)
+    //   })
+    // }
+  }, [getNode, isUnlocked, enabled, onScanStart, renderedNodeIds])
 
   return {
     enabled,

@@ -14,8 +14,8 @@ export const Link = ({
   const { node: target } = useNodeState(source?.target)
   if (
     !source ||
-    !target ||
-    (!source.isOwned && (source.hackDuration ?? 0) <= 0)
+    !target
+    //  || (!source.isOwned && (source.hackDuration ?? 0) <= 0)
   )
     return null
   const isTransfering = !!source.isOwned && !!source?.outgoingMoney

@@ -29,19 +29,32 @@ export const getUpgradeEffect = (key: IUpgradeKey, nextLevel?: boolean) => {
   if (key === 'hack-efficiency')
     return 1 + getLevel('hack-efficiency', nextLevel)
 
-  if (key === 'steal-amount')
-    return 0.1 + getLevel('steal-amount', nextLevel) * 0.1
+  if (key === 'steal-amount') {
+    const level = getLevel('steal-amount', nextLevel)
+    const milestone = Math.floor(level / 10) + 1
+    return 0.1 + level * 0.1 * Math.pow(milestone, 2)
+  }
 
-  if (key === 'auto-steal-amount')
-    return getLevel('auto-steal-amount', nextLevel) * 0.1
+  if (key === 'auto-steal-amount') {
+    const level = getLevel('auto-steal-amount', nextLevel)
+    const milestone = Math.floor(level / 10) + 1
+    return 0.1 + level * 0.1 * Math.pow(milestone, 2)
+  }
 
-  if (key === 'autohack') return 10 - getLevel('autohack', nextLevel) * 2
+  if (key === 'autoscan') {
+    const level = getLevel('autoscan', nextLevel)
+    if (level === 0) return -1
+    return 30 - level * 5
+  }
+
+  if (key === 'suspicion-decay') {
+    const level = getLevel('suspicion-decay', nextLevel)
+    if (level === 0) return 0
+    return level * -0.01
+  }
 
   return 0
 }
-
-// TODO: add upgrade for this
-export const getSuspicionDecay = () => -0.33
 
 export const useUpgrades = () => {
   const { money, setMoney } = useMoney()

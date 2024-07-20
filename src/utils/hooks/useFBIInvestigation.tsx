@@ -22,7 +22,7 @@ export const useFBIInvestigation = () => {
   const { onDisconnect } = useDisconnectNode()
   // TODO: fbi gets stronger as you progress, meaning deeper investigations
   const onInvestigate = useCallback(
-    (depth = sample([1, 2, 2, 2, 3, 3, 4])) => {
+    (depth = sample([1, 1, 1, 1, 1, 2, 2, 2, 3])) => {
       const furthestEdgeNode = sample(getEdgeNodes().slice(0, 6))
       if (furthestEdgeNode) {
         const targets = getNodeTargets(furthestEdgeNode.id)
