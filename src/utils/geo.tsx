@@ -87,6 +87,7 @@ function getRandomNonUniformPointsInCircle(
   )
   // we are reseting the rng each time, maybe we shouldnt?
   const random = getRandom()
+  const random2 = getRandom()
 
   while (points.length < numberOfPoints && fails < 1000) {
     const angle = random() * angleMultiplier
@@ -103,7 +104,12 @@ function getRandomNonUniformPointsInCircle(
       points.push({
         x,
         y,
-        type: points.length === 0 && city.density > 3 ? 'bank' : 'basic',
+        type:
+          points.length === 0 && city.density > 3
+            ? 'bank'
+            : random2() < 0.2
+            ? 'rich'
+            : 'basic',
         country: containingCountry.getAttribute('name') ?? 'Unknown',
       })
     } else {

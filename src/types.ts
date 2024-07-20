@@ -46,7 +46,7 @@ export type PublicNodeState = {
 
 export type FullNode = Node & PublicNodeState
 
-export type INodeType = 'basic' | 'bank' | 'home'
+export type INodeType = 'basic' | 'bank' | 'home' | 'rich'
 export type INodeConfig = {
   startingMoneyMin: number
   startingMoneyMax: number

@@ -22,12 +22,14 @@ export const Node = (props: {
     : node.isOwned
     ? node.type === 'bank'
       ? '#0000ff'
+      : node.type === 'rich'
+      ? '#00ff00'
       : '#ff0000'
     : node.hackDuration
     ? '#ffff00'
     : '#999'
 
-  const size = node.type === 'bank' ? 0.4 : 0.2
+  const size = node.type === 'bank' ? 0.4 : node.type === 'rich' ? 0.3 : 0.2
   const s = selectedNodeId === props.nodeId ? size * 1.5 : size
 
   return (
