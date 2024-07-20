@@ -8,7 +8,7 @@ export const baseHackTime = 5
 
 export const initialMoney = 10
 export const incomeRate = 10
-export const homeId = 1547
+export const homeId = 2065
 export const baseDiscoveryRange = 25
 
 export const background = '#111'
@@ -181,16 +181,16 @@ export const countryConfigs = {
     popFactor: 45000,
   },
   Canada: {
-    densityFactor: 190,
-    maxDensity: 8,
-    maxNodes: 60,
-    popFactor: 10000,
+    densityFactor: 160,
+    maxDensity: 16,
+    maxNodes: 80,
+    popFactor: 7000,
   },
   'United States': {
-    densityFactor: 280,
+    densityFactor: 220,
     maxDensity: 5,
     maxNodes: 50,
-    popFactor: 40000,
+    popFactor: 10000,
   },
   Iceland: {
     densityFactor: 100,
