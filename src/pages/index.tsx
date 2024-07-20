@@ -5,6 +5,7 @@ import { SWRConfig } from 'swr'
 export default function Home() {
   return (
     <SWRConfig value={{ provider: localStorageProvider }}>
+      <title>Hack the Planet</title>
       <main className="w-screen h-screen rounded-xl p-2 overflow-hidden">
         {/* <Crosshair /> */}
         <ParentSize>
