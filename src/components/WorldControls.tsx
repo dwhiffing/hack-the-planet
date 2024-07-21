@@ -12,7 +12,7 @@ export const MapControls = memo(function MapControls(props: IMapProps) {
     ? `${formatMoney(config.incomeMin)} - ${formatMoney(config.incomeMax)}`
     : ''
   return (
-    <div className="absolute top-0 p-4 inset-x-0 flex justify-between pointer-events-none">
+    <div className="absolute top-0 p-4 inset-x-0 flex text-white justify-between pointer-events-none">
       <div className="">
         <p>Money: {formatMoney(props.money)}</p>
         <p>Suspicion: {(props.suspicion / 100).toFixed(2)}%</p>
