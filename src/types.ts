@@ -1,9 +1,12 @@
+import { ProvidedZoom } from '@vx/zoom/lib/types'
+
 export type IMapProps = {
   money: number
   suspicion: number
   selectedNodeActions: INodeAction[]
   globalActions: IGlobalAction[]
   selectedNodeId?: number
+  zoom: ProvidedZoom
 }
 export type INodeAction = {
   label: string

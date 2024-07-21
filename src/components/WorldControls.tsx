@@ -52,6 +52,24 @@ export const MapControls = memo(function MapControls(props: IMapProps) {
         )}
       </div>
       <div className="flex flex-col gap-2 items-end">
+        <div className="flex gap-2 ">
+          <button
+            className="pointer-events-auto"
+            onClick={() => {
+              props.zoom.scale({ scaleX: 0.8 })
+            }}
+          >
+            -
+          </button>
+          <button
+            className="pointer-events-auto"
+            onClick={() => {
+              props.zoom.scale({ scaleX: 1.2 })
+            }}
+          >
+            +
+          </button>
+        </div>
         {props.globalActions
           .filter((a) => a.getIsVisible())
           .map((a) => {

@@ -106,6 +106,7 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
             globalActions={globalActions}
             selectedNodeId={selectedNodeId}
             money={money}
+            zoom={zoom}
             suspicion={suspicion}
           />
         </>
