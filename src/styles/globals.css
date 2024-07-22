@@ -59,3 +59,22 @@ button[disabled] {
   opacity: 0;
   transition: opacity 500ms;
 }
+
+/* .zoom-0 .link, */
+/* .zoom-1 .link, */
+.zoom-2 .link,
+.zoom-3 .link {
+  stroke-dasharray: none;
+}
+
+.zoom-1 .node circle {
+  transform: scale(1.5);
+}
+
+.zoom-2 .node circle {
+  transform: scale(4);
+}
+
+.zoom-3 .node circle {
+  transform: scale(8);
+}

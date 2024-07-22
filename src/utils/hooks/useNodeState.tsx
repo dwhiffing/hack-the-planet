@@ -24,19 +24,24 @@ export const useSelectedNodeId = () => {
 
   const onClickNode = useCallback(
     (id: number) => {
-      // if there's no selected node, select the clicked node
-      if (selectedNodeId === -1) return setSelectedNodeId(id)
+      mutate(
+        (selectedNodeId) => {
+          // if there's no selected node, select the clicked node
+          if (selectedNodeId === -1) return id
 
-      // if we click the currently selected node, deselect it
-      if (id === selectedNodeId) return setSelectedNodeId(-1)
+          // if we click the currently selected node, deselect it
+          if (id === selectedNodeId) return -1
 
-      // otherwise, deselect the current node
-      setSelectedNodeId(id)
+          // otherwise, deselect the current node
+          return id
+        },
+        { revalidate: false },
+      )
     },
-    [selectedNodeId, setSelectedNodeId],
+    [mutate],
   )
 
-  return { selectedNodeId, setSelectedNodeId, onClickNode, onDeselect }
+  return { selectedNodeId, onClickNode, onDeselect }
 }
 
 export const useNodeState = (nodeId?: number) => {

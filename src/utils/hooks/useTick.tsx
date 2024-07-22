@@ -81,9 +81,9 @@ export const useTick = () => {
       // update hack duration
       if ((hackDuration ?? 0) > 0) {
         update.hackDuration = hackDuration - getUpgradeEffect('hack-speed')
-        if (update.hackDuration <= 0) {
-          onHackFinish(nodeId)
-        }
+      }
+      if (typeof update.hackDuration === 'number' && update.hackDuration <= 0) {
+        onHackFinish(nodeId)
       }
 
       if (Object.keys(update).length > 0) {

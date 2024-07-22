@@ -4,15 +4,10 @@ import { useNodes } from './useNodeState'
 import { getUpgradeEffect } from './useUpgrades'
 import { randomInRange } from '../random'
 import { getNode } from '../nodes'
-import {
-  getAdjacentGroups,
-  getNodesWithDistance,
-  rangeSize,
-} from '../getNodesWithDistance'
-import { Node } from '@/types'
+import { getNodesWithDistance, getRelevantNodes } from '../getNodesWithDistance'
 
 export const useScan = () => {
-  const { groupedNodes, updateNode, renderedNodeIds } = useNodes()
+  const { updateNode, renderedNodeIds } = useNodes()
 
   const scanDuration = baseScanTime
   const onScanStart = useCallback(
@@ -29,15 +24,10 @@ export const useScan = () => {
       const node = getNode(id)
       if (!node) return
 
-      const latGroup = Math.floor(node.earthCoords![1] / rangeSize)
-      const lonGroup = Math.floor(node.earthCoords![0] / rangeSize)
-      const adjacentGroups = getAdjacentGroups(latGroup, lonGroup)
-      const relevantNodes: Node[] = []
-      adjacentGroups.forEach((groupKey) => {
-        if (groupedNodes[groupKey]) {
-          relevantNodes.push(...(groupedNodes[groupKey].nodes ?? []))
-        }
-      })
+      const relevantNodes = getRelevantNodes(
+        node.earthCoords![1],
+        node.earthCoords![0],
+      )
 
       const closestNodes = getNodesWithDistance(relevantNodes, node)
         .filter(
@@ -64,7 +54,7 @@ export const useScan = () => {
         })
       })
     },
-    [renderedNodeIds, groupedNodes, updateNode, scanEfficiency, discoveryRange],
+    [renderedNodeIds, updateNode, scanEfficiency, discoveryRange],
   )
 
   return {

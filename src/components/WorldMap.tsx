@@ -1,26 +1,24 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { Zoom } from '@vx/zoom'
 import { background, baseTickspeed, maxZoom, minZoom } from '@/constants'
 import { WorldSvg } from './WorldSvg'
 import { BotNet } from './WorldBotNet'
 import { coordsToTransform } from '@/utils/geo'
 import { MapControls } from './WorldControls'
-import { useMoney } from '@/utils/hooks/useMoney'
 import { useNodes, useSelectedNodeId } from '@/utils/hooks/useNodeState'
 import { useTick } from '@/utils/hooks/useTick'
 import { ProvidedZoom } from '@vx/zoom/lib/types'
 import { useGlobalActions, useNodeActions } from '@/utils/hooks/useActions'
 import { useZoom } from '@/utils/hooks/useZoom'
-import { useSuspicion } from '@/utils/hooks/useSuspicion'
+import { getVisibleGroups, getZoomLevel } from '@/utils/getNodesWithDistance'
 
 export function WorldMap({ width, height }: { width: number; height: number }) {
-  const { renderedNodeIds, worldSvgMountCallback } = useNodes()
+  const { worldSvgMountCallback } = useNodes()
   const { onClickHome, zoomRef, mouseRef } = useZoom(width, height)
   const { globalActions } = useGlobalActions(onClickHome)
   const { selectedNodeActions } = useNodeActions()
   const { selectedNodeId, onClickNode, onDeselect } = useSelectedNodeId()
-  const { money } = useMoney()
-  const { suspicion } = useSuspicion()
+  const allowScroll = useRef(true)
 
   useTick()
 
@@ -31,8 +29,17 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
   if (width === 0 && height === 0) return null
 
   const onScroll = (e: React.WheelEvent<Element> | WheelEvent) => {
-    const f = 1 + -0.01 * e.deltaY
-    return { scaleX: f, scaleY: f }
+    if (!allowScroll.current) {
+      return { scaleX: 1, scaleY: 1 }
+    }
+    allowScroll.current = false
+    setTimeout(() => {
+      allowScroll.current = true
+    }, 400)
+    if (e.deltaY > 0) {
+      return { scaleX: 0.25, scaleY: 0.25 }
+    }
+    return { scaleX: 4, scaleY: 4 }
   }
 
   const onMouseLeave = () => {
@@ -55,7 +62,6 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
     // @ts-ignore
     <Zoom
       ref={zoomRef}
-      className="relative"
       width={width}
       height={height}
       scaleXMin={minZoom}
@@ -63,12 +69,14 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
       scaleXMax={maxZoom}
       scaleYMax={maxZoom}
       wheelDelta={onScroll}
-      transformMatrix={coordsToTransform(0, 0, 1, width, height)}
+      transformMatrix={coordsToTransform(0, 0, maxZoom, width, height)}
     >
       {(zoom) => (
         <>
           <svg
-            className="rounded-xl overflow-hidden"
+            className={`rounded-xl overflow-hidden zoom-${getZoomLevel(
+              zoom.transformMatrix,
+            )}`}
             width={width}
             height={height}
             style={{ cursor: zoom.isDragging ? 'grabbing' : 'grab' }}
@@ -78,7 +86,6 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
             <g ref={worldSvgMountCallback} transform={zoom.toString()}>
               <WorldSvg />
             </g>
-
             <rect
               className="relative z-10"
               fill="transparent"
@@ -94,7 +101,12 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
               transform={zoom.toString()}
             >
               <BotNet
-                nodeIds={renderedNodeIds}
+                groupKeysString={getVisibleGroups(
+                  zoom.transformMatrix,
+                  width,
+                  height,
+                )}
+                zoomLevel={getZoomLevel(zoom.transformMatrix)}
                 onClickNode={onClickNode}
                 tickspeed={baseTickspeed}
               />
@@ -105,9 +117,7 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
             selectedNodeActions={selectedNodeActions}
             globalActions={globalActions}
             selectedNodeId={selectedNodeId}
-            money={money}
             zoom={zoom}
-            suspicion={suspicion}
           />
         </>
       )}

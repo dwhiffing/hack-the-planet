@@ -1,17 +1,17 @@
-import React, { useRef } from 'react'
+import React, { memo, useRef } from 'react'
 import { Group } from '@visx/group'
 import { CSSTransition } from 'react-transition-group'
 
 import { pxPerKM } from '@/constants'
-import { useNodeState, useSelectedNodeId } from '@/utils/hooks/useNodeState'
+import { useNodeState } from '@/utils/hooks/useNodeState'
 import { getUpgradeEffect } from '@/utils/hooks/useUpgrades'
 
-export const Node = (props: {
+export const Node = memo(function Node(props: {
   nodeId: number
+  isSelected: boolean
   onClick: (nodeId: number) => void
   tickspeed: number
-}) => {
-  const { selectedNodeId } = useSelectedNodeId()
+}) {
   const { node } = useNodeState(props.nodeId)
   const nodeRef = useRef(null)
 
@@ -30,10 +30,10 @@ export const Node = (props: {
     : '#999'
 
   const size = node.type === 'bank' ? 0.4 : node.type === 'rich' ? 0.3 : 0.2
-  const s = selectedNodeId === props.nodeId ? size * 1.5 : size
+  const s = props.isSelected ? size * 1.5 : size
 
   return (
-    <Group left={node.x} top={node.y}>
+    <Group className="node" left={node.x} top={node.y}>
       <CSSTransition
         nodeRef={nodeRef}
         in={(node.scanDuration ?? 0) > 0}
@@ -69,12 +69,12 @@ export const Node = (props: {
           transition:
             'all 150ms cubic-bezier(0.4, 0, 0.2, 1), fill 500ms cubic-bezier(0.4, 0, 0.2, 1)',
         }}
-        strokeWidth={selectedNodeId === props.nodeId ? 0.01 : 0}
+        strokeWidth={props.isSelected ? 0.01 : 0}
         fill={fill}
       />
     </Group>
   )
-}
+})
 
 const drawScan = (
   x: number,

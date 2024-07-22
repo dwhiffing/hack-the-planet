@@ -1,5 +1,5 @@
 import { baseScale, baseTranslate, countryConfigs } from '@/constants'
-import { geoMercator } from 'd3-geo'
+import { geoMercator, GeoProjection } from 'd3-geo'
 import { getRandom } from './random'
 import bordersJson from '../assets/borders.json'
 import continents from '../assets/continents.json'
@@ -173,6 +173,8 @@ export const coordsToTransform = (
   }
 }
 
+let _projection: GeoProjection
+let _lastScale: number = 0
 export const transformToCoords = (
   matrix: {
     translateX: number
@@ -182,11 +184,14 @@ export const transformToCoords = (
   width: number,
   height: number,
 ) => {
-  const projection = geoMercator()
-    .translate(baseTranslate)
-    .scale(baseScale * matrix.scaleX)
+  if (_lastScale !== matrix.scaleX) {
+    _projection = geoMercator()
+      .translate(baseTranslate)
+      .scale(baseScale * matrix.scaleX)
+    _lastScale = matrix.scaleX
+  }
 
-  return projection.invert!([
+  return _projection.invert!([
     matrix.translateX * -1 + width / 2,
     matrix.translateY * -1 + height / 2,
   ])!

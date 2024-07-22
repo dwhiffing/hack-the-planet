@@ -6,9 +6,11 @@ const baseLineWidth = 0.01
 export const Link = ({
   nodeId,
   tickspeed,
+  zoomLevel,
 }: {
   nodeId: number
   tickspeed: number
+  zoomLevel: number
 }) => {
   const { node: source } = useNodeState(nodeId)
   const { node: target } = useNodeState(source?.target)
@@ -32,24 +34,28 @@ export const Link = ({
       y2={target.y}
       strokeWidth={strokeWidth}
       stroke={strokeColor}
-      className="pointer-events-none transition-colors duration-500"
+      className="pointer-events-none transition-colors duration-500 link"
       strokeDasharray={`${lineWidth} ${lineSpacing}`}
     >
-      {(source.hackDuration ?? 0) > 0 && (
-        <animate
-          attributeName="stroke-dashoffset"
-          values={`${(lineWidth + lineSpacing) * -8};0`}
-          dur={`${tickspeed}ms`}
-          repeatCount="indefinite"
-        />
-      )}
-      {!!source.isOwned && !!source?.outgoingMoney && (
-        <animate
-          attributeName="stroke-dashoffset"
-          values={`${(lineWidth + lineSpacing) * 2};0`}
-          dur={`${tickspeed}ms`}
-          repeatCount="indefinite"
-        />
+      {zoomLevel <= 1 && (
+        <>
+          {(source.hackDuration ?? 0) > 0 && (
+            <animate
+              attributeName="stroke-dashoffset"
+              values={`${(lineWidth + lineSpacing) * -8};0`}
+              dur={`${tickspeed}ms`}
+              repeatCount="indefinite"
+            />
+          )}
+          {!!source.isOwned && !!source?.outgoingMoney && (
+            <animate
+              attributeName="stroke-dashoffset"
+              values={`${(lineWidth + lineSpacing) * 2};0`}
+              dur={`${tickspeed}ms`}
+              repeatCount="indefinite"
+            />
+          )}
+        </>
       )}
     </line>
   )

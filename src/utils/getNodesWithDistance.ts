@@ -1,18 +1,61 @@
+import { cache } from '@/pages'
 import { Node } from '@/types'
+import { transformToCoords } from './geo'
+import { TransformMatrix } from '@vx/zoom/lib/types'
 
 export interface Group {
   key: string
   nodes: Node[]
 }
 
-export const rangeSize = 5
+export const rangeSize = 1.5
+export const getAllNodeGroups = () => {
+  const groupedNodes = cache.get('grouped-node-data').data as Record<
+    string,
+    Group
+  >
+
+  return Object.keys(groupedNodes)
+}
+
+export const getZoomLevel = (transform: TransformMatrix) => {
+  const zoom = transform.scaleX
+  if (zoom < 5) return 3
+  if (zoom <= 13) return 2
+  if (zoom <= 50) return 1
+  return 0
+}
+const getZoomDrawDistance = (zoom: number) => {
+  if (zoom < 5) return -1
+  if (zoom <= 13) return 7
+  if (zoom <= 50) return 2
+  return 1
+}
+
+export const getVisibleGroups = (
+  transformMatrix: TransformMatrix,
+  width: number,
+  height: number,
+) => {
+  const coords = transformToCoords(transformMatrix, width, height)
+  const zoomLevel = getZoomDrawDistance(transformMatrix.scaleX)
+  if (zoomLevel === -1) return getAllNodeGroups().join(':')
+  const groups = getAdjacentGroups(coords[1], coords[0], zoomLevel)
+
+  return groups.join(':')
+}
+
+export const getGroupFromLatLng = (lat: number, lng: number): string => {
+  const latGroup = Math.floor(lat / rangeSize)
+  const lonGroup = Math.floor(lng / (rangeSize * 2))
+  return `${latGroup},${lonGroup}`
+}
+
 export const groupNodes = (nodes: Node[]): Record<string, Group> => {
   const groups: Record<string, Group> = {}
 
   nodes.forEach((node) => {
-    const latGroup = Math.floor(node.earthCoords![1] / rangeSize)
-    const lonGroup = Math.floor(node.earthCoords![0] / rangeSize)
-    const key = `${latGroup},${lonGroup}`
+    const key = getGroupFromLatLng(node.earthCoords![1], node.earthCoords![0])
 
     if (!groups[key]) {
       groups[key] = { key, nodes: [] }
@@ -23,18 +66,37 @@ export const groupNodes = (nodes: Node[]): Record<string, Group> => {
   return groups
 }
 export const getAdjacentGroups = (
-  latGroup: number,
-  lonGroup: number,
+  lat: number,
+  lng: number,
+  n = 1,
 ): string[] => {
+  const latGroup = Math.floor(lat / rangeSize)
+  const lonGroup = Math.floor(lng / (rangeSize * 2))
   const adjacentGroups: string[] = []
 
-  for (let i = -1; i <= 1; i++) {
-    for (let j = -1; j <= 1; j++) {
+  for (let i = -n; i <= n; i++) {
+    for (let j = -n; j <= n; j++) {
       adjacentGroups.push(`${latGroup + i},${lonGroup + j}`)
     }
   }
 
   return adjacentGroups
+}
+
+export const getRelevantNodes = (lat: number, lng: number) => {
+  const groupedNodes = cache.get('grouped-node-data').data as Record<
+    string,
+    Group
+  >
+
+  const adjacentGroups = getAdjacentGroups(lat, lng)
+  const relevantNodes: Node[] = []
+  adjacentGroups.forEach((groupKey) => {
+    if (groupedNodes[groupKey]) {
+      relevantNodes.push(...(groupedNodes[groupKey].nodes ?? []))
+    }
+  })
+  return relevantNodes
 }
 
 export const getNodesWithDistance = (nodes: Node[], node: Node) =>

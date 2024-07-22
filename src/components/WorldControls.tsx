@@ -3,9 +3,13 @@ import React, { memo } from 'react'
 import { IMapProps } from '@/types'
 import { useNodeState } from '@/utils/hooks/useNodeState'
 import { NODE_CONFIGS } from '@/constants'
+import { useMoney } from '@/utils/hooks/useMoney'
+import { useSuspicion } from '@/utils/hooks/useSuspicion'
 
 export const MapControls = memo(function MapControls(props: IMapProps) {
   const { node: selectedNode } = useNodeState(props.selectedNodeId)
+  const { money } = useMoney()
+  const { suspicion } = useSuspicion()
 
   const config = selectedNode ? NODE_CONFIGS[selectedNode.type] : undefined
   const selectedNodeIncome = config
@@ -14,8 +18,9 @@ export const MapControls = memo(function MapControls(props: IMapProps) {
   return (
     <div className="absolute top-0 p-4 inset-x-0 flex text-white justify-between pointer-events-none">
       <div className="">
-        <p>Money: {formatMoney(props.money)}</p>
-        <p>Suspicion: {(props.suspicion / 100).toFixed(2)}%</p>
+        <p>Money: {formatMoney(money)}</p>
+        {/* <p>Income: {formatMoney(incomePerTick)}</p> */}
+        <p>Suspicion: {(suspicion / 100).toFixed(2)}%</p>
         {selectedNode && (
           <div className="border border-[#555] my-2 p-2">
             {/* <p>id: {selectedNode?.id}</p> */}
@@ -56,7 +61,7 @@ export const MapControls = memo(function MapControls(props: IMapProps) {
           <button
             className="pointer-events-auto"
             onClick={() => {
-              props.zoom.scale({ scaleX: 0.8 })
+              props.zoom.scale({ scaleX: 0.25 })
             }}
           >
             -
@@ -64,7 +69,7 @@ export const MapControls = memo(function MapControls(props: IMapProps) {
           <button
             className="pointer-events-auto"
             onClick={() => {
-              props.zoom.scale({ scaleX: 1.2 })
+              props.zoom.scale({ scaleX: 4 })
             }}
           >
             +
