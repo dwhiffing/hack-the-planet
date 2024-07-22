@@ -4,7 +4,8 @@ export type IMapProps = {
   selectedNodeActions: INodeAction[]
   globalActions: IGlobalAction[]
   selectedNodeId?: number
-  zoom: ProvidedZoom
+  onZoomOut: () => void
+  onZoomIn: () => void
 }
 export type INodeAction = {
   label: string

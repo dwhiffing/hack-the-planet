@@ -54,20 +54,10 @@ export const MapControls = memo(function MapControls(props: IMapProps) {
       </div>
       <div className="flex flex-col gap-2 items-end">
         <div className="flex gap-2 ">
-          <button
-            className="pointer-events-auto"
-            onClick={() => {
-              props.zoom.scale({ scaleX: 0.25 })
-            }}
-          >
+          <button className="pointer-events-auto" onClick={props.onZoomOut}>
             -
           </button>
-          <button
-            className="pointer-events-auto"
-            onClick={() => {
-              props.zoom.scale({ scaleX: 4 })
-            }}
-          >
+          <button className="pointer-events-auto" onClick={props.onZoomIn}>
             +
           </button>
         </div>

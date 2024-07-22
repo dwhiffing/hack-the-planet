@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 import { Zoom } from '@vx/zoom'
 import { background, baseTickspeed, maxZoom, minZoom } from '@/constants'
 import { WorldSvg } from './WorldSvg'
@@ -25,6 +25,14 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
   useEffect(() => {
     onClickHome()
   }, [onClickHome])
+
+  const onZoomIn = useCallback(() => {
+    zoomRef.current?.scale({ scaleX: 4, scaleY: 4 })
+  }, [zoomRef])
+
+  const onZoomOut = useCallback(() => {
+    zoomRef.current?.scale({ scaleX: 0.25, scaleY: 0.25 })
+  }, [zoomRef])
 
   if (width === 0 && height === 0) return null
 
@@ -117,7 +125,8 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
             selectedNodeActions={selectedNodeActions}
             globalActions={globalActions}
             selectedNodeId={selectedNodeId}
-            zoom={zoom}
+            onZoomOut={onZoomOut}
+            onZoomIn={onZoomIn}
           />
         </>
       )}
