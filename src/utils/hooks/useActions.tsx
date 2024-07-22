@@ -1,6 +1,5 @@
 import { useMemo } from 'react'
 import { FullNode, IGlobalAction, INodeAction } from '@/types'
-import { clearLocalStorage } from '../localStorage'
 import { useMoney } from './useMoney'
 import { calculateNextCost, getUpgradeEffect, useUpgrades } from './useUpgrades'
 import { useScan } from './useScan'
@@ -61,18 +60,18 @@ export const useGlobalActions = (onClickHome: () => void) => {
         getIsDisabled: () => false,
         onClick: onClickHome,
       },
-      {
-        label: 'Reset',
-        description: 'Reset your save',
-        getIsVisible: () => true,
-        getIsDisabled: () => false,
-        onClick: () => {
-          const confirmed = confirm(
-            'Are you sure you what to clear your save and restart?',
-          )
-          if (confirmed) clearLocalStorage()
-        },
-      },
+      // {
+      //   label: 'Reset',
+      //   description: 'Reset your save',
+      //   getIsVisible: () => true,
+      //   getIsDisabled: () => false,
+      //   onClick: () => {
+      //     const confirmed = confirm(
+      //       'Are you sure you what to clear your save and restart?',
+      //     )
+      //     if (confirmed) clearLocalStorage()
+      //   },
+      // },
       // {
       //   label: `${enabled ? 'disable' : 'enable'} autohack`,
       //   description: 'Toggle autohack',

@@ -5,7 +5,7 @@ import { Node } from './Node'
 import { Link } from './Link'
 import { cache } from '@/pages'
 import { Group as IGroup } from '@/utils/getNodesWithDistance'
-import { useSelectedNodeId } from '@/utils/hooks/useNodeState'
+import { useNodes, useSelectedNodeId } from '@/utils/hooks/useNodeState'
 
 export const BotNet = memo(function NetworkGraph({
   groupKeysString,
@@ -62,11 +62,14 @@ export const NodeGroup = memo(function NodeGroup({
   selectedNodeId?: number
   isLinks: boolean
 }) {
+  const { renderedNodeIds } = useNodes()
   const groupedNodes = cache.get('grouped-node-data').data as Record<
     string,
     IGroup
   >
-  const nodeIds = groupedNodes[groupKey]?.nodes.map((n) => n.id) ?? []
+  const nodeIds = (groupedNodes[groupKey]?.nodes.map((n) => n.id) ?? []).filter(
+    (id) => renderedNodeIds.includes(id),
+  )
   return (
     <Group>
       {isLinks &&

@@ -14,12 +14,7 @@ export const Link = ({
 }) => {
   const { node: source } = useNodeState(nodeId)
   const { node: target } = useNodeState(source?.target)
-  if (
-    !source ||
-    !target
-    //  || (!source.isOwned && (source.hackDuration ?? 0) <= 0)
-  )
-    return null
+  if (!source || !target) return null
   const isTransfering = !!source.isOwned
   const isScanned = !source.isOwned
   const lineWidth = isScanned ? baseLineWidth : baseLineWidth * 8

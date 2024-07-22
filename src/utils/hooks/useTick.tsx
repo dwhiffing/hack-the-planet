@@ -6,7 +6,7 @@ import { useNodes } from './useNodeState'
 import { useAutoHack } from './useAutoHack'
 import { useHack } from './useHack'
 import { useScan } from './useScan'
-import { onAutoSave } from '../localStorage'
+// import { onAutoSave } from '../localStorage'
 import { getUpgradeEffect } from './useUpgrades'
 
 import { useSuspicion } from './useSuspicion'
@@ -66,7 +66,7 @@ export const useTick = () => {
 
     if (saveCounter === 0) {
       saveCounter = saveRate
-      onAutoSave(cache)
+      // onAutoSave(cache)
     }
     cache.set('save-counter', saveCounter as State<any, any>)
 

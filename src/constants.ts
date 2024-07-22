@@ -17,7 +17,7 @@ export const pxPerKM = 0.04356460038551915
 export const baseScale = 200
 export const zoomScale = 200
 export const minZoom = 1
-export const maxZoom = 500
+export const maxZoom = 200
 export const baseTranslate = [0, 0] as [number, number]
 
 export const UPGRADES: IUpgrade[] = [
