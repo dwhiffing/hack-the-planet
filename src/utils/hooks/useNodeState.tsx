@@ -3,7 +3,7 @@ import useSWRImmutable from 'swr/immutable'
 import { useSWRConfig } from 'swr'
 import { uniq } from 'lodash'
 import { FullNode, Node } from '@/types'
-import { homeId, initialMoney } from '@/constants'
+import { homeId } from '@/constants'
 import { getNodes } from '../geo'
 import { Group, groupNodes } from '../getNodesWithDistance'
 
@@ -139,7 +139,6 @@ export const useNodes = () => {
     const home = getNode(homeId)
     if (!home)
       updateNode(homeId, {
-        money: initialMoney,
         isOwned: true,
         isHome: true,
         type: 'home',

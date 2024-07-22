@@ -20,7 +20,7 @@ export const Link = ({
     //  || (!source.isOwned && (source.hackDuration ?? 0) <= 0)
   )
     return null
-  const isTransfering = !!source.isOwned && !!source?.outgoingMoney
+  const isTransfering = !!source.isOwned
   const isScanned = !source.isOwned
   const lineWidth = isScanned ? baseLineWidth : baseLineWidth * 8
   const strokeWidth = isScanned ? 0.01 : 0.02
@@ -47,7 +47,7 @@ export const Link = ({
               repeatCount="indefinite"
             />
           )}
-          {!!source.isOwned && !!source?.outgoingMoney && (
+          {!!source.isOwned && (
             <animate
               attributeName="stroke-dashoffset"
               values={`${(lineWidth + lineSpacing) * 2};0`}

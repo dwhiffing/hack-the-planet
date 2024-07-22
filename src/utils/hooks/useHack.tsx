@@ -38,30 +38,8 @@ export const useHack = () => {
     [updateNode, getNode, setSuspicion],
   )
 
-  const onSteal = useCallback(
-    (id: number) => {
-      const node = getNode(id)
-      if (!node || !node.target) return
-      let update: Partial<FullNode> = {}
-      const target = getNode(node.target)
-      let currentMoney = node?.money ?? 0
-      if (target && node.isOwned && currentMoney > 0) {
-        let outgoingMoney = getUpgradeEffect('steal-amount')
-        if (currentMoney < outgoingMoney) {
-          outgoingMoney = currentMoney
-        }
-        currentMoney -= outgoingMoney
-        update.money = currentMoney
-        update.outgoingMoney = (node.outgoingMoney ?? 0) + outgoingMoney
-        updateNode(id, update)
-      }
-    },
-    [updateNode, getNode],
-  )
-
   return {
     onHackStart,
     onHackFinish,
-    onSteal,
   }
 }

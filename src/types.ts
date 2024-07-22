@@ -43,16 +43,13 @@ export type PublicNodeState = {
   type?: INodeType
   sources?: number[]
   target?: number
-  money?: number
-  outgoingMoney?: number
+  income?: number
 }
 
 export type FullNode = Node & PublicNodeState
 
 export type INodeType = 'basic' | 'bank' | 'home' | 'rich'
 export type INodeConfig = {
-  startingMoneyMin: number
-  startingMoneyMax: number
   incomeMin: number
   incomeMax: number
   suspicionMin: number
@@ -84,5 +81,4 @@ export type IUpgradeKey =
   | 'hack-efficiency'
   | 'hack-speed'
   | 'steal-amount'
-  | 'auto-steal-amount'
   | 'suspicion-decay'

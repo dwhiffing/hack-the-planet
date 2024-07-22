@@ -13,18 +13,11 @@ import { formatMoney } from '@/components/WorldControls'
 
 export const useNodeActions = () => {
   const { onScanStart } = useScan()
-  const { onHackStart, onSteal } = useHack()
+  const { onHackStart } = useHack()
   const { onDisconnect } = useDisconnectNode()
 
   const selectedNodeActions = useMemo(() => {
     const nodeActions: INodeAction[] = [
-      {
-        label: 'steal',
-        description: 'Take money from this node and send it to connected node',
-        getIsDisabled: (node: FullNode) => (node.money ?? 0) <= 0,
-        getIsVisible: (node: FullNode) => node.isOwned && !node.isHome,
-        onClick: (node: FullNode) => onSteal(node.id),
-      },
       {
         label: 'hack',
         description: 'Take over this node',
@@ -48,7 +41,7 @@ export const useNodeActions = () => {
       },
     ]
     return nodeActions
-  }, [onHackStart, onScanStart, onSteal, onDisconnect])
+  }, [onHackStart, onScanStart, onDisconnect])
 
   return { selectedNodeActions }
 }

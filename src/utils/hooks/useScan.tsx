@@ -38,10 +38,7 @@ export const useScan = () => {
 
       closestNodes.forEach((node) => {
         const config = NODE_CONFIGS[node.node.type]
-        const startingMoney = randomInRange(
-          config.startingMoneyMin,
-          config.startingMoneyMax,
-        )
+        const income = randomInRange(config.incomeMin, config.incomeMax)
 
         updateNode(id, {
           sources: [...(getNode(id)?.sources ?? []), node.id],
@@ -50,7 +47,7 @@ export const useScan = () => {
         updateNode(node.id, {
           isScanned: true,
           target: id,
-          money: startingMoney,
+          income,
         })
       })
     },

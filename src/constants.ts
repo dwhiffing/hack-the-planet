@@ -7,7 +7,7 @@ export const baseScanTime = 5
 export const baseHackTime = 5
 
 export const initialMoney = 0
-export const incomeRate = 10
+export const saveRate = 10
 export const homeId = 2065
 export const baseDiscoveryRange = 25
 
@@ -27,19 +27,9 @@ export const UPGRADES: IUpgrade[] = [
     description:
       'How much money you steal per click and transfer between nodes per tick',
     requiredNodes: 3,
-    maxLevel: 100,
-    costExponent: 1.23,
-    baseCost: 5,
-  },
-  {
-    name: 'Auto Steal',
-    key: 'auto-steal-amount',
-    description:
-      'How much money you automatically steal from hacked nodes per tick',
-    requiredNodes: 4,
-    maxLevel: 100,
-    costExponent: 1.2,
-    baseCost: 25,
+    maxLevel: 99,
+    costExponent: 1.5,
+    baseCost: 10,
   },
   {
     name: 'Scan Range',
@@ -96,8 +86,6 @@ export const UPGRADES: IUpgrade[] = [
 ]
 export const NODE_CONFIGS: Record<INodeType, INodeConfig> = {
   home: {
-    startingMoneyMin: 0,
-    startingMoneyMax: 0,
     incomeMin: 0,
     incomeMax: 0,
     suspicionMin: 0,
@@ -106,8 +94,6 @@ export const NODE_CONFIGS: Record<INodeType, INodeConfig> = {
     hackDifficultyMax: 0,
   },
   basic: {
-    startingMoneyMin: 50,
-    startingMoneyMax: 100,
     incomeMin: 10,
     incomeMax: 20,
     suspicionMin: 300,
@@ -116,8 +102,6 @@ export const NODE_CONFIGS: Record<INodeType, INodeConfig> = {
     hackDifficultyMax: 2,
   },
   rich: {
-    startingMoneyMin: 100,
-    startingMoneyMax: 1000,
     incomeMin: 50,
     incomeMax: 100,
     suspicionMin: 900,
@@ -126,8 +110,6 @@ export const NODE_CONFIGS: Record<INodeType, INodeConfig> = {
     hackDifficultyMax: 10,
   },
   bank: {
-    startingMoneyMin: 5000,
-    startingMoneyMax: 10000,
     incomeMin: 100,
     incomeMax: 500,
     suspicionMin: 2000,
