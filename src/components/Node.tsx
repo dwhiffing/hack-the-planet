@@ -37,7 +37,7 @@ export const Node = (props: {
       <CSSTransition
         nodeRef={nodeRef}
         in={(node.scanDuration ?? 0) > 0}
-        timeout={300}
+        timeout={500}
         classNames="fade"
         unmountOnExit
       >
@@ -67,7 +67,7 @@ export const Node = (props: {
         stroke="#fff"
         style={{
           transition:
-            'all 150ms cubic-bezier(0.4, 0, 0.2, 1), fill 300ms cubic-bezier(0.4, 0, 0.2, 1)',
+            'all 150ms cubic-bezier(0.4, 0, 0.2, 1), fill 500ms cubic-bezier(0.4, 0, 0.2, 1)',
         }}
         strokeWidth={selectedNodeId === props.nodeId ? 0.01 : 0}
         fill={fill}
