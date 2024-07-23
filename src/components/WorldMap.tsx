@@ -48,11 +48,15 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
   }, [onClickHome])
 
   const onZoomIn = useCallback(() => {
-    zoomRef.current?.scale({ scaleX: 4, scaleY: 4 })
+    const scaleX = zoomRef.current?.state.transformMatrix?.scaleX ?? 0
+    const scale = scaleX < 3 ? 2 : 4
+    zoomRef.current?.scale({ scaleX: scale, scaleY: scale })
   }, [zoomRef])
 
   const onZoomOut = useCallback(() => {
-    zoomRef.current?.scale({ scaleX: 0.25, scaleY: 0.25 })
+    const scaleX = zoomRef.current?.state.transformMatrix?.scaleX ?? 0
+    const scale = scaleX < 5 ? 0.5 : 0.25
+    zoomRef.current?.scale({ scaleX: scale, scaleY: scale })
   }, [zoomRef])
 
   if (width === 0 && height === 0) return null
@@ -65,10 +69,14 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
     setTimeout(() => {
       allowScroll.current = true
     }, 400)
+    const scaleX = zoomRef.current?.state.transformMatrix?.scaleX ?? 0
+    let scale: number
     if (e.deltaY > 0) {
-      return { scaleX: 0.25, scaleY: 0.25 }
+      scale = scaleX < 5 ? 0.5 : 0.25
+    } else {
+      scale = scaleX < 3 ? 2 : 4
     }
-    return { scaleX: 4, scaleY: 4 }
+    return { scaleX: scale, scaleY: scale }
   }
 
   const onMouseLeave = () => {

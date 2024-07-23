@@ -24,7 +24,7 @@ export const getZoomLevel = (transform: TransformMatrix) => {
 }
 const getZoomDrawDistance = (zoom: number) => {
   if (zoom < 5) return -1
-  if (zoom <= 13) return 7
+  if (zoom <= 13) return 9
   if (zoom <= 50) return 2
   return 1
 }
