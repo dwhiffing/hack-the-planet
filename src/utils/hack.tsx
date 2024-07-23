@@ -11,14 +11,14 @@ export const onHackStart = (id: number) => {
     config.hackDifficultyMax,
   )
   let hackDuration = baseHackTime + hackDifficulty
-  if (node && node.isScanned && !node.isOwned) {
+  if (node && !node.isOwned) {
     updateNode(id, { hackDuration })
   }
 }
 
 export const onHackFinish = (id: number) => {
   const node = store.nodes[id]
-  if (node && node.isScanned && !node.isOwned) {
+  if (node && !node.isOwned) {
     store.suspicion += getNodeSuspicion(id)
     updateNode(id, { isOwned: true })
   }

@@ -36,7 +36,6 @@ export const onScanFinish = (id: number) => {
     })
 
     updateNode(node.id, {
-      isScanned: true,
       target: id,
       income,
     })

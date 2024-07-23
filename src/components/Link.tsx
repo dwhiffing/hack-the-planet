@@ -17,11 +17,11 @@ export const Link = ({
   const { [source?.target ?? -1]: target } = useSnapshot(store.nodes)
   if (!source || !target) return null
   const isTransfering = !!source.isOwned
-  const isScanned = !source.isOwned
-  const lineWidth = isScanned ? baseLineWidth : baseLineWidth * 8
-  const strokeWidth = isScanned ? 0.01 : 0.02
-  const lineSpacing = isScanned ? 0.1 : 0.05
-  const strokeColor = isTransfering ? 'red' : isScanned ? '#ccc' : 'white'
+  const notOwned = !source.isOwned
+  const lineWidth = notOwned ? baseLineWidth : baseLineWidth * 8
+  const strokeWidth = notOwned ? 0.01 : 0.02
+  const lineSpacing = notOwned ? 0.1 : 0.05
+  const strokeColor = isTransfering ? 'red' : notOwned ? '#ccc' : 'white'
   return (
     <line
       x1={source.x}
