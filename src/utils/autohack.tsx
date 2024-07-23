@@ -1,9 +1,9 @@
 import { sample } from 'lodash'
-import { getUpgradeEffect } from './upgrades'
-import { getEdgeNodes, getIsNodeHackable } from './nodes'
-import { store } from './valtioState'
-import { onScanStart } from './scan'
-import { onHackStart } from './hack'
+import { getUpgradeEffect } from '@/utils/upgrades'
+import { getEdgeNodes, getIsNodeHackable } from '@/utils/nodes'
+import { store } from '@/utils/valtioState'
+import { onScanStart } from '@/utils/scan'
+import { onHackStart } from '@/utils/hack'
 
 export const onAutohack = () => {
   const isUnlocked = store.upgrades.autoscan.level !== 0

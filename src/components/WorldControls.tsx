@@ -12,7 +12,7 @@ import { getIsNodeHackable, getNodeIncome } from '@/utils/nodes'
 import { onHackStart } from '@/utils/hack'
 import { onScanStart } from '@/utils/scan'
 import { onDisconnect } from '@/utils/investigate'
-import { UPGRADES } from '@/constants'
+import { UPGRADES } from '@/constants/index'
 import { clearSave, exportSave, importSave } from '@/utils/localStorage'
 
 export const MapControls = memo(function MapControls(props: IMapProps) {

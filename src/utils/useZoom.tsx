@@ -1,8 +1,8 @@
 import { useCallback, useRef } from 'react'
-import { homeId, zoomScale } from '@/constants'
+import { homeId, zoomScale } from '@/constants/index'
 import { coordsToTransform } from '@/utils/geo'
 import { Zoom } from '@vx/zoom'
-import { store } from '../valtioState'
+import { store } from '@/utils/valtioState'
 
 export const useZoom = (width: number, height: number) => {
   const zoomRef = useRef<Zoom | null>(null)

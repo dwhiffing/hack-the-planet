@@ -1,7 +1,7 @@
-import { baseHackTime, NODE_CONFIGS } from '@/constants'
-import { getNodeSuspicion, updateNode } from './nodes'
-import { randomInRange } from './random'
-import { store } from './valtioState'
+import { baseHackTime, NODE_CONFIGS } from '@/constants/index'
+import { getNodeSuspicion, updateNode } from '@/utils/nodes'
+import { randomInRange } from '@/utils/random'
+import { store } from '@/utils/valtioState'
 
 export const onHackStart = (id: number) => {
   const node = store.nodes[id]

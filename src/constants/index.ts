@@ -1,4 +1,4 @@
-import { INodeConfig, INodeType, IUpgrade } from './types'
+import { INodeConfig, INodeType, IUpgrade } from '@/types'
 
 export const fastMode = false
 
@@ -6,7 +6,7 @@ export const baseTickspeed = fastMode ? 100 : 1000
 export const baseScanTime = 5
 export const baseHackTime = 5
 
-export const initialMoney = 0
+export const initialMoney = 1000000000000000
 export const saveRate = 10
 export const homeId = 2065
 export const baseDiscoveryRange = 25
@@ -36,7 +36,9 @@ export const UPGRADES: IUpgrade[] = [
     key: 'scan-range',
     description: 'How far you can scan in kilometers',
     requiredNodes: 1,
-    costs: [25, 100, 1000, 5000, 10000, 50000, 100000, 500000, 1000000],
+    costs: [
+      25, 100, 1000, 5000, 10000, 50000, 100000, 500000, 1000000, 1, 1, 1, 1, 1,
+    ],
   },
   {
     name: 'Proxy Servers',

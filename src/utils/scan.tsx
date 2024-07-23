@@ -1,9 +1,8 @@
-import { baseScanTime, NODE_CONFIGS } from '@/constants'
-import { getUpgradeEffect } from './upgrades'
-import { randomInRange } from './random'
-import { getNodesWithDistance, getRelevantNodes } from './getNodesWithDistance'
-import { store } from './valtioState'
-import { updateNode } from './nodes'
+import { baseScanTime } from '@/constants/index'
+import { getUpgradeEffect } from '@/utils/upgrades'
+import { getNodesWithDistance, getAdjacentNodes } from '@/utils/geo'
+import { store } from '@/utils/valtioState'
+import { updateNode } from '@/utils/nodes'
 
 export const onScanStart = (id: number) => {
   updateNode(id, { scanDuration: baseScanTime })
@@ -15,7 +14,7 @@ export const onScanFinish = (id: number) => {
   const node = store.nodes[id]
   if (!node) return
 
-  const relevantNodes = getRelevantNodes(
+  const relevantNodes = getAdjacentNodes(
     node.earthCoords![1],
     node.earthCoords![0],
   )

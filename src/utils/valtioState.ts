@@ -1,7 +1,7 @@
-import { homeId, initialMoney, saveRate, UPGRADES } from '@/constants'
-import { FullNode, IUpgradeState, Node } from '@/types'
+import { homeId, initialMoney, saveRate, UPGRADES } from '@/constants/index'
+import { FullNode, IUpgradeState, Node, NodeGroup } from '@/types'
 import { proxy } from 'valtio'
-import { Group } from './getNodesWithDistance'
+
 import { uniq } from 'lodash'
 
 export const initialUpgrades = UPGRADES.reduce(
@@ -23,7 +23,7 @@ type IState = {
   upgrades: Record<string, IUpgradeState>
   allNodes: Node[]
   nodes: Record<number, FullNode>
-  groupedNodes: Record<string, Group>
+  groupedNodes: Record<string, NodeGroup>
 }
 
 const initialState: IState = {
@@ -69,12 +69,13 @@ export const serializeSave = (state: IState) => {
 export const deserializeSave = (save: string) => {
   const _serializedState: ISerializedState = JSON.parse(save)
 
-  const renderedNodeIds = uniq(
-    Object.entries(_serializedState.nodeConnections).flatMap(([k, v]) => [
+  const renderedNodeIds = uniq([
+    homeId,
+    ...Object.entries(_serializedState.nodeConnections).flatMap(([k, v]) => [
       +k,
       v,
     ]),
-  )
+  ])
 
   const nodes: Record<number, FullNode> = {}
   renderedNodeIds.forEach((nodeId) => {
@@ -83,6 +84,7 @@ export const deserializeSave = (save: string) => {
     const sources = Object.entries(_serializedState.nodeConnections)
       .filter(([_nodeId, _targetId]) => _targetId === +nodeId)
       .map(([k, v]) => v)
+
     nodes[+nodeId] = {
       ...node,
       type: +nodeId === homeId ? 'home' : node.type,

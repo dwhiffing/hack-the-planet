@@ -2,7 +2,7 @@ import React, { memo, useRef } from 'react'
 import { Group } from '@visx/group'
 import { CSSTransition } from 'react-transition-group'
 
-import { pxPerKM } from '@/constants'
+import { pxPerKM } from '@/constants/index'
 import { getUpgradeEffect } from '@/utils/upgrades'
 import { useSnapshot } from 'valtio'
 import { store } from '@/utils/valtioState'

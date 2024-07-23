@@ -1,8 +1,8 @@
 import React, { memo } from 'react'
 
 import { Group } from '@visx/group'
-import { Node } from './Node'
-import { Link } from './Link'
+import { Node } from '@/components/Node'
+import { Link } from '@/components/Link'
 import { store } from '@/utils/valtioState'
 import { useSnapshot } from 'valtio'
 

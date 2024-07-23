@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 import { Zoom } from '@vx/zoom'
 import {
   background,
@@ -6,19 +6,15 @@ import {
   homeId,
   maxZoom,
   minZoom,
-} from '@/constants'
-import { WorldSvg } from './WorldSvg'
-import { BotNet } from './WorldBotNet'
+} from '@/constants/index'
+import { WorldSvg } from '@/components/WorldSvg'
+import { BotNet } from '@/components/WorldBotNet'
 import { coordsToTransform, getNodes } from '@/utils/geo'
-import { MapControls } from './WorldControls'
-import { useTick } from '@/utils/hooks/useTick'
+import { MapControls } from '@/components/WorldControls'
+import { useTick } from '@/utils/useTick'
 import { ProvidedZoom } from '@vx/zoom/lib/types'
-import { useZoom } from '@/utils/hooks/useZoom'
-import {
-  getVisibleGroups,
-  getZoomLevel,
-  groupNodes,
-} from '@/utils/getNodesWithDistance'
+import { useZoom } from '@/utils/useZoom'
+import { getVisibleGroups, getZoomLevel, groupNodes } from '@/utils/geo'
 import { deserializeSave, store } from '@/utils/valtioState'
 import { updateNode } from '@/utils/nodes'
 

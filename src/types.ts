@@ -1,3 +1,8 @@
+export type NodeGroup = {
+  key: string
+  nodes: Node[]
+}
+
 export type IMapProps = {
   onClickHome: () => void
   onZoomOut: () => void

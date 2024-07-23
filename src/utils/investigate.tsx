@@ -3,9 +3,9 @@ import {
   getEdgeNodes,
   getNodeTargets,
   updateNode,
-} from './nodes'
+} from '@/utils/nodes'
 import { sample } from 'lodash'
-import { homeId } from '@/constants'
+import { homeId } from '@/constants/index'
 
 export const onDisconnect = (nodeId: number) => {
   getNodeSources(nodeId).forEach(({ id }) => {
@@ -18,6 +18,6 @@ export const onInvestigate = (depth = sample([1, 1, 1, 1, 1, 2, 2, 2, 3])) => {
   if (furthestEdgeNode) {
     const targets = getNodeTargets(furthestEdgeNode.id)
     const target = targets.find((t) => t.depth === depth)
-    if (target) onDisconnect(target.id)
+    // if (target) onDisconnect(target.id)
   }
 }

@@ -1,6 +1,6 @@
-import { baseDiscoveryRange, UPGRADES } from '@/constants'
+import { baseDiscoveryRange, UPGRADES } from '@/constants/index'
 import { IUpgradeKey } from '@/types'
-import { initialUpgrades, store } from './valtioState'
+import { initialUpgrades, store } from '@/utils/valtioState'
 
 const getLevel = (key: IUpgradeKey, nextLevel?: boolean) => {
   const state = store.upgrades
@@ -10,7 +10,7 @@ const getLevel = (key: IUpgradeKey, nextLevel?: boolean) => {
 
 export const getUpgradeEffect = (key: IUpgradeKey, nextLevel?: boolean) => {
   if (key === 'scan-range')
-    return baseDiscoveryRange + getLevel('scan-range', nextLevel) * 10
+    return baseDiscoveryRange + getLevel('scan-range', nextLevel) * 100
 
   if (key === 'scan-efficiency')
     return 1 + getLevel('scan-efficiency', nextLevel)

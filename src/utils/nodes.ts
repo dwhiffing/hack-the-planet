@@ -1,8 +1,8 @@
-import { homeId, NODE_CONFIGS } from '@/constants'
+import { homeId, NODE_CONFIGS } from '@/constants/index'
 import { FullNode } from '@/types'
-import { randomInRange } from './random'
-import { getNodesWithDistance } from './getNodesWithDistance'
-import { store } from './valtioState'
+import { randomInRange } from '@/utils/random'
+import { getNodesWithDistance } from '@/utils/geo'
+import { store } from '@/utils/valtioState'
 import { uniq } from 'lodash'
 
 export const getAllNodes = () => {

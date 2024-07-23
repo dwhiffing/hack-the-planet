@@ -1,15 +1,13 @@
 import { useEffect } from 'react'
 import { FullNode } from '@/types'
-import { baseTickspeed, saveRate } from '@/constants'
-import { onAutohack } from '../autohack'
-import { getUpgradeEffect } from '../upgrades'
-
-import { onInvestigate } from '../investigate'
-
-import { serializeSave, store } from '../valtioState'
-import { getNodeIncome, updateNode } from '../nodes'
-import { onScanFinish } from '../scan'
-import { onHackFinish } from '../hack'
+import { baseTickspeed, saveRate } from '@/constants/index'
+import { onAutohack } from '@/utils/autohack'
+import { getUpgradeEffect } from '@/utils/upgrades'
+import { onInvestigate } from '@/utils/investigate'
+import { serializeSave, store } from '@/utils/valtioState'
+import { getNodeIncome, updateNode } from '@/utils/nodes'
+import { onScanFinish } from '@/utils/scan'
+import { onHackFinish } from '@/utils/hack'
 
 const doTick = () => {
   let saveCounter = store.saveCounter

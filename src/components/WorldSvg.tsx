@@ -3,8 +3,8 @@ import { geoMercator } from 'd3-geo'
 import * as topojson from 'topojson-client'
 import { CustomProjection } from '@visx/geo'
 
-import { background, baseScale, baseTranslate, land } from '@/constants'
-import topology from '../assets/world-topo.json'
+import { background, baseScale, baseTranslate, land } from '@/constants/index'
+import topology from '@/constants/world-topo.json'
 
 export const WorldSvg = memo(function WorldSvg() {
   return (
