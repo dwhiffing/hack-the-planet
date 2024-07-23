@@ -37,7 +37,6 @@ export type PublicNodeState = {
   hackDuration?: number
   sources?: number[]
   target?: number
-  income?: number
 }
 
 export type FullNode = Node & PublicNodeState

@@ -85,6 +85,11 @@ export const getIsNodeHackable = (
   return !node?.isOwned && !node?.hackDuration && target && target.isOwned
 }
 
+export const getNodeIncome = (nodeId: number) => {
+  const config = NODE_CONFIGS[store.nodes[nodeId].type]
+  return config.incomeMin
+}
+
 export const getNodeSuspicion = (nodeId: number) => {
   const node = store.nodes[nodeId]
   const config = NODE_CONFIGS[node.type!]

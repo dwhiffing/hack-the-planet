@@ -28,16 +28,10 @@ export const onScanFinish = (id: number) => {
     .slice(0, scanEfficiency)
 
   closestNodes.forEach((node) => {
-    const config = NODE_CONFIGS[node.node.type]
-    const income = randomInRange(config.incomeMin, config.incomeMax)
-
     updateNode(id, {
       sources: [...(store.nodes[id]?.sources ?? []), node.id],
     })
 
-    updateNode(node.id, {
-      target: id,
-      income,
-    })
+    updateNode(node.id, { target: id })
   })
 }

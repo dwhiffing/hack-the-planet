@@ -8,7 +8,7 @@ import { getUpgradeEffect } from '../upgrades'
 import { onInvestigate } from '../investigate'
 
 import { store } from '../valtioState'
-import { updateNode } from '../nodes'
+import { getNodeIncome, updateNode } from '../nodes'
 import { onScanFinish } from '../scan'
 import { onHackFinish } from '../hack'
 
@@ -20,7 +20,7 @@ const doTick = () => {
     const node = store.nodes[nodeId]
     if (node?.isOwned) {
       const stealAmount = getUpgradeEffect('steal-amount')
-      return sum + (node.income ?? 0) * stealAmount
+      return sum + getNodeIncome(nodeId) * stealAmount
     }
     return sum + 0
   }, 0)

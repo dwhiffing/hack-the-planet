@@ -8,7 +8,7 @@ import {
 } from '@/utils/upgrades'
 import { useSnapshot } from 'valtio'
 import { store } from '@/utils/valtioState'
-import { getIsNodeHackable } from '@/utils/nodes'
+import { getIsNodeHackable, getNodeIncome } from '@/utils/nodes'
 import { onHackStart } from '@/utils/hack'
 import { onScanStart } from '@/utils/scan'
 import { onDisconnect } from '@/utils/investigate'
@@ -63,6 +63,8 @@ export const MapControls = memo(function MapControls(props: IMapProps) {
     }),
   ]
 
+  const selectedNodeIncome = selectedNode ? getNodeIncome(selectedNodeId) : -1
+
   return (
     <div className="absolute top-0 p-4 inset-x-0 flex text-white justify-between pointer-events-none">
       <div className="">
@@ -76,10 +78,10 @@ export const MapControls = memo(function MapControls(props: IMapProps) {
             <p>
               income:{' '}
               {formatMoney(
-                (selectedNode?.income ?? 0) * getUpgradeEffect('steal-amount'),
+                selectedNodeIncome * getUpgradeEffect('steal-amount'),
               )}
             </p>
-            <p>max income: {formatMoney(selectedNode?.income ?? 0)}</p>
+            <p>max income: {formatMoney(selectedNodeIncome)}</p>
             <p>country: {selectedNode?.country}</p>
             <p>
               coords:{' '}
