@@ -2,12 +2,11 @@ import { useEffect } from 'react'
 import { FullNode } from '@/types'
 import { baseTickspeed, saveRate } from '@/constants'
 import { onAutohack } from '../autohack'
-// import { onAutoSave } from '../localStorage'
 import { getUpgradeEffect } from '../upgrades'
 
 import { onInvestigate } from '../investigate'
 
-import { store } from '../valtioState'
+import { serializeSave, store } from '../valtioState'
 import { getNodeIncome, updateNode } from '../nodes'
 import { onScanFinish } from '../scan'
 import { onHackFinish } from '../hack'
@@ -64,7 +63,7 @@ const doTick = () => {
 
   if (saveCounter === 0) {
     saveCounter = saveRate
-    // onAutoSave(cache)
+    localStorage.setItem('hack-the-planet', serializeSave(store))
   }
   store.saveCounter = saveCounter
 

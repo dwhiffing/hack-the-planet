@@ -2,15 +2,12 @@ import { homeId, initialMoney, saveRate, UPGRADES } from '@/constants'
 import { FullNode, IUpgradeState, Node } from '@/types'
 import { proxy } from 'valtio'
 import { Group } from './getNodesWithDistance'
+import { uniq } from 'lodash'
 
 export const initialUpgrades = UPGRADES.reduce(
   (obj, u) => ({
     ...obj,
-    [u.key]: {
-      key: u.key,
-      level: 0,
-      nextCost: u.baseCost ?? u.costs?.[0] ?? 0,
-    },
+    [u.key]: { key: u.key, level: 0 },
   }),
   {},
 ) as Record<string, IUpgradeState>
@@ -29,60 +26,80 @@ type IState = {
   groupedNodes: Record<string, Group>
 }
 
-type ISerializedState = {
-  money: number
-  suspicion: number
-  // object showing what level each upgrade is at
-  upgrades: Record<string, number>
-  scannedNodeIds: number[]
-  // object showing which nodes are connected
-  nodeConnections: Record<number, number[]>
-  timers: Record<string, number>
-}
-const state: IState = {
+const initialState: IState = {
   money: initialMoney,
   incomePerTick: 0,
   suspicion: 0,
   autoHackTime: 0,
   saveCounter: saveRate,
   renderedNodeIds: [],
+  upgrades: initialUpgrades,
   allNodes: [],
   selectedNodeId: homeId,
-  upgrades: initialUpgrades,
   groupedNodes: {},
   nodes: {},
 }
-const serializedState: ISerializedState = {
-  money: 0,
-  suspicion: 0,
-  upgrades: {},
-  scannedNodeIds: [],
-  nodeConnections: {},
-  timers: {},
+type ISerializedState = {
+  money: number
+  suspicion: number
+  autoHackTime: number
+  selectedNodeId: number
+  upgrades: Record<string, IUpgradeState>
+  nodeConnections: Record<number, number>
 }
 
-export const store = proxy(state)
-
 // Take state and convert it into a serializable save
-export const serialize = (state: IState) => {
-  return JSON.stringify({
+export const serializeSave = (state: IState) => {
+  const nodeConnections: Record<number, number> = {}
+  Object.values(state.nodes).forEach((node) => {
+    if (node.target) nodeConnections[node.id] = node.target
+  })
+  const serialized: ISerializedState = {
     money: state.money,
     suspicion: state.suspicion,
-    upgrades: {},
-    scannedNodeIds: [],
-    nodeConnections: {},
-    timers: {},
-  })
+    autoHackTime: state.autoHackTime,
+    selectedNodeId: state.selectedNodeId,
+    upgrades: state.upgrades,
+    nodeConnections,
+  }
+  return JSON.stringify(serialized)
 }
 
 // Take save and convert it back into state
-export const deserialize = (save: string) => {
+export const deserializeSave = (save: string) => {
   const _serializedState: ISerializedState = JSON.parse(save)
 
-  return {
-    money: _serializedState.money,
-    suspicion: _serializedState.suspicion,
-    upgrades: {},
-    nodes: {},
-  }
+  const renderedNodeIds = uniq(
+    Object.entries(_serializedState.nodeConnections).flatMap(([k, v]) => [
+      +k,
+      v,
+    ]),
+  )
+
+  const nodes: Record<number, FullNode> = {}
+  renderedNodeIds.forEach((nodeId) => {
+    const node = store.allNodes.find((n) => n.id === +nodeId)!
+    const target = _serializedState.nodeConnections[node.id]
+    const sources = Object.entries(_serializedState.nodeConnections)
+      .filter(([_nodeId, _targetId]) => _targetId === +nodeId)
+      .map(([k, v]) => v)
+    nodes[+nodeId] = {
+      ...node,
+      type: +nodeId === homeId ? 'home' : node.type,
+      scanDuration: 0,
+      hackDuration: 0,
+      isOwned: sources.length > 0,
+      sources,
+      target,
+    }
+  })
+  store.money = _serializedState.money
+  store.suspicion = _serializedState.suspicion
+  store.autoHackTime = _serializedState.autoHackTime
+  store.selectedNodeId = _serializedState.selectedNodeId
+  store.renderedNodeIds = renderedNodeIds
+  store.upgrades = _serializedState.upgrades
+  store.nodes = nodes
 }
+
+export const store = proxy(initialState)

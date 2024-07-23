@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Zoom } from '@vx/zoom'
 import {
   background,
@@ -19,26 +19,27 @@ import {
   getZoomLevel,
   groupNodes,
 } from '@/utils/getNodesWithDistance'
-import { store } from '@/utils/valtioState'
+import { deserializeSave, store } from '@/utils/valtioState'
 import { updateNode } from '@/utils/nodes'
-import { useSnapshot } from 'valtio'
 
 export function WorldMap({ width, height }: { width: number; height: number }) {
   const { onClickHome, zoomRef, mouseRef } = useZoom(width, height)
   const allowScroll = useRef(true)
-  const { allNodes } = useSnapshot(store)
+
   const worldSvgMountCallback = useCallback((node: SVGGElement) => {
-    const _nodes = getNodes(node)
-    store.allNodes = _nodes
-    store.groupedNodes = groupNodes(_nodes)
+    const nodes = getNodes(node)
+    store.allNodes = nodes
+    store.groupedNodes = groupNodes(nodes)
+
+    updateNode(homeId, { type: 'home', isOwned: true })
+    const save =
+      typeof localStorage !== 'undefined'
+        ? localStorage.getItem('hack-the-planet')
+        : undefined
+    if (save) {
+      deserializeSave(save)
+    }
   }, [])
-
-  useEffect(() => {
-    if (allNodes.length === 0) return
-
-    const home = store.nodes[homeId]
-    if (!home) updateNode(homeId, { type: 'home', isOwned: true })
-  }, [allNodes])
 
   useTick()
 
