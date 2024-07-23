@@ -2,7 +2,7 @@ import React, { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { ParentSize } from '@visx/responsive'
 import { WorldMap } from '@/components/WorldMap'
-import '@/styles/globals.css'
+import '@/styles.css'
 
 const container = document.getElementById('root') as HTMLElement
 

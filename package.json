@@ -2,11 +2,15 @@
   "name": "evasion-incremental",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "yarn@1.22.22",
+  "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "build": "turbo vite.build",
+    "dev": "turbo vite.dev",
+    "preview": "turbo vite.preview",
+    "vite.build": "vite build",
+    "vite.dev": "vite --host",
+    "vite.preview": "vite preview"
   },
   "dependencies": {
     "@visx/geo": "^3.5.0",
@@ -15,11 +19,11 @@
     "d3-geo": "^3.1.1",
     "js-base64": "^3.7.7",
     "lodash": "^4.17.21",
-    "next": "14.2.4",
     "react": "^18",
     "react-dom": "^18",
     "react-transition-group": "^4.4.5",
     "topojson-client": "^3.1.0",
+    "turbo": "^2.0.9",
     "valtio": "^1.13.2"
   },
   "devDependencies": {
@@ -29,6 +33,7 @@
     "@types/react-dom": "^18",
     "@types/react-transition-group": "^4.4.10",
     "@types/topojson-client": "^3.1.4",
+    "@vitejs/plugin-react-swc": "^3.7.0",
     "eslint": "^8",
     "eslint-config-next": "14.2.4",
     "postcss": "^8",

@@ -4,14 +4,6 @@ import { proxy } from 'valtio'
 
 import { uniq } from 'lodash'
 
-export const initialUpgrades = UPGRADES.reduce(
-  (obj, u) => ({
-    ...obj,
-    [u.key]: { key: u.key, level: 0 },
-  }),
-  {},
-) as Record<string, IUpgradeState>
-
 type IState = {
   money: number
   incomePerTick: number
@@ -25,6 +17,22 @@ type IState = {
   nodes: Record<number, FullNode>
   groupedNodes: Record<string, NodeGroup>
 }
+type ISerializedState = {
+  money: number
+  suspicion: number
+  autoHackTime: number
+  selectedNodeId: number
+  upgrades: Record<string, IUpgradeState>
+  nodeConnections: Record<number, number>
+}
+
+export const initialUpgrades = UPGRADES.reduce(
+  (obj, u) => ({
+    ...obj,
+    [u.key]: { key: u.key, level: 0 },
+  }),
+  {},
+) as Record<string, IUpgradeState>
 
 const initialState: IState = {
   money: initialMoney,
@@ -38,14 +46,6 @@ const initialState: IState = {
   selectedNodeId: homeId,
   groupedNodes: {},
   nodes: {},
-}
-type ISerializedState = {
-  money: number
-  suspicion: number
-  autoHackTime: number
-  selectedNodeId: number
-  upgrades: Record<string, IUpgradeState>
-  nodeConnections: Record<number, number>
 }
 
 // Take state and convert it into a serializable save
