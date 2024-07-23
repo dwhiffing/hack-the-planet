@@ -13,6 +13,7 @@ import { onHackStart } from '@/utils/hack'
 import { onScanStart } from '@/utils/scan'
 import { onDisconnect } from '@/utils/investigate'
 import { UPGRADES } from '@/constants'
+import { clearSave, exportSave, importSave } from '@/utils/localStorage'
 
 export const MapControls = memo(function MapControls(props: IMapProps) {
   const { money, upgrades, selectedNodeId, incomePerTick, suspicion } =
@@ -21,18 +22,27 @@ export const MapControls = memo(function MapControls(props: IMapProps) {
   const selectedNode = _selectedNode as FullNode
 
   const globalActions: IGlobalAction[] = [
-    // {
-    //   label: 'Reset',
-    //   description: 'Reset your save',
-    //   getIsVisible: () => true,
-    //   getIsDisabled: () => false,
-    //   onClick: () => {
-    //     const confirmed = confirm(
-    //       'Are you sure you what to clear your save and restart?',
-    //     )
-    //     if (confirmed) clearLocalStorage()
-    //   },
-    // },
+    {
+      label: 'Reset',
+      description: 'Reset your save',
+      getIsVisible: () => true,
+      getIsDisabled: () => false,
+      onClick: clearSave,
+    },
+    {
+      label: 'Export',
+      description: 'Export your save',
+      getIsVisible: () => true,
+      getIsDisabled: () => false,
+      onClick: exportSave,
+    },
+    {
+      label: 'Import',
+      description: 'Import your save',
+      getIsVisible: () => true,
+      getIsDisabled: () => false,
+      onClick: importSave,
+    },
     // {
     //   label: `${enabled ? 'disable' : 'enable'} autohack`,
     //   description: 'Toggle autohack',
