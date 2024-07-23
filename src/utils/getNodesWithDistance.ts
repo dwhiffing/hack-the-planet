@@ -1,7 +1,7 @@
-import { cache } from '@/pages'
 import { Node } from '@/types'
 import { transformToCoords } from './geo'
 import { TransformMatrix } from '@vx/zoom/lib/types'
+import { store } from './valtioState'
 
 export interface Group {
   key: string
@@ -10,10 +10,7 @@ export interface Group {
 
 export const rangeSize = 1.5
 export const getAllNodeGroups = () => {
-  const groupedNodes = cache.get('grouped-node-data').data as Record<
-    string,
-    Group
-  >
+  const groupedNodes = store.groupedNodes
 
   return Object.keys(groupedNodes)
 }
@@ -84,10 +81,7 @@ export const getAdjacentGroups = (
 }
 
 export const getRelevantNodes = (lat: number, lng: number) => {
-  const groupedNodes = cache.get('grouped-node-data').data as Record<
-    string,
-    Group
-  >
+  const groupedNodes = store.groupedNodes
 
   const adjacentGroups = getAdjacentGroups(lat, lng)
   const relevantNodes: Node[] = []

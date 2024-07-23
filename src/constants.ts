@@ -2,7 +2,7 @@ import { INodeConfig, INodeType, IUpgrade } from './types'
 
 export const fastMode = false
 
-export const baseTickspeed = fastMode ? 500 : 1000
+export const baseTickspeed = fastMode ? 100 : 1000
 export const baseScanTime = 5
 export const baseHackTime = 5
 
@@ -26,7 +26,7 @@ export const UPGRADES: IUpgrade[] = [
     key: 'steal-amount',
     description:
       'How much money you steal per click and transfer between nodes per tick',
-    requiredNodes: 3,
+    requiredNodes: 1,
     maxLevel: 99,
     costExponent: 1.5,
     baseCost: 10,
@@ -35,28 +35,28 @@ export const UPGRADES: IUpgrade[] = [
     name: 'Scan Range',
     key: 'scan-range',
     description: 'How far you can scan in kilometers',
-    requiredNodes: 3,
+    requiredNodes: 1,
     costs: [25, 100, 1000, 5000, 10000, 50000, 100000, 500000, 1000000],
   },
   {
     name: 'Proxy Servers',
     key: 'suspicion-decay',
     description: 'Reduces your suspicion every tick',
-    requiredNodes: 16,
+    requiredNodes: 1,
     costs: [100, 500, 1000, 5000, 10000, 50000],
   },
   {
     name: 'Autoscan',
     key: 'autoscan',
     description: 'Automatically scans for nodes occasionally',
-    requiredNodes: 32,
+    requiredNodes: 1,
     costs: [500, 1000, 5000, 10000, 50000],
   },
   {
     name: 'Scan Efficiency',
     key: 'scan-efficiency',
     description: 'How many nodes can be found per scan',
-    requiredNodes: 64,
+    requiredNodes: 1,
     maxLevel: 100,
     costExponent: 1.2,
     baseCost: 500,
@@ -66,21 +66,21 @@ export const UPGRADES: IUpgrade[] = [
     name: 'Scan Speed',
     key: 'scan-speed',
     description: '',
-    requiredNodes: 9999,
+    requiredNodes: 1,
     costs: [10, 100, 1000, 10000, 100000],
   },
   {
     name: 'Hack Speed',
     key: 'hack-speed',
     description: '',
-    requiredNodes: 9999,
+    requiredNodes: 1,
     costs: [10, 100, 1000, 10000, 100000],
   },
   {
     name: 'Hack Efficiency',
     key: 'hack-efficiency',
     description: '',
-    requiredNodes: 9999,
+    requiredNodes: 1,
     costs: [10, 100, 1000, 10000, 100000],
   },
 ]

@@ -1,20 +1,27 @@
 import { homeId, NODE_CONFIGS } from '@/constants'
-import { cache } from '@/pages'
 import { FullNode } from '@/types'
 import { randomInRange } from './random'
 import { getNodesWithDistance } from './getNodesWithDistance'
-
-export const getNode = (nodeId: number) => {
-  const node = cache.get(`node-${nodeId}`)?.data as FullNode
-  return node
-}
+import { store } from './valtioState'
+import { uniq } from 'lodash'
 
 export const getAllNodes = () => {
-  const renderedNodeIds = cache.get('rendered-node-ids').data
-  const nodes = renderedNodeIds.map(
-    (id: number) => cache.get(`node-${id}`).data,
-  ) as FullNode[]
+  const renderedNodeIds = store.renderedNodeIds
+  const nodes = renderedNodeIds.map((id: number) => store.nodes[id])
   return nodes
+}
+
+export const updateNode = (nodeId: number, changes: Partial<FullNode>) => {
+  if (store.allNodes.length === 0 || typeof nodeId !== 'number') return
+
+  const node = store.nodes[nodeId]
+  if (node) {
+    store.nodes[nodeId] = { ...node, ...changes }
+  } else {
+    store.renderedNodeIds = uniq([...store.renderedNodeIds, nodeId])
+    const _node = store.allNodes.find((n) => n.id === nodeId) as FullNode
+    store.nodes[nodeId] = { ..._node, ...changes }
+  }
 }
 
 export const getNodeSources = (
@@ -58,7 +65,7 @@ export const getNodeTargets = (
 export const getEdgeNodes = (
   nodes = getAllNodes().filter((n) => n.isOwned),
 ) => {
-  const home = getNode(homeId)
+  const home = store.nodes[homeId]
   const _nodes = nodes.filter((n) => !n.sources?.length)
   const nodes2 = getNodesWithDistance(_nodes, home)
   return nodes2.sort((a, b) => b.dist - a.dist).map((n) => n.node) as FullNode[]
@@ -74,12 +81,12 @@ export const getIsNodeHackable = (
   } else {
     node = nodeId
   }
-  const target = getNode(node?.target ?? -1)
+  const target = store.nodes[node?.target ?? -1]
   return !node?.isOwned && !node?.hackDuration && target && target.isOwned
 }
 
 export const getNodeSuspicion = (nodeId: number) => {
-  const node = cache.get(`node-${nodeId}`).data as FullNode
+  const node = store.nodes[nodeId]
   const config = NODE_CONFIGS[node.type!]
   const suspicion = randomInRange(config.suspicionMin, config.suspicionMax)
   return suspicion

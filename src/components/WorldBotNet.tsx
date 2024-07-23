@@ -3,22 +3,19 @@ import React, { memo } from 'react'
 import { Group } from '@visx/group'
 import { Node } from './Node'
 import { Link } from './Link'
-import { cache } from '@/pages'
-import { Group as IGroup } from '@/utils/getNodesWithDistance'
-import { useNodes, useSelectedNodeId } from '@/utils/hooks/useNodeState'
+import { store } from '@/utils/valtioState'
+import { useSnapshot } from 'valtio'
 
 export const BotNet = memo(function NetworkGraph({
   groupKeysString,
-  onClickNode,
   tickspeed,
   zoomLevel,
 }: {
   groupKeysString: string
-  onClickNode: (n: number) => void
   tickspeed: number
   zoomLevel: number
 }) {
-  const { selectedNodeId } = useSelectedNodeId()
+  const { selectedNodeId } = useSnapshot(store)
   const groupKeys = groupKeysString.split(':') as string[]
   return (
     <>
@@ -27,7 +24,6 @@ export const BotNet = memo(function NetworkGraph({
           isLinks
           key={groupKey}
           groupKey={groupKey}
-          onClickNode={onClickNode}
           tickspeed={tickspeed}
           zoomLevel={zoomLevel}
         />
@@ -38,7 +34,6 @@ export const BotNet = memo(function NetworkGraph({
           key={groupKey}
           groupKey={groupKey}
           selectedNodeId={selectedNodeId}
-          onClickNode={onClickNode}
           tickspeed={tickspeed}
           zoomLevel={zoomLevel}
         />
@@ -49,27 +44,19 @@ export const BotNet = memo(function NetworkGraph({
 
 export const NodeGroup = memo(function NodeGroup({
   groupKey,
-  onClickNode,
   tickspeed,
   zoomLevel,
   selectedNodeId,
   isLinks,
 }: {
   groupKey: string
-  onClickNode: (n: number) => void
   tickspeed: number
   zoomLevel: number
   selectedNodeId?: number
   isLinks: boolean
 }) {
-  const { renderedNodeIds } = useNodes()
-  const groupedNodes = cache.get('grouped-node-data').data as Record<
-    string,
-    IGroup
-  >
-  const nodeIds = (groupedNodes[groupKey]?.nodes.map((n) => n.id) ?? []).filter(
-    (id) => renderedNodeIds.includes(id),
-  )
+  const groupedNodes = store.groupedNodes
+  const nodeIds = groupedNodes[groupKey]?.nodes.map((n) => n.id) ?? []
   return (
     <Group>
       {isLinks &&
@@ -88,7 +75,6 @@ export const NodeGroup = memo(function NodeGroup({
             key={nodeId}
             isSelected={selectedNodeId === nodeId}
             nodeId={nodeId}
-            onClick={onClickNode}
             tickspeed={tickspeed}
           />
         ))}

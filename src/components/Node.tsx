@@ -3,16 +3,16 @@ import { Group } from '@visx/group'
 import { CSSTransition } from 'react-transition-group'
 
 import { pxPerKM } from '@/constants'
-import { useNodeState } from '@/utils/hooks/useNodeState'
-import { getUpgradeEffect } from '@/utils/hooks/useUpgrades'
+import { getUpgradeEffect } from '@/utils/upgrades'
+import { useSnapshot } from 'valtio'
+import { store } from '@/utils/valtioState'
 
 export const Node = memo(function Node(props: {
   nodeId: number
   isSelected: boolean
-  onClick: (nodeId: number) => void
   tickspeed: number
 }) {
-  const { node } = useNodeState(props.nodeId)
+  const { [props.nodeId]: node } = useSnapshot(store.nodes)
   const nodeRef = useRef(null)
 
   if (!node) return null
@@ -62,7 +62,15 @@ export const Node = memo(function Node(props: {
       <circle
         x={s * -0.5}
         y={s * -0.5}
-        onMouseDown={() => props.onClick(props.nodeId)}
+        onMouseDown={() => {
+          if (store.selectedNodeId === -1) {
+            store.selectedNodeId = props.nodeId
+          } else if (props.nodeId === store.selectedNodeId) {
+            store.selectedNodeId = -1
+          } else {
+            store.selectedNodeId = props.nodeId
+          }
+        }}
         r={s / 2}
         stroke="#fff"
         style={{

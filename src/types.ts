@@ -1,9 +1,5 @@
-import { ProvidedZoom } from '@vx/zoom/lib/types'
-
 export type IMapProps = {
-  selectedNodeActions: INodeAction[]
-  globalActions: IGlobalAction[]
-  selectedNodeId?: number
+  onClickHome: () => void
   onZoomOut: () => void
   onZoomIn: () => void
 }

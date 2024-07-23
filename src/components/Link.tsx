@@ -1,6 +1,7 @@
 import React from 'react'
 
-import { useNodeState } from '@/utils/hooks/useNodeState'
+import { useSnapshot } from 'valtio'
+import { store } from '@/utils/valtioState'
 
 const baseLineWidth = 0.01
 export const Link = ({
@@ -12,8 +13,8 @@ export const Link = ({
   tickspeed: number
   zoomLevel: number
 }) => {
-  const { node: source } = useNodeState(nodeId)
-  const { node: target } = useNodeState(source?.target)
+  const { [nodeId]: source } = useSnapshot(store.nodes)
+  const { [source?.target ?? -1]: target } = useSnapshot(store.nodes)
   if (!source || !target) return null
   const isTransfering = !!source.isOwned
   const isScanned = !source.isOwned

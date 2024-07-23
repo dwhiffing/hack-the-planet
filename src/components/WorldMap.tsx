@@ -1,24 +1,49 @@
 import React, { useCallback, useEffect, useRef } from 'react'
 import { Zoom } from '@vx/zoom'
-import { background, baseTickspeed, maxZoom, minZoom } from '@/constants'
+import {
+  background,
+  baseTickspeed,
+  homeId,
+  maxZoom,
+  minZoom,
+} from '@/constants'
 import { WorldSvg } from './WorldSvg'
 import { BotNet } from './WorldBotNet'
-import { coordsToTransform } from '@/utils/geo'
+import { coordsToTransform, getNodes } from '@/utils/geo'
 import { MapControls } from './WorldControls'
-import { useNodes, useSelectedNodeId } from '@/utils/hooks/useNodeState'
 import { useTick } from '@/utils/hooks/useTick'
 import { ProvidedZoom } from '@vx/zoom/lib/types'
-import { useGlobalActions, useNodeActions } from '@/utils/hooks/useActions'
 import { useZoom } from '@/utils/hooks/useZoom'
-import { getVisibleGroups, getZoomLevel } from '@/utils/getNodesWithDistance'
+import {
+  getVisibleGroups,
+  getZoomLevel,
+  groupNodes,
+} from '@/utils/getNodesWithDistance'
+import { store } from '@/utils/valtioState'
+import { updateNode } from '@/utils/nodes'
+import { useSnapshot } from 'valtio'
 
 export function WorldMap({ width, height }: { width: number; height: number }) {
-  const { worldSvgMountCallback } = useNodes()
   const { onClickHome, zoomRef, mouseRef } = useZoom(width, height)
-  const { globalActions } = useGlobalActions(onClickHome)
-  const { selectedNodeActions } = useNodeActions()
-  const { selectedNodeId, onClickNode, onDeselect } = useSelectedNodeId()
   const allowScroll = useRef(true)
+  const { allNodes } = useSnapshot(store)
+  const worldSvgMountCallback = useCallback((node: SVGGElement) => {
+    const _nodes = getNodes(node)
+    store.allNodes = _nodes
+    store.groupedNodes = groupNodes(_nodes)
+  }, [])
+
+  useEffect(() => {
+    if (allNodes.length === 0) return
+
+    const home = store.nodes[homeId]
+    if (!home)
+      updateNode(homeId, {
+        isOwned: true,
+        isHome: true,
+        type: 'home',
+      })
+  }, [allNodes])
 
   useTick()
 
@@ -57,7 +82,9 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
   const onMouseUp = (zoom: ProvidedZoom) => (e: React.MouseEvent) => {
     const xDiff = Math.abs(e.screenX - (mouseRef.current?.x ?? 0))
     const yDiff = Math.abs(e.screenY - (mouseRef.current?.y ?? 0))
-    if (xDiff + yDiff < 1) onDeselect()
+    if (xDiff + yDiff < 1) {
+      store.selectedNodeId = -1
+    }
     zoom.dragEnd()
   }
 
@@ -115,16 +142,13 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
                   height,
                 )}
                 zoomLevel={getZoomLevel(zoom.transformMatrix)}
-                onClickNode={onClickNode}
                 tickspeed={baseTickspeed}
               />
             </g>
           </svg>
 
           <MapControls
-            selectedNodeActions={selectedNodeActions}
-            globalActions={globalActions}
-            selectedNodeId={selectedNodeId}
+            onClickHome={onClickHome}
             onZoomOut={onZoomOut}
             onZoomIn={onZoomIn}
           />
