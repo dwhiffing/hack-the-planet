@@ -151,7 +151,7 @@ const selectedNodeActions: INodeAction[] = [
     label: 'hack',
     description: 'Take over this node',
     getIsDisabled: (node: FullNode) => !getIsNodeHackable(node.id),
-    getIsVisible: (node: FullNode) => !node.isHome && !node.isOwned,
+    getIsVisible: (node: FullNode) => node.type !== 'home' && !node.isOwned,
     onClick: (node: FullNode) => onHackStart(node.id),
   },
   {
@@ -165,7 +165,7 @@ const selectedNodeActions: INodeAction[] = [
     label: 'disconnect',
     description: 'Disconnect this node and all downstream nodes',
     getIsDisabled: () => false,
-    getIsVisible: (node: FullNode) => node.isOwned && !node.isHome,
+    getIsVisible: (node: FullNode) => node.isOwned && node.type !== 'home',
     onClick: (node: FullNode) => onDisconnect(node.id),
   },
 ]

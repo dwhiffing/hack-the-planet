@@ -32,11 +32,9 @@ export type Node = {
 }
 
 export type PublicNodeState = {
-  isHome?: boolean
   isOwned?: boolean
   scanDuration?: number
   hackDuration?: number
-  type?: INodeType
   sources?: number[]
   target?: number
   income?: number

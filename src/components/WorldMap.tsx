@@ -37,12 +37,7 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
     if (allNodes.length === 0) return
 
     const home = store.nodes[homeId]
-    if (!home)
-      updateNode(homeId, {
-        isOwned: true,
-        isHome: true,
-        type: 'home',
-      })
+    if (!home) updateNode(homeId, { type: 'home', isOwned: true })
   }, [allNodes])
 
   useTick()
