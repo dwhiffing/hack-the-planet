@@ -42,14 +42,14 @@ button[disabled] {
   stroke-dasharray: none;
 }
 
-.zoom-1 .node circle {
+.zoom-1 .node .node-circle {
   transform: scale(1.5);
 }
 
-.zoom-2 .node circle {
+.zoom-2 .node .node-circle {
   transform: scale(4);
 }
 
-.zoom-3 .node circle {
+.zoom-3 .node .node-circle {
   transform: scale(8);
 }

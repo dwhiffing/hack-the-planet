@@ -6,6 +6,7 @@ import { pxPerKM } from '@/constants/index'
 import { useSnapshot } from 'valtio'
 import { store } from '@/utils/valtioState'
 import { getScanRange } from '@/utils/scan'
+import { getUpgradeEffect } from '@/utils/upgrades'
 
 export const Node = memo(function Node(props: {
   nodeId: number
@@ -63,11 +64,11 @@ export const Node = memo(function Node(props: {
       <CSSTransition
         nodeRef={rangeRef}
         in={props.isSelected && node.isOwned}
-        timeout={5000}
+        timeout={500}
         classNames="fade"
         unmountOnExit
       >
-        <ScanRange rangeRef={rangeRef} masScanRange={node.maxScanRange ?? 0} />
+        <ScanRange rangeRef={rangeRef} maxScanRange={node.maxScanRange ?? 0} />
       </CSSTransition>
 
       <circle
@@ -84,7 +85,7 @@ export const Node = memo(function Node(props: {
         }}
         r={s / 2}
         stroke="#fff"
-        className="cursor-pointer"
+        className="node-circle cursor-pointer"
         style={{
           transition:
             'all 150ms cubic-bezier(0.4, 0, 0.2, 1), fill 500ms cubic-bezier(0.4, 0, 0.2, 1)',
@@ -98,10 +99,10 @@ export const Node = memo(function Node(props: {
 
 const ScanRange = ({
   rangeRef,
-  masScanRange,
+  maxScanRange,
 }: {
   rangeRef: MutableRefObject<null>
-  masScanRange: number
+  maxScanRange: number
 }) => {
   const { points } = useSnapshot(store)
   return (
@@ -109,21 +110,30 @@ const ScanRange = ({
       <circle
         x={0}
         y={0}
-        r={pxPerKM * getScanRange()}
+        r={pxPerKM * getScanRange(points)}
         stroke="#0f0a"
-        fill="#0f01"
+        fill="#00ff0009"
         className="transition-all"
         strokeWidth={0.01}
       />
       <circle
         x={0}
         y={0}
-        r={pxPerKM * masScanRange}
-        stroke="#0f04"
+        r={pxPerKM * maxScanRange}
+        stroke="#0f06"
         fill="transparent"
         className="transition-all"
         strokeWidth={0.01}
-        strokeDasharray="0.02 0.05"
+        strokeDasharray="0.03 0.06"
+      />
+      <circle
+        x={0}
+        y={0}
+        r={pxPerKM * getScanRange(getUpgradeEffect('max-points'))}
+        stroke="#0f02"
+        fill="transparent"
+        className="transition-all"
+        strokeWidth={0.01}
       />
     </g>
   )
