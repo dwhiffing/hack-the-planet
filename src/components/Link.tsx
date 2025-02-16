@@ -30,7 +30,7 @@ export const Link = ({
       y2={target.y}
       strokeWidth={strokeWidth}
       stroke={strokeColor}
-      className="pointer-events-none transition-colors duration-500 link"
+      className="link pointer-events-none transition-colors duration-500"
       strokeDasharray={`${lineWidth} ${lineSpacing}`}
     >
       {zoomLevel <= 1 && (

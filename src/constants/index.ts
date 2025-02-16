@@ -8,7 +8,7 @@ export const baseHackTime = 2.5
 export const minScanPoints = 50
 export const stealCost = 10
 
-export const initialMoney = 0 //00000000000000
+export const initialMoney = 0 //100000000000000
 export const saveRate = 10
 export const homeId = 2065
 export const baseDiscoveryRange = 25
@@ -75,20 +75,6 @@ export const UPGRADES: IUpgrade[] = [
     baseCost: 500,
   },
   // TODO: need to figure out these upgrades
-  {
-    name: 'Scan Speed',
-    key: 'scan-speed',
-    description: '',
-    requiredNodes: 1,
-    costs: [10, 100, 1000, 10000, 100000],
-  },
-  {
-    name: 'Hack Speed',
-    key: 'hack-speed',
-    description: '',
-    requiredNodes: 1,
-    costs: [10, 100, 1000, 10000, 100000],
-  },
   {
     name: 'Hack Efficiency',
     key: 'hack-efficiency',

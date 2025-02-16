@@ -76,9 +76,7 @@ export type IUpgradeState = {
 export type IUpgradeKey =
   | 'autoscan'
   | 'scan-efficiency'
-  | 'scan-speed'
   | 'hack-efficiency'
-  | 'hack-speed'
   | 'steal-amount'
   | 'max-points'
   | 'point-amount'

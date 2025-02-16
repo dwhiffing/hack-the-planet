@@ -12,10 +12,6 @@ export const getUpgradeEffect = (key: IUpgradeKey, nextLevel?: boolean) => {
   if (key === 'scan-efficiency')
     return 1 + getLevel('scan-efficiency', nextLevel)
 
-  if (key === 'scan-speed') return 1 + getLevel('scan-speed', nextLevel)
-
-  if (key === 'hack-speed') return 1 + getLevel('hack-speed', nextLevel)
-
   if (key === 'hack-efficiency')
     return 1 + getLevel('hack-efficiency', nextLevel)
 

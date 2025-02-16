@@ -38,7 +38,7 @@ const doTick = () => {
     // update scan duration
     const scanDuration = node.scanDuration ?? 0
     if ((scanDuration ?? 0) > 0) {
-      update.scanDuration = scanDuration - getUpgradeEffect('scan-speed')
+      update.scanDuration = scanDuration - 1
       if (update.scanDuration <= 0) {
         onScanFinish(nodeId)
       }
@@ -47,7 +47,7 @@ const doTick = () => {
     const hackDuration = node.hackDuration ?? 0
     // update hack duration
     if ((hackDuration ?? 0) > 0) {
-      update.hackDuration = hackDuration - getUpgradeEffect('hack-speed')
+      update.hackDuration = hackDuration - 1
     }
     if (typeof update.hackDuration === 'number' && update.hackDuration <= 0) {
       onHackFinish(nodeId)
