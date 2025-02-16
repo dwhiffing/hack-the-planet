@@ -26,9 +26,9 @@ export const getUpgradeEffect = (key: IUpgradeKey, nextLevel?: boolean) => {
     return 30 - level * 5
   }
 
-  if (key === 'point-amount') {
-    const level = getLevel('point-amount', nextLevel)
-    return 0.1 + level * 0.1
+  if (key === 'point-rate') {
+    const level = getLevel('point-rate', nextLevel)
+    return 1 + level * 1
   }
 
   if (key === 'max-points') {

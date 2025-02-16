@@ -3,10 +3,9 @@ import { INodeConfig, INodeType, IUpgrade } from '@/types'
 export const fastMode = false
 
 export const baseTickspeed = fastMode ? 100 : 500
-export const baseScanTime = 2.5
-export const baseHackTime = 2.5
-export const minScanPoints = 50
-export const stealCost = 10
+export const baseScanTime = 5
+export const baseHackTime = 5
+export const startingPoints = 50
 
 export const initialMoney = 0 //100000000000000
 export const saveRate = 10

@@ -43,7 +43,8 @@ export type PublicNodeState = {
   maxScanRange?: number
   showScanRange?: boolean
   hackDuration?: number
-  pointCost?: number
+  stealDuration?: number
+  hackCost?: number
   sources?: number[]
   target?: number
 }
@@ -79,4 +80,4 @@ export type IUpgradeKey =
   | 'hack-efficiency'
   | 'steal-amount'
   | 'max-points'
-  | 'point-amount'
+  | 'point-rate'

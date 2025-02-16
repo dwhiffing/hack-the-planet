@@ -14,7 +14,7 @@ export const onHackStart = (id: number) => {
   if (node && !node.isOwned) {
     updateNode(id, { hackDuration })
   }
-  store.points -= node.pointCost ?? 0
+  store.points -= node.hackCost ?? 0
 }
 
 export const onHackFinish = (id: number) => {

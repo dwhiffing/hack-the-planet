@@ -1,7 +1,7 @@
 import {
   homeId,
   initialMoney,
-  minScanPoints,
+  startingPoints,
   saveRate,
   UPGRADES,
 } from '@/constants/index'
@@ -49,7 +49,7 @@ export const initialUpgrades = UPGRADES.reduce(
 
 const initialState: IState = {
   money: initialMoney,
-  points: minScanPoints,
+  points: startingPoints,
   hasResetSave: false,
   pointsPerTick: 0,
   moneyPerTick: 0,

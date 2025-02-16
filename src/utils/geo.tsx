@@ -97,8 +97,8 @@ export const getNodes = (g: SVGGElement) => {
       return {
         id: -1,
         ...point,
-        pointCost:
-          point.type === 'basic' ? 25 : point.type === 'rich' ? 250 : 1000,
+        hackCost:
+          point.type === 'basic' ? 10 : point.type === 'rich' ? 250 : 1000,
         earthCoords: [x, y] as [number, number],
       }
     })
