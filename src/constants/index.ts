@@ -9,7 +9,7 @@ export const startingPoints = 50
 
 export const initialMoney = 0 //100000000000000
 export const saveRate = 10
-export const homeId = 2065
+export const homeId = 519
 export const baseDiscoveryRange = 25
 
 export const background = '#111'
@@ -33,7 +33,7 @@ export const UPGRADES: IUpgrade[] = [
   },
   {
     name: 'Point Rate',
-    key: 'point-amount',
+    key: 'point-rate',
     description: 'How much many points you get per node per tick',
     requiredNodes: 1,
     maxLevel: 99,

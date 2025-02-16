@@ -44,7 +44,7 @@ export type PublicNodeState = {
   showScanRange?: boolean
   hackDuration?: number
   stealDuration?: number
-  hackCost?: number
+  scaling?: number
   sources?: number[]
   target?: number
 }

@@ -13,6 +13,7 @@ export default defineConfig({
             './src/constants/borders.json',
             './src/constants/world-topo.json',
             './src/constants/cities-pruned.json',
+            './src/constants/node-overrides.json',
             './src/constants/continents.json',
           ],
           'react-vendor': ['react', 'react-dom'],

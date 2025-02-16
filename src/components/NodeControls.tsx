@@ -1,5 +1,5 @@
 import React, { memo } from 'react'
-import { FullNode, IGlobalAction, INodeAction } from '@/types'
+import { FullNode, IGlobalAction, INodeAction, INodeType } from '@/types'
 import {
   buyUpgrade,
   calculateNextCost,
@@ -9,6 +9,7 @@ import { useSnapshot } from 'valtio'
 import { store } from '@/utils/valtioState'
 import {
   getIsNodeHackable,
+  getNodeHackCost,
   getNodeIncome,
   getNodeSources,
   updateNode,
@@ -18,6 +19,7 @@ import { onScanStart } from '@/utils/scan'
 
 import { homeId, UPGRADES } from '@/constants/index'
 import { formatMoney, MapStats } from './WorldControls'
+import { get } from 'lodash'
 
 const onDisconnect = (nodeId: number) => {
   getNodeSources(nodeId).forEach(({ id }) => {
@@ -69,13 +71,14 @@ export const NodeControls = memo(function NodeControls() {
   return (
     <div className="">
       <MapStats />
-      {/* <p>id: {selectedNode?.id}</p> */}
+      <NodeDebug node={selectedNode} />
       <p className="mb-3">type: {selectedNode?.type}</p>
       <p>
         income:{' '}
         {formatMoney(selectedNodeIncome * getUpgradeEffect('steal-amount'))}
       </p>
       <p>max income: {formatMoney(selectedNodeIncome)}</p>
+      <p>hack cost: {getNodeHackCost(selectedNode.id)}</p>
       <p>country: {selectedNode?.country}</p>
       <p>
         coords:{' '}
@@ -100,10 +103,10 @@ export const NodeControls = memo(function NodeControls() {
 
 const selectedNodeActions: INodeAction[] = [
   {
-    getLabel: (node) => `hack (cost: ${formatMoney(node.hackCost ?? 0)})`,
+    getLabel: (node) => `hack (cost: ${getNodeHackCost(node.id)})`,
     description: 'Take over this node',
     getIsDisabled: (node, points) =>
-      !getIsNodeHackable(node.id) || points < (node.hackCost ?? 0),
+      !getIsNodeHackable(node.id) || points < getNodeHackCost(node.id),
     getIsVisible: (node) => node.type !== 'home' && !node.isOwned,
     onClick: (node) => onHackStart(node.id),
   },
@@ -122,3 +125,79 @@ const selectedNodeActions: INodeAction[] = [
     onClick: (node) => onDisconnect(node.id),
   },
 ]
+
+const NodeDebug = (props: { node: FullNode }) => {
+  const updateOverrides = (node: FullNode, change: any) => {
+    updateNode(props.node.id, change)
+    const current = get(store.nodeOverrides, `${node.id}`, {
+      x: node.x,
+      y: node.y,
+      scaling: node.scaling,
+      type: node.type,
+    })
+
+    store.nodeOverrides[`${node.id}`] = { ...current, ...change }
+  }
+  return (
+    <div className="my-4 flex flex-col gap-2 text-[yellow]">
+      <p>id: {props.node?.id}</p>
+
+      <div className="flex items-center gap-2">
+        <p>x:</p>
+        <input
+          value={props.node.x.toFixed(2)}
+          type="number"
+          className="p-1 text-black"
+          step={0.01}
+          onChange={(e) => updateOverrides(props.node, { x: +e.target.value })}
+        />
+      </div>
+      <div className="flex items-center gap-2">
+        <p>y:</p>
+        <input
+          value={props.node.y.toFixed(2)}
+          type="number"
+          className="p-1 text-black"
+          step={0.01}
+          onChange={(e) => updateOverrides(props.node, { y: +e.target.value })}
+        />
+      </div>
+      <div className="flex items-center gap-2">
+        <p>scaling:</p>
+        <input
+          value={props.node.scaling}
+          type="number"
+          className="p-1 text-black"
+          step={0.01}
+          onChange={(e) =>
+            updateOverrides(props.node, { scaling: +e.target.value })
+          }
+        />
+      </div>
+      <div className="flex items-center gap-2">
+        <p>type:</p>
+        <select
+          value={props.node.type}
+          className="p-1 text-black"
+          onChange={(e) =>
+            updateOverrides(props.node, { type: e.target.value as INodeType })
+          }
+        >
+          <option>home</option>
+          <option>basic</option>
+          <option>rich</option>
+          <option>bank</option>
+        </select>
+      </div>
+      <button
+        onClick={() =>
+          window.navigator.clipboard.writeText(
+            JSON.stringify(store.nodeOverrides),
+          )
+        }
+      >
+        Copy
+      </button>
+    </div>
+  )
+}

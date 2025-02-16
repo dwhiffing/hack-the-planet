@@ -1,6 +1,7 @@
 import { homeId, UPGRADES } from '@/constants/index'
 import { IUpgradeKey } from '@/types'
 import { initialUpgrades, store } from '@/utils/valtioState'
+import { getNodeHackCost } from './nodes'
 
 const getLevel = (key: IUpgradeKey, nextLevel?: boolean) => {
   const state = store.upgrades
@@ -13,7 +14,7 @@ export const getMaxPoints = () => {
     (sum, node) =>
       node.id === homeId || !node.isOwned || (node.hackDuration ?? 0) > 0
         ? sum
-        : sum + (node.hackCost ?? 0) / 10,
+        : sum + getNodeHackCost(node.id) / 10,
     0,
   )
   return getUpgradeEffect('max-points') - reservedByOwnedNodes

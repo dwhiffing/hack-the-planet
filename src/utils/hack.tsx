@@ -1,5 +1,5 @@
 import { baseHackTime, NODE_CONFIGS } from '@/constants/index'
-import { updateNode } from '@/utils/nodes'
+import { getNodeHackCost, updateNode } from '@/utils/nodes'
 import { randomInRange } from '@/utils/random'
 import { store } from '@/utils/valtioState'
 
@@ -14,7 +14,7 @@ export const onHackStart = (id: number) => {
   if (node && !node.isOwned) {
     updateNode(id, { hackDuration })
   }
-  store.points -= node.hackCost ?? 0
+  store.points -= getNodeHackCost(id)
 }
 
 export const onHackFinish = (id: number) => {

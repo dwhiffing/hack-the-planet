@@ -5,8 +5,16 @@ import {
   saveRate,
   UPGRADES,
 } from '@/constants/index'
-import { FullNode, IUpgradeKey, IUpgradeState, Node, NodeGroup } from '@/types'
+import {
+  FullNode,
+  INodeType,
+  IUpgradeKey,
+  IUpgradeState,
+  Node,
+  NodeGroup,
+} from '@/types'
 import { proxy } from 'valtio'
+import nodeOverrides from '@/constants/node-overrides.json'
 
 import { uniq } from 'lodash'
 
@@ -24,7 +32,12 @@ type IState = {
   allNodes: Node[]
   nodes: Record<number, FullNode>
   groupedNodes: Record<string, NodeGroup>
+  nodeOverrides: INodeOverrides
 }
+type INodeOverrides = Record<
+  string,
+  { x: number; y: number; scaling: number; type: INodeType }
+>
 type ISerializedNodeState = {
   maxScanRange: number
   isOwned: boolean
@@ -61,6 +74,7 @@ const initialState: IState = {
   selectedNodeId: homeId,
   groupedNodes: {},
   nodes: {},
+  nodeOverrides: nodeOverrides as INodeOverrides,
 }
 
 // Take state and convert it into a serializable save

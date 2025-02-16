@@ -1,6 +1,5 @@
 import { homeId, NODE_CONFIGS } from '@/constants/index'
 import { FullNode } from '@/types'
-import { randomInRange } from '@/utils/random'
 import { getNodesWithDistance } from '@/utils/geo'
 import { store } from '@/utils/valtioState'
 import { uniq } from 'lodash'
@@ -87,5 +86,14 @@ export const getIsNodeHackable = (
 
 export const getNodeIncome = (nodeId: number) => {
   const config = NODE_CONFIGS[store.nodes[nodeId].type]
-  return config.incomeMin
+  const scaling = store.nodes[nodeId].scaling ?? 1
+  return config.incomeMin * scaling
+}
+
+export const getNodeHackCost = (nodeId: number) => {
+  const configType = store.nodes[nodeId].type
+  const scaling = store.nodes[nodeId].scaling ?? 1
+  return (
+    (configType === 'basic' ? 10 : configType === 'rich' ? 250 : 1000) * scaling
+  )
 }

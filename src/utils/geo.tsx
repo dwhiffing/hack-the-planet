@@ -2,7 +2,7 @@ import { groupBy } from 'lodash'
 import { geoMercator, GeoProjection } from 'd3-geo'
 import { TransformMatrix } from '@vx/zoom/lib/types'
 
-import { INodeType, Node, NodeGroup } from '@/types'
+import { FullNode, INodeType, Node, NodeGroup } from '@/types'
 import { getRandom } from '@/utils/random'
 import { store } from '@/utils/valtioState'
 
@@ -10,6 +10,7 @@ import { baseScale, baseTranslate, countryConfigs } from '@/constants/index'
 import bordersJson from '@/constants/borders.json'
 import continents from '@/constants/continents.json'
 import cities from '@/constants/cities-pruned.json'
+import nodeOverrides from '@/constants/node-overrides.json'
 
 const rangeSize = 1.5
 const projection = geoMercator().translate(baseTranslate).scale(baseScale)
@@ -93,21 +94,27 @@ export const getNodes = (g: SVGGElement) => {
     }
 
     return getRandomNonUniformPointsInCircle(city, g).map((point) => {
-      const [x, y] = projection.invert?.([point.x, point.y]) ?? [0, 0]
-      return {
-        id: -1,
-        ...point,
-        hackCost:
-          point.type === 'basic' ? 10 : point.type === 'rich' ? 250 : 1000,
-        earthCoords: [x, y] as [number, number],
+      const _id = id++
+      const override = nodeOverrides[`${_id}` as keyof typeof nodeOverrides]
+
+      const node = { ...point, scaling: 1, id: _id } as FullNode
+
+      if (override) {
+        node.type = override.type as INodeType
+        node.scaling = override.scaling
+        node.x = override.x
+        node.y = override.y
       }
+
+      node.earthCoords = projection.invert?.([node.x, node.y]) ?? [0, 0]
+      return node
     })
   })
 
   const groupedByCountry = groupBy(result, (r) => r.country)
 
   _nodes = Object.values(groupedByCountry).flatMap((nodes) =>
-    groupCoordinates(nodes, 13).flatMap((g) => ({ ...g[0], id: id++ })),
+    groupCoordinates(nodes, 13).flat(),
   )
 
   return _nodes as Node[]
