@@ -6,7 +6,7 @@ export const baseTickspeed = fastMode ? 100 : 1000
 export const baseScanTime = 5
 export const baseHackTime = 5
 
-export const initialMoney = 1000000000000000
+export const initialMoney = 0 //00000000000000
 export const saveRate = 10
 export const homeId = 2065
 export const baseDiscoveryRange = 25
@@ -28,8 +28,8 @@ export const UPGRADES: IUpgrade[] = [
       'How much money you steal per click and transfer between nodes per tick',
     requiredNodes: 1,
     maxLevel: 99,
-    costExponent: 1.5,
-    baseCost: 10,
+    costExponent: 1.15,
+    baseCost: 15,
   },
   {
     name: 'Scan Range',
