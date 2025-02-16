@@ -13,7 +13,9 @@ import cities from '@/constants/cities-pruned.json'
 import nodeOverrides from '@/constants/node-overrides.json'
 
 const rangeSize = 1.5
-const projection = geoMercator().translate(baseTranslate).scale(baseScale)
+export const projection = geoMercator()
+  .translate(baseTranslate)
+  .scale(baseScale)
 
 type IBordersKey = keyof typeof bordersJson
 type IContinentKey = keyof typeof continents
@@ -206,7 +208,7 @@ const getZoomDrawDistance = (zoom: number) => {
   return 1
 }
 
-const getGroupFromLatLng = (lat: number, lng: number): string => {
+export const getGroupFromLatLng = (lat: number, lng: number): string => {
   const latGroup = Math.floor(lat / rangeSize)
   const lonGroup = Math.floor(lng / (rangeSize * 2))
   return `${latGroup},${lonGroup}`

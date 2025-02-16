@@ -1,12 +1,6 @@
 import React, { useCallback, useEffect, useRef } from 'react'
 import { Zoom } from '@vx/zoom'
-import {
-  background,
-  baseTickspeed,
-  homeId,
-  maxZoom,
-  minZoom,
-} from '@/constants/index'
+import { background, baseTickspeed, maxZoom, minZoom } from '@/constants/index'
 import { WorldSvg } from '@/components/WorldSvg'
 import { BotNet } from '@/components/WorldBotNet'
 import { coordsToTransform, getNodes } from '@/utils/geo'
@@ -116,9 +110,7 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
         {(zoom) => (
           <>
             <svg
-              className={`overflow-hidden lg:rounded-xl zoom-${getZoomLevel(
-                zoom.transformMatrix,
-              )}`}
+              className={`overflow-hidden lg:rounded-xl zoom-${getZoomLevel(zoom.transformMatrix)}`}
               width={width}
               height={height}
               style={{ cursor: zoom.isDragging ? 'grabbing' : undefined }}
