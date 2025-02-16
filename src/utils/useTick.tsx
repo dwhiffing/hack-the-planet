@@ -12,12 +12,12 @@ const doTick = () => {
   let saveCounter = store.saveCounter
   saveCounter = Math.max(0, saveCounter - 1)
 
+  let currentPoints = store.points
   store.pointsPerTick = getUpgradeEffect('point-rate')
-  store.points += store.pointsPerTick
-  store.points = clamp(store.points, 0, getUpgradeEffect('max-points'))
+  currentPoints += store.pointsPerTick
+  currentPoints = clamp(currentPoints, 0, getUpgradeEffect('max-points'))
 
   let moneyPerTick = 0
-  let currentPoints = store.points
   let nodeIdsStolenFrom: number[] = []
 
   // console.time('update nodes')
