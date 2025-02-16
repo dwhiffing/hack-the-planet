@@ -2,7 +2,7 @@ import { sample } from 'lodash'
 import { getUpgradeEffect } from '@/utils/upgrades'
 import { getEdgeNodes, getIsNodeHackable } from '@/utils/nodes'
 import { store } from '@/utils/valtioState'
-import { onScanStart } from '@/utils/scan'
+import { onScan } from '@/utils/scan'
 import { onHackStart } from '@/utils/hack'
 
 export const onAutohack = () => {
@@ -24,7 +24,7 @@ export const onAutohack = () => {
 
   const nodeToScan = sample(possibleScanNodes)
   if (nodeToScan) {
-    onScanStart(nodeToScan.id)
+    onScan(nodeToScan.id)
   }
   const possibleHackNodes = nodes.filter((n) => getIsNodeHackable(n, nodes))
   const nodeToHack = sample(possibleHackNodes)

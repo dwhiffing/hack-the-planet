@@ -15,7 +15,7 @@ import {
   updateNode,
 } from '@/utils/nodes'
 import { onHackStart } from '@/utils/hack'
-import { onScanStart } from '@/utils/scan'
+import { onScan } from '@/utils/scan'
 
 import { homeId, UPGRADES } from '@/constants/index'
 import { formatMoney, MapStats } from './WorldControls'
@@ -115,7 +115,7 @@ const selectedNodeActions: INodeAction[] = [
     description: 'Scan for nearby nodes',
     getIsVisible: (node) => node && node.isOwned,
     getIsDisabled: (_selectedNode, points) => false,
-    onClick: (node) => onScanStart(node.id),
+    onClick: (node) => onScan(node.id),
   },
   {
     getLabel: () => 'disconnect',

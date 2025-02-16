@@ -7,7 +7,7 @@ import { updateNode } from '@/utils/nodes'
 export const getScanRange = (points = store.points, cap = 50, rate = 1) =>
   10 + Math.min(cap, rate * Math.sqrt(points))
 
-export const onScanStart = (id: number) => {
+export const onScan = (id: number) => {
   const scanEfficiency = getUpgradeEffect('scan-efficiency')
   const node = store.nodes[id]
   if (!node) return
@@ -37,5 +37,3 @@ export const onScanStart = (id: number) => {
   const cost = closestNodes.length === 0 ? store.points / 2 : store.points
   store.points -= cost
 }
-
-export const onScanFinish = (id: number) => {}
