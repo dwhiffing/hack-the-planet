@@ -16,7 +16,6 @@ import { ProvidedZoom } from '@vx/zoom/lib/types'
 import { useZoom } from '@/utils/useZoom'
 import { getVisibleGroups, getZoomLevel, groupNodes } from '@/utils/geo'
 import { deserializeSave, store } from '@/utils/valtioState'
-import { updateNode } from '@/utils/nodes'
 
 export function WorldMap({ width, height }: { width: number; height: number }) {
   const { onClickHome, zoomRef, mouseRef } = useZoom(width, height)
@@ -27,14 +26,11 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
     store.allNodes = nodes
     store.groupedNodes = groupNodes(nodes)
 
-    updateNode(homeId, { type: 'home', isOwned: true })
     const save =
       typeof localStorage !== 'undefined'
         ? localStorage.getItem('hack-the-planet')
         : undefined
-    if (save) {
-      deserializeSave(save)
-    }
+    deserializeSave(save)
   }, [])
 
   useTick()

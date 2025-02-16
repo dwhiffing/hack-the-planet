@@ -4,6 +4,7 @@ import {
   startingPoints,
   saveRate,
   UPGRADES,
+  showAllNodes,
 } from '@/constants/index'
 import {
   FullNode,
@@ -101,26 +102,33 @@ export const serializeSave = (state: IState) => {
 }
 
 // Take save and convert it back into state
-export const deserializeSave = (save: string) => {
-  const _serializedState: ISerializedState = JSON.parse(save)
+export const deserializeSave = (save?: string | null) => {
+  const _serializedState: ISerializedState | null = save
+    ? JSON.parse(save)
+    : null
 
-  const renderedNodeIds = uniq([
-    homeId,
-    ...Object.entries(_serializedState.nodeData)
-      .filter(([k, v]) => v.target)
-      .flatMap(([k, v]) => [+k, v.target]),
-  ])
+  const renderedNodeIds = showAllNodes
+    ? store.allNodes.map((n) => n.id)
+    : _serializedState
+      ? uniq([
+          homeId,
+          ...Object.entries(_serializedState.nodeData)
+            .filter(([k, v]) => v.target)
+            .flatMap(([k, v]) => [+k, v.target]),
+        ])
+      : [homeId]
 
   const nodes: Record<number, FullNode> = {}
   renderedNodeIds.forEach((nodeId) => {
     const node = store.allNodes.find((n) => n.id === +nodeId)!
-    const nodeSavedData = _serializedState.nodeData[node.id]
-    const sources = Object.entries(_serializedState.nodeData)
+    const nodeSavedData = _serializedState?.nodeData[node.id]
+    const sources = Object.entries(_serializedState?.nodeData ?? {})
       .filter(([_nodeId, data]) => data.target === +nodeId)
       .map(([k, v]) => v.target)
 
     nodes[+nodeId] = {
       ...node,
+      isOwned: +nodeId === homeId,
       ...nodeSavedData,
       type: +nodeId === homeId ? 'home' : node.type,
       scanDuration: 0,
@@ -129,13 +137,15 @@ export const deserializeSave = (save: string) => {
       sources,
     }
   })
+  if (_serializedState) {
+    store.points = _serializedState.points
+    store.money = _serializedState.money
+    store.autoHackTime = _serializedState.autoHackTime
+    store.selectedNodeId = _serializedState.selectedNodeId
+    store.upgrades = _serializedState.upgrades
+  }
 
-  store.points = _serializedState.points
-  store.money = _serializedState.money
-  store.autoHackTime = _serializedState.autoHackTime
-  store.selectedNodeId = _serializedState.selectedNodeId
   store.renderedNodeIds = renderedNodeIds
-  store.upgrades = _serializedState.upgrades
   store.nodes = nodes
 }
 
