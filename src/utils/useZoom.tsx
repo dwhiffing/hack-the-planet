@@ -10,10 +10,21 @@ export const useZoom = (width: number, height: number) => {
 
   const onClickHome = useCallback(() => {
     const home = store.allNodes.find((n) => n.id == homeId)?.earthCoords
-    if (home && width && height)
+    if (home && width && height) {
+      const offsetX = width >= 768 ? 150 : 0
+      const offsetY = width >= 768 ? 0 : -150
       zoomRef.current?.setTransformMatrix(
-        coordsToTransform(home[0], home[1], zoomScale, width, height),
+        coordsToTransform(
+          home[0],
+          home[1],
+          zoomScale,
+          width,
+          height,
+          offsetX,
+          offsetY,
+        ),
       )
+    }
 
     store.selectedNodeId = homeId
   }, [width, height, zoomRef])

@@ -119,6 +119,8 @@ export const coordsToTransform = (
   scale: number,
   width: number,
   height: number,
+  offsetX = 0,
+  offsetY = 0,
 ) => {
   const projection = geoMercator()
     .translate(baseTranslate)
@@ -129,8 +131,8 @@ export const coordsToTransform = (
     scaleY: scale,
     skewX: 0,
     skewY: 0,
-    translateX: width / 2 + coords[0] * -1,
-    translateY: height / 2 + coords[1] * -1,
+    translateX: offsetX + width / 2 + coords[0] * -1,
+    translateY: offsetY + height / 2 + coords[1] * -1,
   }
 }
 

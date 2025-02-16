@@ -30,7 +30,7 @@ export const MapControls = memo(function MapControls(props: IMapProps) {
       <div className="m-3">
         <MapStats />
         {selectedNodeId !== -1 && (
-          <div className="pointer-events-auto absolute inset-x-3 bottom-1 z-20 my-2 max-h-[300px] overflow-scroll rounded-md border border-[#000] bg-[#222] p-2 md:right-auto md:top-1 md:max-h-none md:p-4">
+          <div className="pointer-events-auto absolute inset-x-3 bottom-1 z-20 my-2 max-h-[300px] overflow-scroll rounded-md border border-[#000] bg-[#222] p-2 md:right-auto md:top-1 md:max-h-none md:w-full md:max-w-[300px] md:p-4">
             <NodeControls />
           </div>
         )}
