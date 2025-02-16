@@ -1,18 +1,22 @@
 import React, { memo } from 'react'
 
-import { FullNode, IMapProps } from '@/types'
+import { IMapProps } from '@/types'
 
 import { useSnapshot } from 'valtio'
 import { store } from '@/utils/valtioState'
 import { NodeControls } from './NodeControls'
 import { SaveControls } from './SaveControls'
+import { getUpgradeEffect } from '@/utils/upgrades'
 
-const MapStats = () => {
-  const { money, incomePerTick, suspicion } = useSnapshot(store)
+export const MapStats = () => {
+  const { money, points, moneyPerTick, suspicion } = useSnapshot(store)
   return (
     <div>
+      <p>
+        points: {points.toFixed(2)}/{getUpgradeEffect('max-points')}
+      </p>
       <p>Money: {formatMoney(money)}</p>
-      <p>Income: {formatMoney(incomePerTick)}</p>
+      <p>Income: {formatMoney(moneyPerTick)}</p>
       <p>Suspicion: {(suspicion / 100).toFixed(2)}%</p>
     </div>
   )

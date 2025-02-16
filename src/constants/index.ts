@@ -3,8 +3,9 @@ import { INodeConfig, INodeType, IUpgrade } from '@/types'
 export const fastMode = false
 
 export const baseTickspeed = fastMode ? 100 : 1000
-export const baseScanTime = 5
-export const baseHackTime = 5
+export const baseScanTime = 2.5
+export const baseHackTime = 2.5
+export const minScanPoints = 50
 
 export const initialMoney = 0 //00000000000000
 export const saveRate = 10
@@ -22,6 +23,24 @@ export const baseTranslate = [0, 0] as [number, number]
 
 export const UPGRADES: IUpgrade[] = [
   {
+    name: 'Max points',
+    key: 'max-points',
+    description: 'Maximum number of points',
+    requiredNodes: 1,
+    maxLevel: 99,
+    costExponent: 1.15,
+    baseCost: 15,
+  },
+  {
+    name: 'Point Rate',
+    key: 'point-amount',
+    description: 'How much many points you get per node per tick',
+    requiredNodes: 1,
+    maxLevel: 99,
+    costExponent: 1.15,
+    baseCost: 15,
+  },
+  {
     name: 'Steal Rate',
     key: 'steal-amount',
     description:
@@ -30,15 +49,6 @@ export const UPGRADES: IUpgrade[] = [
     maxLevel: 99,
     costExponent: 1.15,
     baseCost: 15,
-  },
-  {
-    name: 'Scan Range',
-    key: 'scan-range',
-    description: 'How far you can scan in kilometers',
-    requiredNodes: 1,
-    costs: [
-      25, 100, 1000, 5000, 10000, 50000, 100000, 500000, 1000000, 1, 1, 1, 1, 1,
-    ],
   },
   {
     name: 'Proxy Servers',

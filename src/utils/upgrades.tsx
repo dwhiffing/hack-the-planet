@@ -9,9 +9,6 @@ const getLevel = (key: IUpgradeKey, nextLevel?: boolean) => {
 }
 
 export const getUpgradeEffect = (key: IUpgradeKey, nextLevel?: boolean) => {
-  if (key === 'scan-range')
-    return baseDiscoveryRange + getLevel('scan-range', nextLevel) * 100
-
   if (key === 'scan-efficiency')
     return 1 + getLevel('scan-efficiency', nextLevel)
 
@@ -37,6 +34,17 @@ export const getUpgradeEffect = (key: IUpgradeKey, nextLevel?: boolean) => {
     const level = getLevel('suspicion-decay', nextLevel)
     if (level === 0) return 0
     return level * -0.01
+  }
+
+  if (key === 'point-amount') {
+    const level = getLevel('point-amount', nextLevel)
+    return 0.1 + level * 0.1
+  }
+
+  if (key === 'max-points') {
+    const level = getLevel('max-points', nextLevel)
+    if (level === 0) return 50
+    return 50 + level * 50
   }
 
   return 0

@@ -5,15 +5,15 @@ import { store } from '@/utils/valtioState'
 import { updateNode } from '@/utils/nodes'
 
 export const onScanStart = (id: number) => {
-  updateNode(id, { scanDuration: baseScanTime })
-}
-
-export const onScanFinish = (id: number) => {
-  const discoveryRange = getUpgradeEffect('scan-range')
+  updateNode(id, {
+    scanDuration: baseScanTime,
+    scanRange: 10 + store.points / 10,
+  })
   const scanEfficiency = getUpgradeEffect('scan-efficiency')
   const node = store.nodes[id]
   if (!node) return
 
+  const discoveryRange = node.scanRange ?? 0
   const relevantNodes = getAdjacentNodes(
     node.earthCoords![1],
     node.earthCoords![0],
@@ -33,4 +33,8 @@ export const onScanFinish = (id: number) => {
 
     updateNode(node.id, { target: id })
   })
+  const cost = closestNodes.length === 0 ? store.points / 2 : store.points
+  store.points -= cost
 }
+
+export const onScanFinish = (id: number) => {}

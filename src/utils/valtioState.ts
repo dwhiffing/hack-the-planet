@@ -1,28 +1,38 @@
-import { homeId, initialMoney, saveRate, UPGRADES } from '@/constants/index'
-import { FullNode, IUpgradeState, Node, NodeGroup } from '@/types'
+import {
+  homeId,
+  initialMoney,
+  minScanPoints,
+  saveRate,
+  UPGRADES,
+} from '@/constants/index'
+import { FullNode, IUpgradeKey, IUpgradeState, Node, NodeGroup } from '@/types'
 import { proxy } from 'valtio'
 
 import { uniq } from 'lodash'
 
 type IState = {
+  points: number
+  pointsPerTick: number
   money: number
-  incomePerTick: number
+  moneyPerTick: number
   suspicion: number
   selectedNodeId: number
   saveCounter: number
   autoHackTime: number
   renderedNodeIds: number[]
-  upgrades: Record<string, IUpgradeState>
+  upgrades: Record<IUpgradeKey, IUpgradeState>
   allNodes: Node[]
   nodes: Record<number, FullNode>
   groupedNodes: Record<string, NodeGroup>
 }
 type ISerializedState = {
+  points: number
   money: number
   suspicion: number
   autoHackTime: number
   selectedNodeId: number
   upgrades: Record<string, IUpgradeState>
+  unownedNodeIds: number[]
   nodeConnections: Record<number, number>
 }
 
@@ -36,7 +46,9 @@ export const initialUpgrades = UPGRADES.reduce(
 
 const initialState: IState = {
   money: initialMoney,
-  incomePerTick: 0,
+  points: minScanPoints,
+  pointsPerTick: 0,
+  moneyPerTick: 0,
   suspicion: 0,
   autoHackTime: 0,
   saveCounter: saveRate,
@@ -51,15 +63,21 @@ const initialState: IState = {
 // Take state and convert it into a serializable save
 export const serializeSave = (state: IState) => {
   const nodeConnections: Record<number, number> = {}
+  const unownedNodeIds: number[] = []
   Object.values(state.nodes).forEach((node) => {
-    if (node.target) nodeConnections[node.id] = node.target
+    if (node.target) {
+      nodeConnections[node.id] = node.target
+      if (!node.isOwned) unownedNodeIds.push(node.id)
+    }
   })
   const serialized: ISerializedState = {
+    points: state.points,
     money: state.money,
     suspicion: state.suspicion,
     autoHackTime: state.autoHackTime,
     selectedNodeId: state.selectedNodeId,
     upgrades: state.upgrades,
+    unownedNodeIds,
     nodeConnections,
   }
   return JSON.stringify(serialized)
@@ -90,11 +108,13 @@ export const deserializeSave = (save: string) => {
       type: +nodeId === homeId ? 'home' : node.type,
       scanDuration: 0,
       hackDuration: 0,
-      isOwned: sources.length > 0,
+      isOwned: !_serializedState.unownedNodeIds.includes(nodeId),
       sources,
       target,
     }
   })
+
+  store.points = _serializedState.points
   store.money = _serializedState.money
   store.suspicion = _serializedState.suspicion
   store.autoHackTime = _serializedState.autoHackTime

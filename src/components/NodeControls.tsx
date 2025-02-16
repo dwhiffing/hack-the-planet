@@ -11,13 +11,12 @@ import { getIsNodeHackable, getNodeIncome } from '@/utils/nodes'
 import { onHackStart } from '@/utils/hack'
 import { onScanStart } from '@/utils/scan'
 import { onDisconnect } from '@/utils/investigate'
-import { homeId, UPGRADES } from '@/constants/index'
+import { homeId, minScanPoints, UPGRADES } from '@/constants/index'
 import { onSteal } from '@/utils/steal'
-import { formatMoney } from './WorldControls'
+import { formatMoney, MapStats } from './WorldControls'
 
 export const NodeControls = memo(function NodeControls() {
-  const { money, selectedNodeId, upgrades, incomePerTick, suspicion } =
-    useSnapshot(store)
+  const { selectedNodeId, upgrades, points, money } = useSnapshot(store)
   const { [selectedNodeId]: _selectedNode } = useSnapshot(store.nodes)
   const selectedNode = _selectedNode as FullNode
   const selectedNodeIncome = selectedNode ? getNodeIncome(selectedNodeId) : -1
@@ -41,7 +40,7 @@ export const NodeControls = memo(function NodeControls() {
         description: upgrade.description ?? 'Placeholder',
         getIsVisible: () =>
           store.renderedNodeIds.length >= upgrade.requiredNodes,
-        getIsDisabled: () => store.money < cost || isMaxed,
+        getIsDisabled: () => money < cost || isMaxed,
         onClick: () => buyUpgrade(upgrade.key),
       }
     }),
@@ -49,7 +48,7 @@ export const NodeControls = memo(function NodeControls() {
 
   const buttons = [
     ...(selectedNodeId
-      ? selectedNodeActions.filter((a) => a.getIsVisible(selectedNode))
+      ? selectedNodeActions.filter((a) => a.getIsVisible(selectedNode, points))
       : []),
     ...(selectedNodeId === homeId
       ? globalActions.filter((a) => a.getIsVisible())
@@ -58,11 +57,7 @@ export const NodeControls = memo(function NodeControls() {
 
   return (
     <div className="">
-      <div className="mb-3 hidden md:block">
-        <p>Money: {formatMoney(money)}</p>
-        <p>Income: {formatMoney(incomePerTick)}</p>
-        <p>Suspicion: {(suspicion / 100).toFixed(2)}%</p>
-      </div>
+      <MapStats />
       {/* <p>id: {selectedNode?.id}</p> */}
       <p className="mb-3">type: {selectedNode?.type}</p>
       <p>
@@ -81,7 +76,7 @@ export const NodeControls = memo(function NodeControls() {
             key={a.label}
             className="pointer-events-auto"
             title={a.description}
-            disabled={a.getIsDisabled(selectedNode)}
+            disabled={a.getIsDisabled(selectedNode, points)}
             onClick={() => a.onClick(selectedNode)}
           >
             {a.label}
@@ -96,7 +91,8 @@ const selectedNodeActions: INodeAction[] = [
   {
     label: 'hack',
     description: 'Take over this node',
-    getIsDisabled: (node: FullNode) => !getIsNodeHackable(node.id),
+    getIsDisabled: (node: FullNode, points: number) =>
+      !getIsNodeHackable(node.id) || points < (node.pointCost ?? 0),
     getIsVisible: (node: FullNode) => node.type !== 'home' && !node.isOwned,
     onClick: (node: FullNode) => onHackStart(node.id),
   },
@@ -104,7 +100,7 @@ const selectedNodeActions: INodeAction[] = [
     label: 'scan',
     description: 'Scan for nearby nodes',
     getIsVisible: (node: FullNode) => node && node.isOwned,
-    getIsDisabled: (node: FullNode) => (node.scanDuration ?? 0) > 0,
+    getIsDisabled: (_selectedNode, points: number) => points < minScanPoints,
     onClick: (node: FullNode) => onScanStart(node.id),
   },
   {

@@ -3,7 +3,6 @@ import { Group } from '@visx/group'
 import { CSSTransition } from 'react-transition-group'
 
 import { pxPerKM } from '@/constants/index'
-import { getUpgradeEffect } from '@/utils/upgrades'
 import { useSnapshot } from 'valtio'
 import { store } from '@/utils/valtioState'
 
@@ -45,7 +44,7 @@ export const Node = memo(function Node(props: {
         <path
           ref={nodeRef}
           className={`pointer-events-none`}
-          d={drawScan(0, 0, pxPerKM * getUpgradeEffect('scan-range'), 0, 40)}
+          d={drawScan(0, 0, pxPerKM * (node.scanRange ?? 0), 0, 40)}
           fill="#ff000033"
         >
           <animateTransform

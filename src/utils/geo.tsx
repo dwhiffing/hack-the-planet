@@ -97,6 +97,8 @@ export const getNodes = (g: SVGGElement) => {
       return {
         id: -1,
         ...point,
+        pointCost:
+          point.type === 'basic' ? 25 : point.type === 'rich' ? 250 : 1000,
         earthCoords: [x, y] as [number, number],
       }
     })
@@ -299,8 +301,8 @@ function getRandomNonUniformPointsInCircle(
           points.length === 0 && city.density > 3
             ? 'bank'
             : random2() < 0.2
-            ? 'rich'
-            : 'basic',
+              ? 'rich'
+              : 'basic',
         country: containingCountry.getAttribute('name') ?? 'Unknown',
       })
     } else {

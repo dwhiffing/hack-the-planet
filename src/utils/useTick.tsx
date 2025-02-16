@@ -8,16 +8,22 @@ import { serializeSave, store } from '@/utils/valtioState'
 import { getNodeIncome, updateNode } from '@/utils/nodes'
 import { onScanFinish } from '@/utils/scan'
 import { onHackFinish } from '@/utils/hack'
+import { clamp } from 'lodash'
 
 const doTick = () => {
   let saveCounter = store.saveCounter
   saveCounter = Math.max(0, saveCounter - 1)
 
-  store.incomePerTick = store.renderedNodeIds.reduce((sum, nodeId) => {
-    const node = store.nodes[nodeId]
-    if (node?.isOwned) {
-      const stealAmount = getUpgradeEffect('steal-amount')
-      return sum + getNodeIncome(nodeId) * stealAmount
+  store.pointsPerTick = store.renderedNodeIds.reduce((sum, nodeId) => {
+    if (store.nodes[nodeId]?.isOwned) {
+      return sum + getUpgradeEffect('point-amount')
+    }
+    return sum + 0
+  }, 0)
+
+  store.moneyPerTick = store.renderedNodeIds.reduce((sum, nodeId) => {
+    if (store.nodes[nodeId]?.isOwned) {
+      return sum + getNodeIncome(nodeId) * getUpgradeEffect('steal-amount')
     }
     return sum + 0
   }, 0)
@@ -43,10 +49,7 @@ const doTick = () => {
     if ((hackDuration ?? 0) > 0) {
       update.hackDuration = hackDuration - getUpgradeEffect('hack-speed')
     }
-    if (
-      (typeof update.hackDuration === 'number' && update.hackDuration <= 0) ||
-      (typeof node.hackDuration === 'number' && node.hackDuration <= 0)
-    ) {
+    if (typeof update.hackDuration === 'number' && update.hackDuration <= 0) {
       onHackFinish(nodeId)
     }
 
@@ -56,7 +59,10 @@ const doTick = () => {
   })
   // console.timeEnd('update nodes')
 
-  store.money += store.incomePerTick
+  store.points += store.pointsPerTick
+  store.points = clamp(store.points, 0, getUpgradeEffect('max-points'))
+
+  store.money += store.moneyPerTick
   store.suspicion += getUpgradeEffect('suspicion-decay') * 100
 
   if (saveCounter === 0) {

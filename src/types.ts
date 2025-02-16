@@ -11,8 +11,8 @@ export type IMapProps = {
 export type INodeAction = {
   label: string
   description: string
-  getIsVisible: (node: FullNode) => boolean | undefined
-  getIsDisabled: (node: FullNode) => boolean | undefined
+  getIsVisible: (node: FullNode, points: number) => boolean | undefined
+  getIsDisabled: (node: FullNode, points: number) => boolean | undefined
   onClick: (node: FullNode) => void
 }
 
@@ -39,7 +39,9 @@ export type Node = {
 export type PublicNodeState = {
   isOwned?: boolean
   scanDuration?: number
+  scanRange?: number
   hackDuration?: number
+  pointCost?: number
   sources?: number[]
   target?: number
 }
@@ -72,11 +74,12 @@ export type IUpgradeState = {
   level: number
 }
 export type IUpgradeKey =
-  | 'scan-range'
   | 'autoscan'
   | 'scan-efficiency'
   | 'scan-speed'
   | 'hack-efficiency'
   | 'hack-speed'
   | 'steal-amount'
+  | 'max-points'
+  | 'point-amount'
   | 'suspicion-decay'
