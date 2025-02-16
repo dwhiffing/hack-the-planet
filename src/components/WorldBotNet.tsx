@@ -55,7 +55,7 @@ export const NodeGroup = memo(function NodeGroup({
   selectedNodeId?: number
   isLinks: boolean
 }) {
-  const groupedNodes = store.groupedNodes
+  const { groupedNodes } = useSnapshot(store)
   const nodeIds = groupedNodes[groupKey]?.nodes.map((n) => n.id) ?? []
   return (
     <Group>
