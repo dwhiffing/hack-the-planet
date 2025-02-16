@@ -9,7 +9,7 @@ import { homeId } from '@/constants/index'
 
 export const onDisconnect = (nodeId: number) => {
   getNodeSources(nodeId).forEach(({ id }) => {
-    if (id !== homeId) updateNode(id, { isOwned: false })
+    if (id !== homeId) updateNode(id, { isOwned: false, hackDuration: 0 })
   })
 }
 
