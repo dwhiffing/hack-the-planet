@@ -21,14 +21,14 @@ export const Node = memo(function Node(props: {
     node.type === 'home'
       ? '#f0f'
       : node.isOwned
-      ? node.type === 'bank'
-        ? '#0000ff'
-        : node.type === 'rich'
-        ? '#00ff00'
-        : '#ff0000'
-      : node.hackDuration
-      ? '#ffff00'
-      : '#999'
+        ? node.type === 'bank'
+          ? '#0000ff'
+          : node.type === 'rich'
+            ? '#00ff00'
+            : '#ff0000'
+        : node.hackDuration
+          ? '#ffff00'
+          : '#999'
 
   const size = node.type === 'bank' ? 0.4 : node.type === 'rich' ? 0.3 : 0.2
   const s = props.isSelected ? size * 1.5 : size
@@ -74,6 +74,7 @@ export const Node = memo(function Node(props: {
         }}
         r={s / 2}
         stroke="#fff"
+        className="cursor-pointer"
         style={{
           transition:
             'all 150ms cubic-bezier(0.4, 0, 0.2, 1), fill 500ms cubic-bezier(0.4, 0, 0.2, 1)',

@@ -75,85 +75,100 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
     return { scaleX: scale, scaleY: scale }
   }
 
-  const onMouseLeave = () => {
+  const onPointerLeave = () => {
     if (zoomRef.current?.state.isDragging) zoomRef.current?.dragEnd()
   }
 
-  const onMouseUp = (zoom: ProvidedZoom) => (e: React.MouseEvent) => {
-    const xDiff = Math.abs(e.screenX - (mouseRef.current?.x ?? 0))
-    const yDiff = Math.abs(e.screenY - (mouseRef.current?.y ?? 0))
-    if (xDiff + yDiff < 1) {
-      store.selectedNodeId = -1
+  const onPointerUp =
+    (zoom: ProvidedZoom) => (e: React.MouseEvent | React.TouchEvent) => {
+      // @ts-ignore
+      const xDiff = Math.abs(e.screenX - (mouseRef.current?.x ?? 0))
+      // @ts-ignore
+      const yDiff = Math.abs(e.screenY - (mouseRef.current?.y ?? 0))
+      if (xDiff + yDiff < 1) {
+        store.selectedNodeId = -1
+      }
+      zoom.dragEnd()
     }
-    zoom.dragEnd()
-  }
 
-  const onMouseDown = (zoom: ProvidedZoom) => (e: React.MouseEvent) => {
-    mouseRef.current = { x: e.screenX, y: e.screenY }
-    zoom.dragStart(e)
-  }
+  const onPointerDown =
+    (zoom: ProvidedZoom) => (e: React.MouseEvent | React.TouchEvent) => {
+      // @ts-ignore
+      mouseRef.current = { x: e.screenX, y: e.screenY }
+      zoom.dragStart(e)
+    }
 
   return (
-    // @ts-ignore
-    <Zoom
-      ref={zoomRef}
-      width={width}
-      height={height}
-      scaleXMin={minZoom}
-      scaleYMin={minZoom}
-      scaleXMax={maxZoom}
-      scaleYMax={maxZoom}
-      wheelDelta={onScroll}
-      transformMatrix={coordsToTransform(0, 0, maxZoom, width, height)}
-    >
-      {(zoom) => (
-        <>
-          <svg
-            className={`rounded-xl overflow-hidden zoom-${getZoomLevel(
-              zoom.transformMatrix,
-            )}`}
-            width={width}
-            height={height}
-            style={{ cursor: zoom.isDragging ? 'grabbing' : 'grab' }}
-          >
-            <rect x={0} y={0} width={width} height={height} fill={background} />
-
-            <g ref={worldSvgMountCallback} transform={zoom.toString()}>
-              <WorldSvg />
-            </g>
-            <rect
-              className="relative z-10"
-              fill="transparent"
+    <>
+      <MapControls
+        onClickHome={onClickHome}
+        onZoomOut={onZoomOut}
+        onZoomIn={onZoomIn}
+      />
+      {/* @ts-ignore */}
+      <Zoom
+        ref={zoomRef}
+        width={width}
+        height={height}
+        scaleXMin={minZoom}
+        scaleYMin={minZoom}
+        scaleXMax={maxZoom}
+        scaleYMax={maxZoom}
+        wheelDelta={onScroll}
+        transformMatrix={coordsToTransform(0, 0, maxZoom, width, height)}
+      >
+        {(zoom) => (
+          <>
+            <svg
+              className={`overflow-hidden lg:rounded-xl zoom-${getZoomLevel(
+                zoom.transformMatrix,
+              )}`}
               width={width}
               height={height}
-              onMouseMove={zoom.dragMove}
-              onMouseLeave={onMouseLeave}
-              onMouseUp={onMouseUp(zoom)}
-              onMouseDown={onMouseDown(zoom)}
-            />
-            <g
-              style={{ pointerEvents: zoom.isDragging ? 'none' : 'auto' }}
-              transform={zoom.toString()}
+              style={{ cursor: zoom.isDragging ? 'grabbing' : undefined }}
             >
-              <BotNet
-                groupKeysString={getVisibleGroups(
-                  zoom.transformMatrix,
-                  width,
-                  height,
-                )}
-                zoomLevel={getZoomLevel(zoom.transformMatrix)}
-                tickspeed={baseTickspeed}
+              <rect
+                x={0}
+                y={0}
+                width={width}
+                height={height}
+                fill={background}
               />
-            </g>
-          </svg>
 
-          <MapControls
-            onClickHome={onClickHome}
-            onZoomOut={onZoomOut}
-            onZoomIn={onZoomIn}
-          />
-        </>
-      )}
-    </Zoom>
+              <g ref={worldSvgMountCallback} transform={zoom.toString()}>
+                <WorldSvg />
+              </g>
+              <rect
+                className="relative z-10"
+                fill="transparent"
+                width={width}
+                height={height}
+                onTouchMove={zoom.dragMove}
+                onTouchEnd={onPointerUp(zoom)}
+                onTouchStart={onPointerDown(zoom)}
+                onMouseMove={zoom.dragMove}
+                onMouseLeave={onPointerLeave}
+                onMouseUp={onPointerUp(zoom)}
+                onMouseDown={onPointerDown(zoom)}
+              />
+              <g
+                style={{ pointerEvents: zoom.isDragging ? 'none' : 'auto' }}
+                transform={zoom.toString()}
+              >
+                <BotNet
+                  groupKeysString={getVisibleGroups(
+                    zoom.transformMatrix,
+                    width,
+                    height,
+                  )}
+                  zoomLevel={getZoomLevel(zoom.transformMatrix)}
+                  tickspeed={baseTickspeed}
+                />
+              </g>
+            </svg>
+          </>
+        )}
+      </Zoom>
+    </>
   )
 }
