@@ -40,6 +40,8 @@ export type PublicNodeState = {
   isOwned?: boolean
   scanDuration?: number
   scanRange?: number
+  maxScanRange?: number
+  showScanRange?: boolean
   hackDuration?: number
   pointCost?: number
   sources?: number[]

@@ -26,6 +26,11 @@ type IState = {
   nodes: Record<number, FullNode>
   groupedNodes: Record<string, NodeGroup>
 }
+type ISerializedNodeState = {
+  maxScanRange: number
+  isOwned: boolean
+  target: number
+}
 type ISerializedState = {
   points: number
   money: number
@@ -33,8 +38,7 @@ type ISerializedState = {
   autoHackTime: number
   selectedNodeId: number
   upgrades: Record<string, IUpgradeState>
-  unownedNodeIds: number[]
-  nodeConnections: Record<number, number>
+  nodeData: Record<number, ISerializedNodeState>
 }
 
 export const initialUpgrades = UPGRADES.reduce(
@@ -64,14 +68,16 @@ const initialState: IState = {
 
 // Take state and convert it into a serializable save
 export const serializeSave = (state: IState) => {
-  const nodeConnections: Record<number, number> = {}
-  const unownedNodeIds: number[] = []
-  Object.values(state.nodes).forEach((node) => {
-    if (node.target) {
-      nodeConnections[node.id] = node.target
-      if (!node.isOwned) unownedNodeIds.push(node.id)
-    }
-  })
+  const nodeData: Record<number, ISerializedNodeState> = {}
+  Object.values(state.nodes)
+    .filter((node) => node.target || node.id === homeId)
+    .forEach((node) => {
+      nodeData[node.id] = {
+        target: node.target!,
+        isOwned: !!node.isOwned,
+        maxScanRange: node.maxScanRange ?? 0,
+      }
+    })
   const serialized: ISerializedState = {
     points: state.points,
     money: state.money,
@@ -79,8 +85,7 @@ export const serializeSave = (state: IState) => {
     autoHackTime: state.autoHackTime,
     selectedNodeId: state.selectedNodeId,
     upgrades: state.upgrades,
-    unownedNodeIds,
-    nodeConnections,
+    nodeData,
   }
   return JSON.stringify(serialized)
 }
@@ -91,28 +96,26 @@ export const deserializeSave = (save: string) => {
 
   const renderedNodeIds = uniq([
     homeId,
-    ...Object.entries(_serializedState.nodeConnections).flatMap(([k, v]) => [
-      +k,
-      v,
-    ]),
+    ...Object.entries(_serializedState.nodeData)
+      .filter(([k, v]) => v.target)
+      .flatMap(([k, v]) => [+k, v.target]),
   ])
 
   const nodes: Record<number, FullNode> = {}
   renderedNodeIds.forEach((nodeId) => {
     const node = store.allNodes.find((n) => n.id === +nodeId)!
-    const target = _serializedState.nodeConnections[node.id]
-    const sources = Object.entries(_serializedState.nodeConnections)
-      .filter(([_nodeId, _targetId]) => _targetId === +nodeId)
-      .map(([k, v]) => v)
+    const nodeSavedData = _serializedState.nodeData[node.id]
+    const sources = Object.entries(_serializedState.nodeData)
+      .filter(([_nodeId, data]) => data.target === +nodeId)
+      .map(([k, v]) => v.target)
 
     nodes[+nodeId] = {
       ...node,
+      ...nodeSavedData,
       type: +nodeId === homeId ? 'home' : node.type,
       scanDuration: 0,
       hackDuration: 0,
-      isOwned: !_serializedState.unownedNodeIds.includes(nodeId),
       sources,
-      target,
     }
   })
 

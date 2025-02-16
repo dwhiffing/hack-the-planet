@@ -4,25 +4,25 @@ import { getNodesWithDistance, getAdjacentNodes } from '@/utils/geo'
 import { store } from '@/utils/valtioState'
 import { updateNode } from '@/utils/nodes'
 
+export const getScanRange = () => 10 + store.points / 10
+
 export const onScanStart = (id: number) => {
-  updateNode(id, {
-    scanDuration: baseScanTime,
-    scanRange: 10 + store.points / 10,
-  })
   const scanEfficiency = getUpgradeEffect('scan-efficiency')
   const node = store.nodes[id]
   if (!node) return
 
-  const discoveryRange = node.scanRange ?? 0
+  const scanRange = getScanRange()
+  const maxScanRange =
+    scanRange > (node.maxScanRange ?? 0) ? scanRange : (node.maxScanRange ?? 0)
+  updateNode(id, { scanDuration: baseScanTime, scanRange, maxScanRange })
+
   const relevantNodes = getAdjacentNodes(
     node.earthCoords![1],
     node.earthCoords![0],
   )
 
   const closestNodes = getNodesWithDistance(relevantNodes, node)
-    .filter(
-      (n) => !store.renderedNodeIds?.includes(n.id) && n.dist < discoveryRange,
-    )
+    .filter((n) => !store.renderedNodeIds?.includes(n.id) && n.dist < scanRange)
     .sort((a, b) => a.dist - b.dist)
     .slice(0, scanEfficiency)
 

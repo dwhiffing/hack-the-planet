@@ -8,16 +8,16 @@ body {
 }
 
 button {
-  @apply text-center border-none bg-black text-white py-1 px-2;
+  @apply border-none bg-black px-2 py-1 text-center text-white;
 }
 
 button:disabled,
 button[disabled] {
-  @apply opacity-30 cursor-not-allowed;
+  @apply cursor-not-allowed opacity-30;
 }
 
 .controls {
-  @apply absolute top-4 right-4 flex flex-col items-end;
+  @apply absolute right-4 top-4 flex flex-col items-end;
 }
 
 .fade-enter {

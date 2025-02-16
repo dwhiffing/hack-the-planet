@@ -1,10 +1,11 @@
-import React, { memo, useRef } from 'react'
+import React, { memo, MutableRefObject, useRef } from 'react'
 import { Group } from '@visx/group'
 import { CSSTransition } from 'react-transition-group'
 
 import { pxPerKM } from '@/constants/index'
 import { useSnapshot } from 'valtio'
 import { store } from '@/utils/valtioState'
+import { getScanRange } from '@/utils/scan'
 
 export const Node = memo(function Node(props: {
   nodeId: number
@@ -13,6 +14,7 @@ export const Node = memo(function Node(props: {
 }) {
   const { [props.nodeId]: node } = useSnapshot(store.nodes)
   const nodeRef = useRef(null)
+  const rangeRef = useRef(null)
 
   if (!node) return null
 
@@ -45,7 +47,7 @@ export const Node = memo(function Node(props: {
           ref={nodeRef}
           className={`pointer-events-none`}
           d={drawScan(0, 0, pxPerKM * (node.scanRange ?? 0), 0, 40)}
-          fill="#ff000033"
+          fill="#0f03"
         >
           <animateTransform
             attributeName="transform"
@@ -57,6 +59,15 @@ export const Node = memo(function Node(props: {
             repeatCount="indefinite"
           />
         </path>
+      </CSSTransition>
+      <CSSTransition
+        nodeRef={rangeRef}
+        in={props.isSelected && node.isOwned}
+        timeout={5000}
+        classNames="fade"
+        unmountOnExit
+      >
+        <ScanRange rangeRef={rangeRef} masScanRange={node.maxScanRange ?? 0} />
       </CSSTransition>
 
       <circle
@@ -84,6 +95,39 @@ export const Node = memo(function Node(props: {
     </Group>
   )
 })
+
+const ScanRange = ({
+  rangeRef,
+  masScanRange,
+}: {
+  rangeRef: MutableRefObject<null>
+  masScanRange: number
+}) => {
+  const { points } = useSnapshot(store)
+  return (
+    <g ref={rangeRef} className="pointer-events-none">
+      <circle
+        x={0}
+        y={0}
+        r={pxPerKM * getScanRange()}
+        stroke="#0f0a"
+        fill="#0f01"
+        className="transition-all"
+        strokeWidth={0.01}
+      />
+      <circle
+        x={0}
+        y={0}
+        r={pxPerKM * masScanRange}
+        stroke="#0f04"
+        fill="transparent"
+        className="transition-all"
+        strokeWidth={0.01}
+        strokeDasharray="0.02 0.05"
+      />
+    </g>
+  )
+}
 
 const drawScan = (
   x: number,
