@@ -7,13 +7,24 @@ import {
 } from '@/utils/upgrades'
 import { useSnapshot } from 'valtio'
 import { store } from '@/utils/valtioState'
-import { getIsNodeHackable, getNodeIncome } from '@/utils/nodes'
+import {
+  getIsNodeHackable,
+  getNodeIncome,
+  getNodeSources,
+  updateNode,
+} from '@/utils/nodes'
 import { onHackStart } from '@/utils/hack'
 import { onScanStart } from '@/utils/scan'
-import { onDisconnect } from '@/utils/investigate'
+
 import { homeId, minScanPoints, stealCost, UPGRADES } from '@/constants/index'
 import { onSteal } from '@/utils/steal'
 import { formatMoney, MapStats } from './WorldControls'
+
+const onDisconnect = (nodeId: number) => {
+  getNodeSources(nodeId).forEach(({ id }) => {
+    if (id !== homeId) updateNode(id, { isOwned: false, hackDuration: 0 })
+  })
+}
 
 export const NodeControls = memo(function NodeControls() {
   const { selectedNodeId, upgrades, points, money } = useSnapshot(store)

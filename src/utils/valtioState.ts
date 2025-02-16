@@ -16,7 +16,6 @@ type IState = {
   hasResetSave: boolean
   money: number
   moneyPerTick: number
-  suspicion: number
   selectedNodeId: number
   saveCounter: number
   autoHackTime: number
@@ -34,7 +33,6 @@ type ISerializedNodeState = {
 type ISerializedState = {
   points: number
   money: number
-  suspicion: number
   autoHackTime: number
   selectedNodeId: number
   upgrades: Record<string, IUpgradeState>
@@ -55,7 +53,6 @@ const initialState: IState = {
   hasResetSave: false,
   pointsPerTick: 0,
   moneyPerTick: 0,
-  suspicion: 0,
   autoHackTime: 0,
   saveCounter: saveRate,
   renderedNodeIds: [],
@@ -81,7 +78,6 @@ export const serializeSave = (state: IState) => {
   const serialized: ISerializedState = {
     points: state.points,
     money: state.money,
-    suspicion: state.suspicion,
     autoHackTime: state.autoHackTime,
     selectedNodeId: state.selectedNodeId,
     upgrades: state.upgrades,
@@ -121,7 +117,6 @@ export const deserializeSave = (save: string) => {
 
   store.points = _serializedState.points
   store.money = _serializedState.money
-  store.suspicion = _serializedState.suspicion
   store.autoHackTime = _serializedState.autoHackTime
   store.selectedNodeId = _serializedState.selectedNodeId
   store.renderedNodeIds = renderedNodeIds

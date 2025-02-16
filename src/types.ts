@@ -54,8 +54,6 @@ export type INodeType = 'basic' | 'bank' | 'home' | 'rich'
 export type INodeConfig = {
   incomeMin: number
   incomeMax: number
-  suspicionMin: number
-  suspicionMax: number
   hackDifficultyMin: number
   hackDifficultyMax: number
 }
@@ -82,4 +80,3 @@ export type IUpgradeKey =
   | 'steal-amount'
   | 'max-points'
   | 'point-amount'
-  | 'suspicion-decay'

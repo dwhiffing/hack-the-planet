@@ -9,7 +9,7 @@ import { SaveControls } from './SaveControls'
 import { getUpgradeEffect } from '@/utils/upgrades'
 
 export const MapStats = () => {
-  const { money, points, moneyPerTick, suspicion } = useSnapshot(store)
+  const { money, points, moneyPerTick } = useSnapshot(store)
   return (
     <div>
       <p>
@@ -17,7 +17,6 @@ export const MapStats = () => {
       </p>
       <p>Money: {formatMoney(money)}</p>
       <p>Income: {formatMoney(moneyPerTick)}</p>
-      <p>Suspicion: {(suspicion / 100).toFixed(2)}%</p>
     </div>
   )
 }

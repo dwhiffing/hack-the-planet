@@ -3,7 +3,6 @@ import { FullNode } from '@/types'
 import { baseTickspeed, saveRate } from '@/constants/index'
 import { onAutohack } from '@/utils/autohack'
 import { getUpgradeEffect } from '@/utils/upgrades'
-import { onInvestigate } from '@/utils/investigate'
 import { serializeSave, store } from '@/utils/valtioState'
 import { getNodeIncome, updateNode } from '@/utils/nodes'
 import { onScanFinish } from '@/utils/scan'
@@ -63,19 +62,12 @@ const doTick = () => {
   store.points = clamp(store.points, 0, getUpgradeEffect('max-points'))
 
   store.money += store.moneyPerTick
-  store.suspicion += getUpgradeEffect('suspicion-decay') * 100
 
   if (saveCounter === 0 && !store.hasResetSave) {
     saveCounter = saveRate
     localStorage.setItem('hack-the-planet', serializeSave(store))
   }
   store.saveCounter = saveCounter
-
-  const suspicion = store.suspicion
-  if (suspicion >= 10000) {
-    store.suspicion = 0
-    onInvestigate()
-  }
 
   onAutohack()
 }

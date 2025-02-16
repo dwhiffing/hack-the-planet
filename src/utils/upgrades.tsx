@@ -26,12 +26,6 @@ export const getUpgradeEffect = (key: IUpgradeKey, nextLevel?: boolean) => {
     return 30 - level * 5
   }
 
-  if (key === 'suspicion-decay') {
-    const level = getLevel('suspicion-decay', nextLevel)
-    if (level === 0) return 0
-    return level * -0.01
-  }
-
   if (key === 'point-amount') {
     const level = getLevel('point-amount', nextLevel)
     return 0.1 + level * 0.1
