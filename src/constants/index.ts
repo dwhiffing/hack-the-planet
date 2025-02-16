@@ -6,6 +6,7 @@ export const baseTickspeed = fastMode ? 100 : 1000
 export const baseScanTime = 2.5
 export const baseHackTime = 2.5
 export const minScanPoints = 50
+export const stealCost = 10
 
 export const initialMoney = 0 //00000000000000
 export const saveRate = 10

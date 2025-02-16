@@ -11,7 +11,7 @@ import { getIsNodeHackable, getNodeIncome } from '@/utils/nodes'
 import { onHackStart } from '@/utils/hack'
 import { onScanStart } from '@/utils/scan'
 import { onDisconnect } from '@/utils/investigate'
-import { homeId, minScanPoints, UPGRADES } from '@/constants/index'
+import { homeId, minScanPoints, stealCost, UPGRADES } from '@/constants/index'
 import { onSteal } from '@/utils/steal'
 import { formatMoney, MapStats } from './WorldControls'
 
@@ -91,31 +91,30 @@ const selectedNodeActions: INodeAction[] = [
   {
     label: 'hack',
     description: 'Take over this node',
-    getIsDisabled: (node: FullNode, points: number) =>
+    getIsDisabled: (node, points) =>
       !getIsNodeHackable(node.id) || points < (node.pointCost ?? 0),
-    getIsVisible: (node: FullNode) => node.type !== 'home' && !node.isOwned,
-    onClick: (node: FullNode) => onHackStart(node.id),
+    getIsVisible: (node) => node.type !== 'home' && !node.isOwned,
+    onClick: (node) => onHackStart(node.id),
   },
   {
     label: 'scan',
     description: 'Scan for nearby nodes',
-    getIsVisible: (node: FullNode) => node && node.isOwned,
-    getIsDisabled: (_selectedNode, points: number) => points < minScanPoints,
-    onClick: (node: FullNode) => onScanStart(node.id),
+    getIsVisible: (node) => node && node.isOwned,
+    getIsDisabled: (_selectedNode, points) => points < minScanPoints,
+    onClick: (node) => onScanStart(node.id),
   },
   {
     label: 'steal',
     description: 'Steal extra money from this node',
-    getIsVisible: (node: FullNode) =>
-      node && node.isOwned && node.id !== homeId,
-    getIsDisabled: (node: FullNode) => false,
-    onClick: (node: FullNode) => onSteal(node.id),
+    getIsVisible: (node) => node && node.isOwned && node.id !== homeId,
+    getIsDisabled: (node, points) => points < stealCost,
+    onClick: (node) => onSteal(node.id),
   },
   {
     label: 'disconnect',
     description: 'Disconnect this node and all downstream nodes',
     getIsDisabled: () => false,
-    getIsVisible: (node: FullNode) => node.isOwned && node.type !== 'home',
-    onClick: (node: FullNode) => onDisconnect(node.id),
+    getIsVisible: (node) => node.isOwned && node.type !== 'home',
+    onClick: (node) => onDisconnect(node.id),
   },
 ]
