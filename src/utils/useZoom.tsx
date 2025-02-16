@@ -14,6 +14,8 @@ export const useZoom = (width: number, height: number) => {
       zoomRef.current?.setTransformMatrix(
         coordsToTransform(home[0], home[1], zoomScale, width, height),
       )
+
+    store.selectedNodeId = homeId
   }, [width, height, zoomRef])
 
   return { onClickHome, zoomRef, mouseRef }
