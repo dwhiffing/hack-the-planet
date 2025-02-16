@@ -65,7 +65,7 @@ const doTick = () => {
   store.money += store.moneyPerTick
   store.suspicion += getUpgradeEffect('suspicion-decay') * 100
 
-  if (saveCounter === 0) {
+  if (saveCounter === 0 && !store.hasResetSave) {
     saveCounter = saveRate
     localStorage.setItem('hack-the-planet', serializeSave(store))
   }

@@ -13,6 +13,7 @@ import { uniq } from 'lodash'
 type IState = {
   points: number
   pointsPerTick: number
+  hasResetSave: boolean
   money: number
   moneyPerTick: number
   suspicion: number
@@ -47,6 +48,7 @@ export const initialUpgrades = UPGRADES.reduce(
 const initialState: IState = {
   money: initialMoney,
   points: minScanPoints,
+  hasResetSave: false,
   pointsPerTick: 0,
   moneyPerTick: 0,
   suspicion: 0,
