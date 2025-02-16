@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { FullNode } from '@/types'
-import { baseTickspeed, saveRate } from '@/constants/index'
+import { baseTickspeed, homeId, saveRate } from '@/constants/index'
 import { onAutohack } from '@/utils/autohack'
 import { getUpgradeEffect } from '@/utils/upgrades'
 import { serializeSave, store } from '@/utils/valtioState'
@@ -13,19 +13,25 @@ const doTick = () => {
   let saveCounter = store.saveCounter
   saveCounter = Math.max(0, saveCounter - 1)
 
-  store.pointsPerTick = store.renderedNodeIds.reduce((sum, nodeId) => {
-    if (store.nodes[nodeId]?.isOwned) {
-      return sum + getUpgradeEffect('point-amount')
-    }
-    return sum + 0
-  }, 0)
+  store.pointsPerTick = getUpgradeEffect('point-rate')
+  store.points += store.pointsPerTick
+  store.points = clamp(store.points, 0, getUpgradeEffect('max-points'))
 
-  store.moneyPerTick = store.renderedNodeIds.reduce((sum, nodeId) => {
-    if (store.nodes[nodeId]?.isOwned) {
-      return sum + getNodeIncome(nodeId) * getUpgradeEffect('steal-amount')
+  let moneyPerTick = 0
+  let currentPoints = store.points
+  let nodeIdsStolenFrom: number[] = []
+  store.renderedNodeIds.forEach((nodeId) => {
+    if (store.nodes[nodeId]?.isOwned && nodeId !== homeId) {
+      const stealCost = (store.nodes[nodeId].hackCost ?? 0) / 10
+      if (currentPoints >= stealCost) {
+        nodeIdsStolenFrom.push(nodeId)
+        moneyPerTick += getNodeIncome(nodeId) * getUpgradeEffect('steal-amount')
+        currentPoints -= stealCost
+      }
     }
-    return sum + 0
-  }, 0)
+  })
+  store.points = currentPoints
+  store.moneyPerTick = moneyPerTick
 
   // console.time('update nodes')
   store.renderedNodeIds.forEach((nodeId) => {
@@ -43,6 +49,8 @@ const doTick = () => {
       }
     }
 
+    update.stealDuration = nodeIdsStolenFrom.includes(nodeId) ? 1 : 0
+
     const hackDuration = node.hackDuration ?? 0
     // update hack duration
     if ((hackDuration ?? 0) > 0) {
@@ -57,9 +65,6 @@ const doTick = () => {
     }
   })
   // console.timeEnd('update nodes')
-
-  store.points += store.pointsPerTick
-  store.points = clamp(store.points, 0, getUpgradeEffect('max-points'))
 
   store.money += store.moneyPerTick
 

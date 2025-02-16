@@ -9,7 +9,7 @@ export type IMapProps = {
   onZoomIn: () => void
 }
 export type INodeAction = {
-  label: string
+  getLabel: (node: FullNode, points: number) => string
   description: string
   getIsVisible: (node: FullNode, points: number) => boolean | undefined
   getIsDisabled: (node: FullNode, points: number) => boolean | undefined
@@ -17,7 +17,7 @@ export type INodeAction = {
 }
 
 export type IGlobalAction = {
-  label: string
+  getLabel: () => string
   description: string
   getIsVisible: () => boolean | undefined
   getIsDisabled: () => boolean | undefined

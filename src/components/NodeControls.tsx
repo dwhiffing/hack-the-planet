@@ -16,8 +16,7 @@ import {
 import { onHackStart } from '@/utils/hack'
 import { onScanStart } from '@/utils/scan'
 
-import { homeId, minScanPoints, stealCost, UPGRADES } from '@/constants/index'
-import { onSteal } from '@/utils/steal'
+import { homeId, UPGRADES } from '@/constants/index'
 import { formatMoney, MapStats } from './WorldControls'
 
 const onDisconnect = (nodeId: number) => {
@@ -41,13 +40,14 @@ export const NodeControls = memo(function NodeControls() {
       const isMaxed =
         level === (upgrade.costs ? upgrade.costs.length : upgrade.maxLevel)
       return {
-        label: isMaxed
-          ? `${upgrade.name} maxed`
-          : `${upgrade.name} (${getUpgradeEffect(upgrade.key).toFixed(
-              2,
-            )} to ${getUpgradeEffect(upgrade.key, true).toFixed(
-              2,
-            )}) - ${formatMoney(cost)}`,
+        getLabel: () =>
+          isMaxed
+            ? `${upgrade.name} maxed`
+            : `${upgrade.name} (${getUpgradeEffect(upgrade.key).toFixed(
+                2,
+              )} to ${getUpgradeEffect(upgrade.key, true).toFixed(
+                2,
+              )}) - ${formatMoney(cost)}`,
         description: upgrade.description ?? 'Placeholder',
         getIsVisible: () =>
           store.renderedNodeIds.length >= upgrade.requiredNodes,
@@ -82,15 +82,15 @@ export const NodeControls = memo(function NodeControls() {
         {selectedNode?.earthCoords?.map((n) => n.toFixed(1))?.join(', ')}
       </p>
       <div className="mt-2 flex max-w-[300px] flex-wrap gap-2">
-        {buttons.map((a) => (
+        {buttons.map((a, i) => (
           <button
-            key={a.label}
+            key={i}
             className="pointer-events-auto"
             title={a.description}
             disabled={a.getIsDisabled(selectedNode, points)}
             onClick={() => a.onClick(selectedNode)}
           >
-            {a.label}
+            {a.getLabel(selectedNode, points)}
           </button>
         ))}
       </div>
@@ -100,29 +100,22 @@ export const NodeControls = memo(function NodeControls() {
 
 const selectedNodeActions: INodeAction[] = [
   {
-    label: 'hack',
+    getLabel: (node) => `hack (cost: ${formatMoney(node.hackCost ?? 0)})`,
     description: 'Take over this node',
     getIsDisabled: (node, points) =>
-      !getIsNodeHackable(node.id) || points < (node.pointCost ?? 0),
+      !getIsNodeHackable(node.id) || points < (node.hackCost ?? 0),
     getIsVisible: (node) => node.type !== 'home' && !node.isOwned,
     onClick: (node) => onHackStart(node.id),
   },
   {
-    label: 'scan',
+    getLabel: () => 'scan',
     description: 'Scan for nearby nodes',
     getIsVisible: (node) => node && node.isOwned,
-    getIsDisabled: (_selectedNode, points) => points < minScanPoints,
+    getIsDisabled: (_selectedNode, points) => false,
     onClick: (node) => onScanStart(node.id),
   },
   {
-    label: 'steal',
-    description: 'Steal extra money from this node',
-    getIsVisible: (node) => node && node.isOwned && node.id !== homeId,
-    getIsDisabled: (node, points) => points < stealCost,
-    onClick: (node) => onSteal(node.id),
-  },
-  {
-    label: 'disconnect',
+    getLabel: () => 'disconnect',
     description: 'Disconnect this node and all downstream nodes',
     getIsDisabled: () => false,
     getIsVisible: (node) => node.isOwned && node.type !== 'home',

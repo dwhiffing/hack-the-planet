@@ -111,6 +111,7 @@ export const deserializeSave = (save: string) => {
       type: +nodeId === homeId ? 'home' : node.type,
       scanDuration: 0,
       hackDuration: 0,
+      stealDuration: 0,
       sources,
     }
   })

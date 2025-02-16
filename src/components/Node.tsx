@@ -6,7 +6,7 @@ import { pxPerKM } from '@/constants/index'
 import { useSnapshot } from 'valtio'
 import { store } from '@/utils/valtioState'
 import { getScanRange } from '@/utils/scan'
-import { getUpgradeEffect } from '@/utils/upgrades'
+import { getMaxPoints } from '@/utils/upgrades'
 
 export const Node = memo(function Node(props: {
   nodeId: number
@@ -129,7 +129,7 @@ const ScanRange = ({
       <circle
         x={0}
         y={0}
-        r={pxPerKM * getScanRange(getUpgradeEffect('max-points'))}
+        r={pxPerKM * getScanRange(getMaxPoints())}
         stroke="#0f02"
         fill="transparent"
         className="transition-all"

@@ -6,14 +6,15 @@ import { useSnapshot } from 'valtio'
 import { store } from '@/utils/valtioState'
 import { NodeControls } from './NodeControls'
 import { SaveControls } from './SaveControls'
-import { getUpgradeEffect } from '@/utils/upgrades'
+import { getMaxPoints, getUpgradeEffect } from '@/utils/upgrades'
 
 export const MapStats = () => {
   const { money, points, moneyPerTick } = useSnapshot(store)
   return (
     <div>
       <p>
-        points: {points.toFixed(2)}/{getUpgradeEffect('max-points')}
+        points: {points.toFixed(2)}/{getMaxPoints()}(
+        {getUpgradeEffect('max-points')})
       </p>
       <p>Money: {formatMoney(money)}</p>
       <p>Income: {formatMoney(moneyPerTick)}</p>

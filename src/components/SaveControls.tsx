@@ -11,21 +11,21 @@ export const SaveControls = memo(function SaveControls() {
   const [isOpen, setIsOpen] = useState(false)
   const globalActions: IGlobalAction[] = [
     {
-      label: 'Reset Save',
+      getLabel: () => 'Reset Save',
       description: 'Reset your save',
       getIsVisible: () => true,
       getIsDisabled: () => false,
       onClick: clearSave,
     },
     {
-      label: 'Export Save',
+      getLabel: () => 'Export Save',
       description: 'Export your save',
       getIsVisible: () => true,
       getIsDisabled: () => false,
       onClick: exportSave,
     },
     {
-      label: 'Import Save',
+      getLabel: () => 'Import Save',
       description: 'Import your save',
       getIsVisible: () => true,
       getIsDisabled: () => false,
@@ -46,14 +46,14 @@ export const SaveControls = memo(function SaveControls() {
         <div className="pointer-events-auto z-40 flex h-40 items-center gap-2 bg-white p-4">
           {globalActions
             .filter((a) => a.getIsVisible())
-            .map((a) => (
+            .map((a, i) => (
               <button
-                key={a.label}
+                key={i}
                 disabled={a.getIsDisabled()}
                 title={a.description}
                 onClick={a.onClick}
               >
-                {a.label}
+                {a.getLabel()}
               </button>
             ))}
         </div>

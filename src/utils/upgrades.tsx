@@ -1,4 +1,4 @@
-import { baseDiscoveryRange, UPGRADES } from '@/constants/index'
+import { homeId, UPGRADES } from '@/constants/index'
 import { IUpgradeKey } from '@/types'
 import { initialUpgrades, store } from '@/utils/valtioState'
 
@@ -6,6 +6,17 @@ const getLevel = (key: IUpgradeKey, nextLevel?: boolean) => {
   const state = store.upgrades
 
   return (state[key]?.level ?? 0) + (nextLevel ? 1 : 0)
+}
+
+export const getMaxPoints = () => {
+  const reservedByOwnedNodes = Object.values(store.nodes).reduce(
+    (sum, node) =>
+      node.id === homeId || !node.isOwned || (node.hackDuration ?? 0) > 0
+        ? sum
+        : sum + (node.hackCost ?? 0) / 10,
+    0,
+  )
+  return getUpgradeEffect('max-points') - reservedByOwnedNodes
 }
 
 export const getUpgradeEffect = (key: IUpgradeKey, nextLevel?: boolean) => {
