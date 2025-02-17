@@ -48,10 +48,10 @@ button[disabled] {
   transform: scale(8);
 }
 
-.zoom-0 line,
-.zoom-1 line {
-  stroke-dashoffset: 0.8;
-  animation: dash 3s linear forwards;
+.zoom-0 line.transferring,
+.zoom-1 line.transferring {
+  stroke-dashoffset: 0.26;
+  animation: dash 500ms linear forwards;
   animation-iteration-count: infinite;
 }
 

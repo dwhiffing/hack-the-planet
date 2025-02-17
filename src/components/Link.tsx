@@ -14,11 +14,12 @@ export const Link = ({
   const { [nodeId]: source } = useSnapshot(store.nodes)
   const { [source?.target ?? -1]: target } = useSnapshot(store.nodes)
   if (!source || !target) return null
-  const isTransfering = source.stealDuration ?? 0
+  const isTransferring = !!(source.stealDuration ?? 0)
   const notOwned = !source.isOwned
-  const spacing = notOwned ? baseSpacing : baseSpacing * 8
+  const spacing = notOwned ? 0.01 : baseSpacing * 8
+  const spacing2 = notOwned ? 0.1 : 0.05
   const strokeWidth = notOwned ? 0.01 : 0.02
-  const strokeColor = isTransfering ? 'red' : notOwned ? '#ccc' : 'white'
+  const strokeColor = isTransferring ? 'red' : notOwned ? '#ccc' : 'white'
   return (
     <line
       x1={source.x}
@@ -27,8 +28,9 @@ export const Link = ({
       y2={target.y}
       strokeWidth={strokeWidth}
       stroke={strokeColor}
-      className="link pointer-events-none transition-colors duration-500"
-      strokeDasharray={`${spacing} ${spacing}`}
+      className={`link pointer-events-none transition-colors duration-500 ${isTransferring ? 'transferring' : ''}`}
+      strokeDasharray={`${spacing} ${spacing2}`}
+      style={{ animationDuration: `${tickspeed}ms` }}
     >
       {(source.hackDuration ?? 0) > 0 && (
         <animate
