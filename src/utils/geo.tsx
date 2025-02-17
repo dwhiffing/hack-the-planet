@@ -97,15 +97,17 @@ export const getNodes = (g: SVGGElement) => {
 
     return getRandomNonUniformPointsInCircle(city, g).map((point) => {
       const _id = id++
-      const override = nodeOverrides[`${_id}` as keyof typeof nodeOverrides]
+      const override = nodeOverrides[
+        `${_id}` as keyof typeof nodeOverrides
+      ] as { x?: number; y?: number; scaling?: number; type?: INodeType }
 
       const node = { ...point, scaling: 1, id: _id } as FullNode
 
       if (override) {
-        node.type = override.type as INodeType
-        node.scaling = override.scaling
-        node.x = override.x
-        node.y = override.y
+        if (override.type) node.type = override.type as INodeType
+        if (override.scaling) node.scaling = override.scaling
+        if (override.x) node.x = override.x
+        if (override.y) node.y = override.y
       }
 
       node.earthCoords = projection.invert?.([node.x, node.y]) ?? [0, 0]

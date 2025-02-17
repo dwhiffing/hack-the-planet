@@ -37,7 +37,7 @@ type IState = {
 }
 type INodeOverrides = Record<
   string,
-  { x: number; y: number; scaling: number; type: INodeType }
+  { x?: number; y?: number; scaling?: number; type?: INodeType }
 >
 type ISerializedNodeState = {
   maxScanRange: number
