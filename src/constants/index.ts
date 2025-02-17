@@ -1,9 +1,6 @@
 import { INodeConfig, INodeType, IUpgrade } from '@/types'
 
-export const fastMode = false
-export const showAllNodes = localStorage.getItem('show-all-nodes') === 'true'
-
-export const baseTickspeed = fastMode ? 250 : 500
+export const baseTickspeed = 500
 export const baseScanTime = 5
 export const baseHackTime = 10
 export const startingPoints = 50

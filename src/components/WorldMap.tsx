@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef } from 'react'
 import { Zoom } from '@vx/zoom'
-import { background, baseTickspeed, maxZoom, minZoom } from '@/constants/index'
+import { background, maxZoom, minZoom } from '@/constants/index'
 import { WorldSvg } from '@/components/WorldSvg'
 import { BotNet, Collapsed } from '@/components/WorldBotNet'
 import { coordsToTransform, getNodes } from '@/utils/geo'
@@ -10,9 +10,11 @@ import { ProvidedZoom } from '@vx/zoom/lib/types'
 import { useZoom } from '@/utils/useZoom'
 import { getVisibleGroups, getZoomLevel, groupNodes } from '@/utils/geo'
 import { deserializeSave, store } from '@/utils/valtioState'
+import { useSnapshot } from 'valtio'
 
 export function WorldMap({ width, height }: { width: number; height: number }) {
   const { onClickHome, zoomRef, mouseRef } = useZoom(width, height)
+  const { tickspeed } = useSnapshot(store)
   const allowScroll = useRef(true)
 
   const worldSvgMountCallback = useCallback((node: SVGGElement) => {
@@ -149,9 +151,9 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
                       ? ''
                       : getVisibleGroups(zoom.transformMatrix, width, height)
                   }
-                  tickspeed={baseTickspeed}
+                  tickspeed={tickspeed}
                 />
-                <Collapsed tickspeed={baseTickspeed} />
+                <Collapsed tickspeed={tickspeed} />
               </g>
             </svg>
           </>

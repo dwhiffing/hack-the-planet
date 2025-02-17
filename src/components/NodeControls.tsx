@@ -17,7 +17,7 @@ import {
 import { onHackStart } from '@/utils/hack'
 import { onScan } from '@/utils/scan'
 
-import { homeId, UPGRADES } from '@/constants/index'
+import { baseTickspeed, homeId, UPGRADES } from '@/constants/index'
 import { formatMoney, MapStats } from './WorldControls'
 import { get } from 'lodash'
 
@@ -127,6 +127,7 @@ const selectedNodeActions: INodeAction[] = [
 ]
 
 const NodeDebug = (props: { node: FullNode }) => {
+  const { tickspeed } = useSnapshot(store)
   const updateOverrides = (node: FullNode, change: any) => {
     updateNode(props.node.id, change)
     const current = get(store.nodeOverrides, `${node.id}`, {})
@@ -184,28 +185,42 @@ const NodeDebug = (props: { node: FullNode }) => {
           <option>bank</option>
         </select>
       </div>
-      <button
-        onClick={() =>
-          window.navigator.clipboard.writeText(
-            JSON.stringify(store.nodeOverrides),
-          )
-        }
-      >
-        Copy
-      </button>
-      <button
-        onClick={() => {
-          localStorage.setItem(
-            'show-all-nodes',
-            (
-              (localStorage.getItem('show-all-nodes') ?? '') !== 'true'
-            ).toString(),
-          )
-          window.location.reload()
-        }}
-      >
-        toggle show all
-      </button>
+      <div className="flex gap-2">
+        <button
+          onClick={() =>
+            window.navigator.clipboard.writeText(
+              JSON.stringify(store.nodeOverrides),
+            )
+          }
+        >
+          Copy
+        </button>
+        <button
+          onClick={() => {
+            localStorage.setItem(
+              'show-all-nodes',
+              (
+                (localStorage.getItem('show-all-nodes') ?? '') !== 'true'
+              ).toString(),
+            )
+            window.location.reload()
+          }}
+        >
+          toggle show all
+        </button>
+        <button
+          onClick={() => {
+            store.tickspeed =
+              tickspeed === baseTickspeed
+                ? baseTickspeed / 2
+                : tickspeed === baseTickspeed / 2
+                  ? baseTickspeed / 5
+                  : baseTickspeed
+          }}
+        >
+          toggle tickspeed {tickspeed}
+        </button>
+      </div>
     </div>
   )
 }

@@ -4,7 +4,7 @@ import {
   startingPoints,
   saveRate,
   UPGRADES,
-  showAllNodes,
+  baseTickspeed,
 } from '@/constants/index'
 import {
   FullNode,
@@ -23,6 +23,7 @@ type IState = {
   points: number
   pointsPerTick: number
   hasResetSave: boolean
+  tickspeed: number
   money: number
   moneyPerTick: number
   selectedNodeId: number
@@ -47,6 +48,7 @@ type ISerializedNodeState = {
 type ISerializedState = {
   points: number
   money: number
+  tickspeed: number
   autoHackTime: number
   selectedNodeId: number
   upgrades: Record<string, IUpgradeState>
@@ -65,6 +67,7 @@ const initialState: IState = {
   money: initialMoney,
   points: startingPoints,
   hasResetSave: false,
+  tickspeed: baseTickspeed,
   pointsPerTick: 0,
   moneyPerTick: 0,
   autoHackTime: 0,
@@ -93,6 +96,7 @@ export const serializeSave = (state: IState) => {
   const serialized: ISerializedState = {
     points: state.points,
     money: state.money,
+    tickspeed: state.tickspeed,
     autoHackTime: state.autoHackTime,
     selectedNodeId: state.selectedNodeId,
     upgrades: state.upgrades,
@@ -107,16 +111,17 @@ export const deserializeSave = (save?: string | null) => {
     ? JSON.parse(save)
     : null
 
-  const renderedNodeIds = showAllNodes
-    ? store.allNodes.map((n) => n.id)
-    : _serializedState
-      ? uniq([
-          homeId,
-          ...Object.entries(_serializedState.nodeData)
-            .filter(([k, v]) => v.target)
-            .flatMap(([k, v]) => [+k, v.target]),
-        ])
-      : [homeId]
+  const renderedNodeIds =
+    localStorage.getItem('show-all-nodes') === 'true'
+      ? store.allNodes.map((n) => n.id)
+      : _serializedState
+        ? uniq([
+            homeId,
+            ...Object.entries(_serializedState.nodeData)
+              .filter(([k, v]) => v.target)
+              .flatMap(([k, v]) => [+k, v.target]),
+          ])
+        : [homeId]
 
   const nodes: Record<number, FullNode> = {}
   renderedNodeIds.forEach((nodeId) => {
@@ -142,6 +147,7 @@ export const deserializeSave = (save?: string | null) => {
     store.money = _serializedState.money
     store.autoHackTime = _serializedState.autoHackTime
     store.selectedNodeId = _serializedState.selectedNodeId
+    store.tickspeed = _serializedState.tickspeed
     store.upgrades = _serializedState.upgrades
   }
 
