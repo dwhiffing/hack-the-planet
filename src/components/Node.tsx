@@ -126,7 +126,7 @@ const ScanRange = ({
         r={pxPerKM * getScanRange(points)}
         stroke="#0f0a"
         fill="#00ff0009"
-        className="transition-all"
+        className="transition-all duration-[350ms]"
         strokeWidth={0.01}
       />
       <circle
@@ -135,7 +135,7 @@ const ScanRange = ({
         r={pxPerKM * maxScanRange}
         stroke="#0f06"
         fill="transparent"
-        className="transition-all"
+        className="transition-all duration-1000"
         strokeWidth={0.01}
         strokeDasharray="0.03 0.06"
       />
@@ -145,7 +145,7 @@ const ScanRange = ({
         r={pxPerKM * getScanRange(getMaxPoints())}
         stroke="#0f02"
         fill="transparent"
-        className="transition-all"
+        className="transition-all duration-1000"
         strokeWidth={0.01}
       />
     </g>
