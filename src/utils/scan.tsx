@@ -4,8 +4,8 @@ import { getNodesWithDistance, getAdjacentNodes } from '@/utils/geo'
 import { store } from '@/utils/valtioState'
 import { updateNode } from '@/utils/nodes'
 
-export const getScanRange = (points = store.points, cap = 50, rate = 1) =>
-  10 + Math.min(cap, rate * Math.sqrt(points))
+export const getScanRange = (points = store.points, cap = 200, rate = 1) =>
+  points <= 0 ? 0 : 10 + Math.min(cap, rate * Math.sqrt(points))
 
 export const onScan = (id: number) => {
   const scanEfficiency = getUpgradeEffect('scan-efficiency')

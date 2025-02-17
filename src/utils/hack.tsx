@@ -1,16 +1,10 @@
-import { baseHackTime, NODE_CONFIGS } from '@/constants/index'
+import { baseHackTime } from '@/constants/index'
 import { getNodeHackCost, updateNode } from '@/utils/nodes'
-import { randomInRange } from '@/utils/random'
 import { store } from '@/utils/valtioState'
 
 export const onHackStart = (id: number) => {
   const node = store.nodes[id]
-  const config = NODE_CONFIGS[node.type!]
-  const hackDifficulty = randomInRange(
-    config.hackDifficultyMin,
-    config.hackDifficultyMax,
-  )
-  let hackDuration = baseHackTime + hackDifficulty
+  let hackDuration = baseHackTime
   if (node && !node.isOwned) {
     updateNode(id, { hackDuration })
   }

@@ -50,7 +50,7 @@ const doTick = () => {
     }
     const hackDuration = node.hackDuration ?? 0
     // update hack duration
-    if ((hackDuration ?? 0) > 0) {
+    if (hackDuration > 0) {
       update.hackDuration = hackDuration - 1
     }
     if (typeof update.hackDuration === 'number' && update.hackDuration <= 0) {
