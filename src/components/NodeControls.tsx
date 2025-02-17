@@ -193,6 +193,19 @@ const NodeDebug = (props: { node: FullNode }) => {
       >
         Copy
       </button>
+      <button
+        onClick={() => {
+          localStorage.setItem(
+            'show-all-nodes',
+            (
+              (localStorage.getItem('show-all-nodes') ?? '') !== 'true'
+            ).toString(),
+          )
+          window.location.reload()
+        }}
+      >
+        toggle show all
+      </button>
     </div>
   )
 }

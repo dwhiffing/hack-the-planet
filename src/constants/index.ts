@@ -1,7 +1,7 @@
 import { INodeConfig, INodeType, IUpgrade } from '@/types'
 
 export const fastMode = false
-export const showAllNodes = false
+export const showAllNodes = localStorage.getItem('show-all-nodes') === 'true'
 
 export const baseTickspeed = fastMode ? 100 : 500
 export const baseScanTime = 5
