@@ -21,8 +21,7 @@ export const getMaxPoints = () => {
 }
 
 export const getUpgradeEffect = (key: IUpgradeKey, nextLevel?: boolean) => {
-  if (key === 'scan-efficiency')
-    return 1 + getLevel('scan-efficiency', nextLevel)
+  if (key === 'scan-efficiency') return 99 //1 + getLevel('scan-efficiency', nextLevel)
 
   if (key === 'hack-efficiency')
     return 1 + getLevel('hack-efficiency', nextLevel)
