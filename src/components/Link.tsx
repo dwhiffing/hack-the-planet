@@ -35,8 +35,8 @@ export const Link = ({
       {(source.hackDuration ?? 0) > 0 && (
         <animate
           attributeName="stroke-dashoffset"
-          values={`${(spacing + spacing) * -8};0`}
-          dur={`${tickspeed}ms`}
+          values={`${(spacing + spacing2) * -8};0`}
+          dur={`${tickspeed * 2}ms`}
           repeatCount="indefinite"
         />
       )}
