@@ -6,7 +6,12 @@ import { FullNode, INodeType, Node, NodeGroup, Point } from '@/types'
 import { getRandom } from '@/utils/random'
 import { store } from '@/utils/valtioState'
 
-import { baseScale, baseTranslate, countryConfigs } from '@/constants/index'
+import {
+  baseScale,
+  baseTranslate,
+  countryConfigs,
+  homeId,
+} from '@/constants/index'
 import bordersJson from '@/constants/borders.json'
 import continents from '@/constants/continents.json'
 import cities from '@/constants/cities-pruned.json'
@@ -99,18 +104,24 @@ export const getNodes = (g: SVGGElement) => {
       const _id = id++
       const override = nodeOverrides[
         `${_id}` as keyof typeof nodeOverrides
-      ] as { x?: number; y?: number; scaling?: number; type?: INodeType }
+      ] as { x?: number; y?: number; type?: INodeType }
 
       const node = { ...point, scaling: 1, id: _id } as FullNode
 
       if (override) {
         if (override.type) node.type = override.type as INodeType
-        if (override.scaling) node.scaling = override.scaling
         if (override.x) node.x = override.x
         if (override.y) node.y = override.y
       }
 
       node.earthCoords = projection.invert?.([node.x, node.y]) ?? [0, 0]
+      const distFromHome = haversineDistance(
+        -79.98490820026292,
+        43.95167845917806,
+        node.earthCoords[0],
+        node.earthCoords[1],
+      )
+      node.scaling = 1 + Math.floor((distFromHome / 50) * 2) / 2
       return node
     })
   })

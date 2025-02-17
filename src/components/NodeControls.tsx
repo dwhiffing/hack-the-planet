@@ -159,18 +159,6 @@ const NodeDebug = (props: { node: FullNode }) => {
         />
       </div>
       <div className="flex items-center gap-2">
-        <p>scaling:</p>
-        <input
-          value={props.node.scaling}
-          type="number"
-          className="p-1 text-black"
-          step={0.05}
-          onChange={(e) =>
-            updateOverrides(props.node, { scaling: +e.target.value })
-          }
-        />
-      </div>
-      <div className="flex items-center gap-2">
         <p>type:</p>
         <select
           value={props.node.type}
