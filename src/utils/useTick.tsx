@@ -18,14 +18,15 @@ const doTick = () => {
   currentPoints = clamp(currentPoints, 0, getUpgradeEffect('max-points'))
 
   let moneyPerTick = 0
+  let nodeIdsToUpdate: number[] = []
   let nodeIdsStolenFrom: number[] = []
 
   // console.time('update nodes')
   store.renderedNodeIds.forEach((nodeId) => {
     const node = store.nodes[nodeId]
-
     if (!node) return
-    let update: Partial<FullNode> = {}
+    if (node.scanDuration || node.hackDuration || node.stealDuration)
+      nodeIdsToUpdate.push(nodeId)
 
     if (node.isOwned && nodeId !== homeId) {
       const stealCost = getNodeHackCost(nodeId) / 10
@@ -35,26 +36,37 @@ const doTick = () => {
         currentPoints -= stealCost
       }
     }
+  })
 
-    // update scan duration
+  const combined = [...nodeIdsToUpdate, ...nodeIdsStolenFrom]
+  combined.forEach((nodeId) => {
+    const node = store.nodes[nodeId]
+
+    if (!node) return
+    let update: Partial<FullNode> = {}
+
     const scanDuration = node.scanDuration ?? 0
-    if ((scanDuration ?? 0) > 0) {
+    if (scanDuration > 0) {
       update.scanDuration = scanDuration - 1
       if (update.scanDuration <= 0) {
         update.scanDuration = 0
       }
     }
 
-    if (node.stealDuration === 0 && nodeIdsStolenFrom.includes(nodeId)) {
-      update.stealDuration = 1
-    }
     const hackDuration = node.hackDuration ?? 0
-    // update hack duration
     if (hackDuration > 0) {
       update.hackDuration = hackDuration - 1
     }
     if (typeof update.hackDuration === 'number' && update.hackDuration <= 0) {
       onHackFinish(nodeId)
+    }
+
+    const isStolenFrom = nodeIdsStolenFrom.includes(nodeId)
+    if (isStolenFrom && node.stealDuration !== 1) {
+      update.stealDuration = 1
+    }
+    if (!isStolenFrom && node.stealDuration !== 0) {
+      update.stealDuration = 0
     }
 
     if (Object.keys(update).length > 0) {
