@@ -143,7 +143,7 @@ const NodeDebug = (props: { node: FullNode }) => {
           value={props.node.x.toFixed(2)}
           type="number"
           className="p-1 text-black"
-          step={0.25}
+          step={0.05}
           onChange={(e) => updateOverrides(props.node, { x: +e.target.value })}
         />
       </div>
@@ -153,7 +153,7 @@ const NodeDebug = (props: { node: FullNode }) => {
           value={props.node.y.toFixed(2)}
           type="number"
           className="p-1 text-black"
-          step={0.25}
+          step={0.05}
           onChange={(e) => updateOverrides(props.node, { y: +e.target.value })}
         />
       </div>
@@ -163,7 +163,7 @@ const NodeDebug = (props: { node: FullNode }) => {
           value={props.node.scaling}
           type="number"
           className="p-1 text-black"
-          step={0.25}
+          step={0.05}
           onChange={(e) =>
             updateOverrides(props.node, { scaling: +e.target.value })
           }
