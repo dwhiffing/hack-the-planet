@@ -2,7 +2,7 @@ import { groupBy } from 'lodash'
 import { geoMercator, GeoProjection } from 'd3-geo'
 import { TransformMatrix } from '@vx/zoom/lib/types'
 
-import { FullNode, INodeType, Node, NodeGroup } from '@/types'
+import { FullNode, INodeType, Node, NodeGroup, Point } from '@/types'
 import { getRandom } from '@/utils/random'
 import { store } from '@/utils/valtioState'
 
@@ -12,7 +12,7 @@ import continents from '@/constants/continents.json'
 import cities from '@/constants/cities-pruned.json'
 import nodeOverrides from '@/constants/node-overrides.json'
 
-const rangeSize = 1.5
+const rangeSize = 3
 export const projection = geoMercator()
   .translate(baseTranslate)
   .scale(baseScale)
@@ -21,11 +21,11 @@ type IBordersKey = keyof typeof bordersJson
 type IContinentKey = keyof typeof continents
 type IConfigKey = keyof typeof countryConfigs
 
-export const getZoomLevel = (transform: TransformMatrix) => {
-  const zoom = transform.scaleX
-  if (zoom < 5) return 3
-  if (zoom <= 13) return 2
-  if (zoom <= 50) return 1
+export const getZoomLevel = (scale: number) => {
+  if (scale < 3) return 4
+  if (scale < 5) return 3
+  if (scale <= 13) return 2
+  if (scale <= 50) return 1
   return 0
 }
 
@@ -203,7 +203,7 @@ const getCityConfig = (city: { country: string }) => {
 
 const getZoomDrawDistance = (zoom: number) => {
   if (zoom < 5) return -1
-  if (zoom <= 13) return 9
+  if (zoom <= 13) return 3
   if (zoom <= 50) return 2
   return 1
 }
@@ -322,4 +322,96 @@ function getRandomNonUniformPointsInCircle(
   }
 
   return points
+}
+
+function distance(a: Point, b: Point): number {
+  const dx = a.x - b.x
+  const dy = a.y - b.y
+  return Math.sqrt(dx * dx + dy * dy)
+}
+export function mergeCoordinates(coords: Node[], threshold: number): Node[] {
+  if (coords.length === 0) return []
+
+  const grid = new Map<string, Node[]>()
+  const cellSize = threshold
+
+  for (const coord of coords) {
+    const cellKey = getCellKey(coord.x, coord.y, cellSize)
+    if (!grid.has(cellKey)) {
+      grid.set(cellKey, [])
+    }
+    grid.get(cellKey)!.push(coord)
+  }
+
+  const visited = new Set<Node>()
+  const clusters: Node[][] = []
+
+  for (const coord of coords) {
+    if (visited.has(coord)) continue
+
+    const cluster: Node[] = []
+    const stack = [coord]
+
+    while (stack.length > 0) {
+      const current = stack.pop()!
+      if (visited.has(current)) continue
+      visited.add(current)
+      cluster.push(current)
+
+      const neighbors = getNeighbors(current.x, current.y, cellSize, grid)
+      for (const neighbor of neighbors) {
+        if (
+          !visited.has(neighbor) &&
+          distance(current, neighbor) <= threshold
+        ) {
+          stack.push(neighbor)
+        }
+      }
+    }
+
+    clusters.push(cluster)
+  }
+
+  return clusters.map((cluster) => {
+    const sum = cluster.reduce(
+      (acc, { x, y }) => [acc[0] + x, acc[1] + y],
+      [0, 0],
+    )
+    const x = sum[0] / cluster.length
+    const y = sum[1] / cluster.length
+    return {
+      ...cluster[0],
+      x,
+      y,
+      r: Math.min(0.25, cluster.length / 10),
+    } as Node
+  })
+}
+
+function getCellKey(x: number, y: number, size: number): string {
+  const cellX = Math.floor(x / size)
+  const cellY = Math.floor(y / size)
+  return `${cellX},${cellY}`
+}
+
+function getNeighbors(
+  x: number,
+  y: number,
+  size: number,
+  grid: Map<string, Node[]>,
+): Node[] {
+  const neighbors: Node[] = []
+  const cellX = Math.floor(x / size)
+  const cellY = Math.floor(y / size)
+
+  for (let dx = -1; dx <= 1; dx++) {
+    for (let dy = -1; dy <= 1; dy++) {
+      const key = `${cellX + dx},${cellY + dy}`
+      if (grid.has(key)) {
+        neighbors.push(...grid.get(key)!)
+      }
+    }
+  }
+
+  return neighbors
 }

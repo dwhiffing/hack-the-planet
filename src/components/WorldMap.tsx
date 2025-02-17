@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef } from 'react'
 import { Zoom } from '@vx/zoom'
 import { background, baseTickspeed, maxZoom, minZoom } from '@/constants/index'
 import { WorldSvg } from '@/components/WorldSvg'
-import { BotNet } from '@/components/WorldBotNet'
+import { BotNet, Collapsed } from '@/components/WorldBotNet'
 import { coordsToTransform, getNodes } from '@/utils/geo'
 import { MapControls } from '@/components/WorldControls'
 import { useTick } from '@/utils/useTick'
@@ -110,7 +110,7 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
         {(zoom) => (
           <>
             <svg
-              className={`overflow-hidden lg:rounded-xl zoom-${getZoomLevel(zoom.transformMatrix)}`}
+              className={`overflow-hidden lg:rounded-xl zoom-${getZoomLevel(zoom.transformMatrix.scaleX)}`}
               width={width}
               height={height}
               style={{ cursor: zoom.isDragging ? 'grabbing' : undefined }}
@@ -144,14 +144,14 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
                 transform={zoom.toString()}
               >
                 <BotNet
-                  groupKeysString={getVisibleGroups(
-                    zoom.transformMatrix,
-                    width,
-                    height,
-                  )}
-                  zoomLevel={getZoomLevel(zoom.transformMatrix)}
+                  groupKeysString={
+                    getZoomLevel(zoom.transformMatrix.scaleX) > 2
+                      ? ''
+                      : getVisibleGroups(zoom.transformMatrix, width, height)
+                  }
                   tickspeed={baseTickspeed}
                 />
+                <Collapsed tickspeed={baseTickspeed} />
               </g>
             </svg>
           </>

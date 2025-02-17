@@ -1,4 +1,10 @@
-import React, { memo, MutableRefObject, useRef } from 'react'
+import React, {
+  memo,
+  MutableRefObject,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import { Group } from '@visx/group'
 import { CSSTransition } from 'react-transition-group'
 
@@ -8,7 +14,7 @@ import { store } from '@/utils/valtioState'
 import { getScanRange } from '@/utils/scan'
 import { getMaxPoints } from '@/utils/upgrades'
 
-export const Node = memo(function Node(props: {
+export const Node = function Node(props: {
   nodeId: number
   isSelected: boolean
   tickspeed: number
@@ -16,7 +22,11 @@ export const Node = memo(function Node(props: {
   const { [props.nodeId]: node } = useSnapshot(store.nodes)
   const nodeRef = useRef(null)
   const rangeRef = useRef(null)
+  const [wasSelected, setWasSelected] = useState(false)
 
+  useEffect(() => {
+    if (!wasSelected && props.isSelected) setWasSelected(true)
+  }, [props.isSelected])
   if (!node) return null
 
   const fill =
@@ -34,6 +44,19 @@ export const Node = memo(function Node(props: {
 
   const size = node.type === 'bank' ? 0.4 : node.type === 'rich' ? 0.3 : 0.2
   const s = props.isSelected ? size * 1.5 : size
+
+  const onClickNode = () => {
+    if (store.selectedNodeId === -1) {
+      store.selectedNodeId = props.nodeId
+    } else if (props.nodeId === store.selectedNodeId) {
+      store.selectedNodeId = -1
+    } else {
+      store.selectedNodeId = props.nodeId
+    }
+  }
+
+  const transition =
+    'all 150ms cubic-bezier(0.4, 0, 0.2, 1), fill 500ms cubic-bezier(0.4, 0, 0.2, 1)'
 
   return (
     <Group className="node" left={node.x} top={node.y}>
@@ -74,28 +97,17 @@ export const Node = memo(function Node(props: {
       <circle
         x={s * -0.5}
         y={s * -0.5}
-        onMouseDown={() => {
-          if (store.selectedNodeId === -1) {
-            store.selectedNodeId = props.nodeId
-          } else if (props.nodeId === store.selectedNodeId) {
-            store.selectedNodeId = -1
-          } else {
-            store.selectedNodeId = props.nodeId
-          }
-        }}
         r={s / 2}
+        onMouseDown={onClickNode}
         stroke="#fff"
         className="node-circle cursor-pointer"
-        style={{
-          transition:
-            'all 150ms cubic-bezier(0.4, 0, 0.2, 1), fill 500ms cubic-bezier(0.4, 0, 0.2, 1)',
-        }}
+        style={{ transition: wasSelected ? transition : undefined }}
         strokeWidth={props.isSelected ? 0.01 : 0}
         fill={fill}
       />
     </Group>
   )
-})
+}
 
 const ScanRange = ({
   rangeRef,
@@ -105,6 +117,7 @@ const ScanRange = ({
   maxScanRange: number
 }) => {
   const { points } = useSnapshot(store)
+
   return (
     <g ref={rangeRef} className="pointer-events-none">
       <circle

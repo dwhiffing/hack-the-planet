@@ -7,11 +7,9 @@ const baseSpacing = 0.01
 export const Link = ({
   nodeId,
   tickspeed,
-  zoomLevel,
 }: {
   nodeId: number
   tickspeed: number
-  zoomLevel: number
 }) => {
   const { [nodeId]: source } = useSnapshot(store.nodes)
   const { [source?.target ?? -1]: target } = useSnapshot(store.nodes)
@@ -32,25 +30,13 @@ export const Link = ({
       className="link pointer-events-none transition-colors duration-500"
       strokeDasharray={`${spacing} ${spacing}`}
     >
-      {zoomLevel <= 1 && (
-        <>
-          {(source.hackDuration ?? 0) > 0 && (
-            <animate
-              attributeName="stroke-dashoffset"
-              values={`${(spacing + spacing) * -8};0`}
-              dur={`${tickspeed}ms`}
-              repeatCount="indefinite"
-            />
-          )}
-          {isTransfering && (
-            <animate
-              attributeName="stroke-dashoffset"
-              values={`${(spacing + spacing) * 2};0`}
-              dur={`${tickspeed}ms`}
-              repeatCount="indefinite"
-            />
-          )}
-        </>
+      {(source.hackDuration ?? 0) > 0 && (
+        <animate
+          attributeName="stroke-dashoffset"
+          values={`${(spacing + spacing) * -8};0`}
+          dur={`${tickspeed}ms`}
+          repeatCount="indefinite"
+        />
       )}
     </line>
   )

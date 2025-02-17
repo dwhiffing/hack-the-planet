@@ -35,13 +35,6 @@ button[disabled] {
   transition: opacity 500ms;
 }
 
-/* .zoom-0 .link, */
-/* .zoom-1 .link, */
-.zoom-2 .link,
-.zoom-3 .link {
-  stroke-dasharray: none;
-}
-
 .zoom-1 .node .node-circle {
   transform: scale(1.5);
 }
@@ -50,6 +43,25 @@ button[disabled] {
   transform: scale(4);
 }
 
-.zoom-3 .node .node-circle {
+.zoom-3 .node .node-circle,
+.zoom-4 .node .node-circle {
   transform: scale(8);
+}
+
+.zoom-0 line,
+.zoom-1 line {
+  stroke-dashoffset: 0.8;
+  animation: dash 3s linear forwards;
+  animation-iteration-count: infinite;
+}
+
+.zoom-2 line,
+.zoom-3 line {
+  stroke-dasharray: none;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: 0;
+  }
 }
