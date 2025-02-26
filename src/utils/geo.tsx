@@ -116,12 +116,12 @@ export const getNodes = (g: SVGGElement) => {
 
       node.earthCoords = projection.invert?.([node.x, node.y]) ?? [0, 0]
       const distFromHome = haversineDistance(
-        -79.98490820026292,
         43.95167845917806,
-        node.earthCoords[0],
+        -79.98490820026292,
         node.earthCoords[1],
+        node.earthCoords[0],
       )
-      node.scaling = 1 + Math.floor((distFromHome / 50) * 2) / 2
+      node.scaling = 1 + Math.floor((distFromHome / 150) * 2) / 2
       return node
     })
   })

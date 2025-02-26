@@ -28,7 +28,7 @@ export const getUpgradeEffect = (key: IUpgradeKey, nextLevel?: boolean) => {
 
   if (key === 'steal-amount') {
     const level = getLevel('steal-amount', nextLevel)
-    return 0.01 + level * 0.01
+    return 1 + level * 0.1
   }
 
   if (key === 'autoscan') {
@@ -44,8 +44,8 @@ export const getUpgradeEffect = (key: IUpgradeKey, nextLevel?: boolean) => {
 
   if (key === 'max-points') {
     const level = getLevel('max-points', nextLevel)
-    if (level === 0) return 50
-    return 50 + level * 50
+    if (level === 0) return 10
+    return 10 + level * 10
   }
 
   return 0

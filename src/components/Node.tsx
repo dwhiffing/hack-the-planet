@@ -116,7 +116,8 @@ const ScanRange = ({
   rangeRef: MutableRefObject<null>
   maxScanRange: number
 }) => {
-  const { points } = useSnapshot(store)
+  // subscribe to upgrades so that we re-render on max range increase
+  const { points, upgrades } = useSnapshot(store)
 
   return (
     <g ref={rangeRef} className="pointer-events-none">

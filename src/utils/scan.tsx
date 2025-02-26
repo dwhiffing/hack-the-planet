@@ -4,7 +4,7 @@ import { getNodesWithDistance, getAdjacentNodes } from '@/utils/geo'
 import { store } from '@/utils/valtioState'
 import { updateNode } from '@/utils/nodes'
 
-export const getScanRange = (points = store.points, cap = 200, rate = 1) =>
+export const getScanRange = (points = store.points, cap = 200, rate = 2) =>
   points <= 0 ? 0 : 10 + Math.min(cap, rate * Math.sqrt(points))
 
 export const onScan = (id: number) => {
@@ -23,7 +23,12 @@ export const onScan = (id: number) => {
   )
 
   const closestNodes = getNodesWithDistance(relevantNodes, node)
-    .filter((n) => !store.renderedNodeIds?.includes(n.id) && n.dist < scanRange)
+    .filter(
+      (n) =>
+        store.nodes[n.id].sources?.length === 0 &&
+        n.id !== id &&
+        n.dist < scanRange,
+    )
     .sort((a, b) => a.dist - b.dist)
     .slice(0, scanEfficiency)
 

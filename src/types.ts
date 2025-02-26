@@ -53,10 +53,7 @@ export type FullNode = Node & PublicNodeState
 
 export type INodeType = 'basic' | 'bank' | 'home' | 'rich'
 export type INodeConfig = {
-  incomeMin: number
-  incomeMax: number
-  hackDifficultyMin: number
-  hackDifficultyMax: number
+  baseIncome: number
 }
 
 export type IUpgrade = {

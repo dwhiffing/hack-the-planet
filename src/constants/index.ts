@@ -3,7 +3,7 @@ import { INodeConfig, INodeType, IUpgrade } from '@/types'
 export const baseTickspeed = 500
 export const baseScanTime = 5
 export const baseHackTime = 10
-export const startingPoints = 50
+export const startingPoints = 10
 
 export const initialMoney = 0 //100000000000000
 export const saveRate = 10
@@ -26,8 +26,8 @@ export const UPGRADES: IUpgrade[] = [
     description: 'Maximum number of points',
     requiredNodes: 1,
     maxLevel: 99,
-    costExponent: 1.15,
-    baseCost: 15,
+    costExponent: 1.25,
+    baseCost: 30,
   },
   {
     name: 'Point Rate',
@@ -45,59 +45,39 @@ export const UPGRADES: IUpgrade[] = [
       'How much money you steal per click and transfer between nodes per tick',
     requiredNodes: 1,
     maxLevel: 99,
-    costExponent: 1.15,
-    baseCost: 15,
-  },
-  {
-    name: 'Autoscan',
-    key: 'autoscan',
-    description: 'Automatically scans for nodes occasionally',
-    requiredNodes: 1,
-    costs: [500, 1000, 5000, 10000, 50000],
-  },
-  {
-    name: 'Scan Efficiency',
-    key: 'scan-efficiency',
-    description: 'How many nodes can be found per scan',
-    requiredNodes: 1,
-    maxLevel: 100,
     costExponent: 1.2,
-    baseCost: 500,
+    baseCost: 150,
   },
-  // TODO: need to figure out these upgrades
-  {
-    name: 'Hack Efficiency',
-    key: 'hack-efficiency',
-    description: '',
-    requiredNodes: 1,
-    costs: [10, 100, 1000, 10000, 100000],
-  },
+  // {
+  //   name: 'Autoscan',
+  //   key: 'autoscan',
+  //   description: 'Automatically scans for nodes occasionally',
+  //   requiredNodes: 1,
+  //   costs: [500, 1000, 5000, 10000, 50000],
+  // },
+  // {
+  //   name: 'Scan Efficiency',
+  //   key: 'scan-efficiency',
+  //   description: 'How many nodes can be found per scan',
+  //   requiredNodes: 1,
+  //   maxLevel: 100,
+  //   costExponent: 1.2,
+  //   baseCost: 500,
+  // },
+  // // TODO: need to figure out these upgrades
+  // {
+  //   name: 'Hack Efficiency',
+  //   key: 'hack-efficiency',
+  //   description: '',
+  //   requiredNodes: 1,
+  //   costs: [10, 100, 1000, 10000, 100000],
+  // },
 ]
 export const NODE_CONFIGS: Record<INodeType, INodeConfig> = {
-  home: {
-    incomeMin: 0,
-    incomeMax: 0,
-    hackDifficultyMin: 0,
-    hackDifficultyMax: 0,
-  },
-  basic: {
-    incomeMin: 10,
-    incomeMax: 20,
-    hackDifficultyMin: 1,
-    hackDifficultyMax: 2,
-  },
-  rich: {
-    incomeMin: 50,
-    incomeMax: 100,
-    hackDifficultyMin: 5,
-    hackDifficultyMax: 10,
-  },
-  bank: {
-    incomeMin: 100,
-    incomeMax: 500,
-    hackDifficultyMin: 10,
-    hackDifficultyMax: 20,
-  },
+  home: { baseIncome: 0 },
+  basic: { baseIncome: 1 },
+  rich: { baseIncome: 5 },
+  bank: { baseIncome: 10 },
 }
 export const countryConfigs = {
   default: {

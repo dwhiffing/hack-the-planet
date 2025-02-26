@@ -9,13 +9,14 @@ import { SaveControls } from './SaveControls'
 import { getMaxPoints, getUpgradeEffect } from '@/utils/upgrades'
 
 export const MapStats = () => {
-  const { money, points, moneyPerTick } = useSnapshot(store)
+  const { money, points, pointsPerTick, moneyPerTick } = useSnapshot(store)
   return (
     <div>
       <p>
         points: {points.toFixed(2)}/{getMaxPoints()}(
         {getUpgradeEffect('max-points')})
       </p>
+      <p>points per tick: {pointsPerTick}</p>
       <p>Money: {formatMoney(money)}</p>
       <p>Income: {formatMoney(moneyPerTick)}</p>
     </div>

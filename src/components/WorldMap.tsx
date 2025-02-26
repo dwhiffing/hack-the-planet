@@ -29,7 +29,7 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
     deserializeSave(save)
   }, [])
 
-  useTick()
+  useTick(tickspeed)
 
   useEffect(() => {
     onClickHome()

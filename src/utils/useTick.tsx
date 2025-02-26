@@ -12,29 +12,32 @@ const doTick = () => {
   let saveCounter = store.saveCounter
   saveCounter = Math.max(0, saveCounter - 1)
 
-  let currentPoints = store.points
-  store.pointsPerTick = getUpgradeEffect('point-rate')
-  currentPoints += store.pointsPerTick
-  currentPoints = clamp(currentPoints, 0, getUpgradeEffect('max-points'))
+  let currentPoints = clamp(
+    store.points + getUpgradeEffect('point-rate'),
+    0,
+    getUpgradeEffect('max-points'),
+  )
 
-  let moneyPerTick = 0
+  let totalMaintenance = 0
+  let nodeIncome = 0
   let nodeIdsToUpdate: number[] = []
   let nodeIdsStolenFrom: number[] = []
 
   // console.time('update nodes')
   store.renderedNodeIds.forEach((nodeId) => {
     const node = store.nodes[nodeId]
-    if (!node) return
+    if (!node || nodeId === homeId) return
     if (node.scanDuration || node.hackDuration || node.stealDuration)
       nodeIdsToUpdate.push(nodeId)
 
-    if (node.isOwned && nodeId !== homeId) {
-      const stealCost = getNodeHackCost(nodeId) / 10
-      if (currentPoints >= stealCost) {
-        nodeIdsStolenFrom.push(nodeId)
-        moneyPerTick += getNodeIncome(nodeId) * getUpgradeEffect('steal-amount')
-        currentPoints -= stealCost
-      }
+    const maintenance = getNodeHackCost(nodeId) / 10
+    if (node.isOwned || node.hackDuration) {
+      totalMaintenance += maintenance
+    }
+
+    if (node.isOwned && currentPoints >= totalMaintenance) {
+      nodeIdsStolenFrom.push(nodeId)
+      nodeIncome += getNodeIncome(nodeId) * getUpgradeEffect('steal-amount')
     }
   })
 
@@ -75,8 +78,13 @@ const doTick = () => {
   })
   // console.timeEnd('update nodes')
 
-  store.points = currentPoints
-  store.moneyPerTick = moneyPerTick
+  store.points = clamp(
+    currentPoints - totalMaintenance,
+    0,
+    getUpgradeEffect('max-points'),
+  )
+  store.pointsPerTick = getUpgradeEffect('point-rate') - totalMaintenance
+  store.moneyPerTick = nodeIncome
   store.money += store.moneyPerTick
 
   if (saveCounter === 0 && !store.hasResetSave) {
@@ -88,9 +96,9 @@ const doTick = () => {
   onAutohack()
 }
 
-export const useTick = () => {
+export const useTick = (tickspeed: number) => {
   useEffect(() => {
-    const intervalId = setInterval(doTick, baseTickspeed)
+    const intervalId = setInterval(doTick, tickspeed)
     return () => clearInterval(intervalId)
-  }, [])
+  }, [tickspeed])
 }
