@@ -38,6 +38,7 @@ export const SaveControls = memo(function SaveControls() {
       <button onClick={() => setIsOpen(true)}>Settings</button>
       <ReactModal
         isOpen={isOpen}
+        ariaHideApp={false}
         shouldCloseOnOverlayClick
         onRequestClose={() => setIsOpen(false)}
         className="pointer-events-none absolute inset-20 flex items-center justify-center"
