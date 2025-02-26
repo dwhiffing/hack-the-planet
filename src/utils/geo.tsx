@@ -1,4 +1,4 @@
-import { groupBy } from 'lodash'
+import { clamp, groupBy } from 'lodash'
 import { geoMercator, GeoProjection } from 'd3-geo'
 import { TransformMatrix } from '@vx/zoom/lib/types'
 
@@ -41,7 +41,7 @@ export const getVisibleGroups = (
 ) => {
   const coords = transformToCoords(transformMatrix, width, height)
   const zoomLevel = getZoomDrawDistance(transformMatrix.scaleX)
-  if (zoomLevel === -1) return Object.keys(store.groupedNodes).join(':')
+  // if (zoomLevel === -1) return Object.keys(store.groupedNodes).join(':')
   const groups = getAdjacentGroups(coords[1], coords[0], zoomLevel)
 
   return groups.join(':')
@@ -215,9 +215,10 @@ const getCityConfig = (city: { country: string }) => {
 }
 
 const getZoomDrawDistance = (zoom: number) => {
-  if (zoom < 5) return -1
-  if (zoom <= 13) return 3
-  if (zoom <= 50) return 2
+  // if (zoom < 5) return -1
+  // if (zoom < 9) return 7
+  // if (zoom <= 13) return 4
+  if (zoom <= 50) return 1
   return 1
 }
 
@@ -342,7 +343,7 @@ function distance(a: Point, b: Point): number {
   const dy = a.y - b.y
   return Math.sqrt(dx * dx + dy * dy)
 }
-export function mergeCoordinates(coords: Node[], threshold: number): Node[] {
+export function mergeCoordinates(coords: Node[], threshold: number) {
   if (coords.length === 0) return []
 
   const grid = new Map<string, Node[]>()
@@ -356,48 +357,21 @@ export function mergeCoordinates(coords: Node[], threshold: number): Node[] {
     grid.get(cellKey)!.push(coord)
   }
 
-  const visited = new Set<Node>()
-  const clusters: Node[][] = []
-
-  for (const coord of coords) {
-    if (visited.has(coord)) continue
-
-    const cluster: Node[] = []
-    const stack = [coord]
-
-    while (stack.length > 0) {
-      const current = stack.pop()!
-      if (visited.has(current)) continue
-      visited.add(current)
-      cluster.push(current)
-
-      const neighbors = getNeighbors(current.x, current.y, cellSize, grid)
-      for (const neighbor of neighbors) {
-        if (
-          !visited.has(neighbor) &&
-          distance(current, neighbor) <= threshold
-        ) {
-          stack.push(neighbor)
-        }
-      }
-    }
-
-    clusters.push(cluster)
-  }
-
-  return clusters.map((cluster) => {
-    const sum = cluster.reduce(
+  // @ts-ignore
+  return [...grid.entries()].map(([key, nodes]) => {
+    const sum = nodes.reduce(
+      // @ts-ignore
       (acc, { x, y }) => [acc[0] + x, acc[1] + y],
       [0, 0],
     )
-    const x = sum[0] / cluster.length
-    const y = sum[1] / cluster.length
+    const x = sum[0] / nodes.length
+    const y = sum[1] / nodes.length
     return {
-      ...cluster[0],
-      x,
-      y,
-      r: Math.min(0.25, cluster.length / 10),
-    } as Node
+      x: +x,
+      y: +y,
+      count: nodes.length,
+      r: clamp(nodes.length / 40, 0.15, 0.75),
+    }
   })
 }
 

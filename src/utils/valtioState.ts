@@ -136,7 +136,7 @@ export const deserializeSave = (save?: string | null) => {
       isOwned: +nodeId === homeId,
       ...nodeSavedData,
       type: +nodeId === homeId ? 'home' : node.type,
-      scanDuration: 0,
+      lastScannedAt: -1,
       hackDuration: 0,
       stealDuration: 0,
       sources,

@@ -1,21 +1,20 @@
 import React, { useCallback, useEffect, useRef } from 'react'
 import { Zoom } from '@vx/zoom'
-import { background, maxZoom, minZoom } from '@/constants/index'
+import { maxZoom, minZoom } from '@/constants/index'
 import { WorldSvg } from '@/components/WorldSvg'
-import { BotNet, Collapsed } from '@/components/WorldBotNet'
-import { coordsToTransform, getNodes } from '@/utils/geo'
+import { CollapsedBotNet, GroupedBotNet } from '@/components/WorldBotNet'
+import { coordsToTransform, getNodes, getVisibleGroups } from '@/utils/geo'
 import { MapControls } from '@/components/WorldControls'
 import { useTick } from '@/utils/useTick'
 import { ProvidedZoom } from '@vx/zoom/lib/types'
 import { useZoom } from '@/utils/useZoom'
-import { getVisibleGroups, getZoomLevel, groupNodes } from '@/utils/geo'
+import { getZoomLevel, groupNodes } from '@/utils/geo'
 import { deserializeSave, store } from '@/utils/valtioState'
 import { useSnapshot } from 'valtio'
 
 export function WorldMap({ width, height }: { width: number; height: number }) {
   const { onClickHome, zoomRef, mouseRef } = useZoom(width, height)
   const { tickspeed } = useSnapshot(store)
-  const allowScroll = useRef(true)
 
   const worldSvgMountCallback = useCallback((node: SVGGElement) => {
     const nodes = getNodes(node)
@@ -50,19 +49,11 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
   if (width === 0 && height === 0) return null
 
   const onScroll = (e: React.WheelEvent<Element> | WheelEvent) => {
-    if (!allowScroll.current) {
-      return { scaleX: 1, scaleY: 1 }
-    }
-    allowScroll.current = false
-    setTimeout(() => {
-      allowScroll.current = true
-    }, 400)
-    const scaleX = zoomRef.current?.state.transformMatrix?.scaleX ?? 0
     let scale: number
     if (e.deltaY > 0) {
-      scale = scaleX < 5 ? 0.5 : 0.25
+      scale = 0.9
     } else {
-      scale = scaleX < 3 ? 2 : 4
+      scale = 1.1
     }
     return { scaleX: scale, scaleY: scale }
   }
@@ -112,19 +103,11 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
         {(zoom) => (
           <>
             <svg
-              className={`overflow-hidden lg:rounded-xl zoom-${getZoomLevel(zoom.transformMatrix.scaleX)}`}
+              className={`overflow-hidden lg:rounded-xl zoom-${getZoomLevel(zoom.transformMatrix.scaleX)} ${zoom.isDragging ? '' : 'not-dragging'}`}
               width={width}
               height={height}
               style={{ cursor: zoom.isDragging ? 'grabbing' : undefined }}
             >
-              <rect
-                x={0}
-                y={0}
-                width={width}
-                height={height}
-                fill={background}
-              />
-
               <g ref={worldSvgMountCallback} transform={zoom.toString()}>
                 <WorldSvg />
               </g>
@@ -145,15 +128,16 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
                 style={{ pointerEvents: zoom.isDragging ? 'none' : 'auto' }}
                 transform={zoom.toString()}
               >
-                <BotNet
-                  groupKeysString={
-                    getZoomLevel(zoom.transformMatrix.scaleX) > 2
-                      ? ''
-                      : getVisibleGroups(zoom.transformMatrix, width, height)
-                  }
-                  tickspeed={tickspeed}
+                <GroupedBotNet
+                  allGroupKeys={Object.keys(store.groupedNodes).join(':')}
+                  groupKeysString={getVisibleGroups(
+                    zoom.transformMatrix,
+                    width,
+                    height,
+                  )}
+                  isVisible={zoom.transformMatrix.scaleX >= 13}
                 />
-                <Collapsed tickspeed={tickspeed} />
+                <CollapsedBotNet isVisible={zoom.transformMatrix.scaleX < 13} />
               </g>
             </svg>
           </>

@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --anim-duration: 1500ms;
+}
+
 body {
   color: white;
   background: black;
@@ -25,14 +29,14 @@ button[disabled] {
 }
 .fade-enter-active {
   opacity: 1;
-  transition: opacity 500ms;
+  transition: opacity var(--anim-duration);
 }
 .fade-exit {
   opacity: 1;
 }
 .fade-exit-active {
   opacity: 0;
-  transition: opacity 500ms;
+  transition: opacity var(--anim-duration);
 }
 
 .zoom-1 .node .node-circle {
@@ -40,18 +44,24 @@ button[disabled] {
 }
 
 .zoom-2 .node .node-circle {
+  transform: scale(2.5);
+}
+
+.zoom-3 .node .node-circle {
   transform: scale(4);
 }
 
-.zoom-3 .node .node-circle,
 .zoom-4 .node .node-circle {
-  transform: scale(8);
+  transform: scale(6);
 }
 
 .zoom-0 line.transferring,
 .zoom-1 line.transferring {
   stroke-dashoffset: 0.26;
-  animation: dash 500ms linear forwards;
+}
+
+.not-dragging line.transferring {
+  animation: dash var(--anim-duration) linear forwards;
   animation-iteration-count: infinite;
 }
 

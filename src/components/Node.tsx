@@ -8,25 +8,36 @@ import React, {
 import { Group } from '@visx/group'
 import { CSSTransition } from 'react-transition-group'
 
-import { pxPerKM } from '@/constants/index'
+import {
+  baseAnimationDuration,
+  baseTickspeed,
+  pxPerKM,
+} from '@/constants/index'
 import { useSnapshot } from 'valtio'
 import { store } from '@/utils/valtioState'
 import { getScanRange } from '@/utils/scan'
 import { getMaxPoints } from '@/utils/upgrades'
 
-export const Node = function Node(props: {
+export const Node = memo(function Node(props: {
   nodeId: number
   isSelected: boolean
-  tickspeed: number
 }) {
   const { [props.nodeId]: node } = useSnapshot(store.nodes)
+  const scanRef = useRef(null)
   const nodeRef = useRef(null)
   const rangeRef = useRef(null)
-  const [wasSelected, setWasSelected] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
+  const [animateScan, setAnimateScan] = useState(false)
 
   useEffect(() => {
-    if (!wasSelected && props.isSelected) setWasSelected(true)
-  }, [props.isSelected])
+    setAnimateScan(true)
+    setTimeout(() => setAnimateScan(false), baseTickspeed * 3)
+  }, [node?.lastScannedAt])
+
+  useEffect(() => {
+    if (node && !isMounted) setIsMounted(true)
+  }, [node, isMounted])
+
   if (!node) return null
 
   const fill =
@@ -55,59 +66,72 @@ export const Node = function Node(props: {
     }
   }
 
-  const transition =
-    'all 150ms cubic-bezier(0.4, 0, 0.2, 1), fill 500ms cubic-bezier(0.4, 0, 0.2, 1)'
+  const timeout = baseAnimationDuration
+  const isConnected = (node.sources?.length ?? 0 > 0) || (node.target ?? 0) > 0
 
   return (
-    <Group className="node" left={node.x} top={node.y}>
-      <CSSTransition
-        nodeRef={nodeRef}
-        in={(node.scanDuration ?? 0) > 0}
-        timeout={500}
-        classNames="fade"
-        unmountOnExit
-      >
-        <path
-          ref={nodeRef}
-          className={`pointer-events-none`}
-          d={drawScan(0, 0, pxPerKM * (node.scanRange ?? 0), 0, 40)}
-          fill="#0f03"
+    <Group key={node.id} className="node" left={node.x} top={node.y}>
+      {isConnected && (
+        <CSSTransition
+          nodeRef={scanRef}
+          in={animateScan}
+          timeout={timeout}
+          classNames="fade"
+          unmountOnExit
         >
-          <animateTransform
-            attributeName="transform"
-            attributeType="XML"
-            type="rotate"
-            from="0"
-            to="-360"
-            dur={`${props.tickspeed * 5}ms`}
-            repeatCount="indefinite"
+          <path
+            ref={scanRef}
+            className={`pointer-events-none`}
+            d={drawScan(0, 0, pxPerKM * (node.scanRange ?? 0), 0, 40)}
+            fill="#0f03"
+          >
+            <animateTransform
+              attributeName="transform"
+              attributeType="XML"
+              type="rotate"
+              from="0"
+              to="-360"
+              dur={`${timeout}ms`}
+              repeatCount="indefinite"
+            />
+          </path>
+        </CSSTransition>
+      )}
+      {isConnected && (
+        <CSSTransition
+          nodeRef={rangeRef}
+          in={props.isSelected && node.isOwned}
+          timeout={timeout}
+          classNames="fade"
+          unmountOnExit
+        >
+          <ScanRange
+            rangeRef={rangeRef}
+            maxScanRange={node.maxScanRange ?? 0}
           />
-        </path>
-      </CSSTransition>
-      <CSSTransition
-        nodeRef={rangeRef}
-        in={props.isSelected && node.isOwned}
-        timeout={500}
-        classNames="fade"
-        unmountOnExit
-      >
-        <ScanRange rangeRef={rangeRef} maxScanRange={node.maxScanRange ?? 0} />
-      </CSSTransition>
+        </CSSTransition>
+      )}
 
       <circle
+        ref={nodeRef}
         x={s * -0.5}
         y={s * -0.5}
         r={s / 2}
         onMouseDown={onClickNode}
-        stroke="#fff"
+        stroke={props.isSelected ? '#fff' : 'transparent'}
         className="node-circle cursor-pointer"
-        style={{ transition: wasSelected ? transition : undefined }}
-        strokeWidth={props.isSelected ? 0.01 : 0}
+        opacity={isMounted ? 1 : 0}
+        style={{
+          transitionProperty: isConnected ? 'r, stroke, opacity' : 'none',
+          transitionDuration: `${timeout}ms`,
+          transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
+        }}
+        strokeWidth={0.01}
         fill={fill}
       />
     </Group>
   )
-}
+})
 
 const ScanRange = ({
   rangeRef,
@@ -127,7 +151,8 @@ const ScanRange = ({
         r={pxPerKM * getScanRange(points)}
         stroke="#0f0a"
         fill="#00ff0009"
-        className="transition-all duration-[350ms]"
+        className="transition-all"
+        style={{ transitionDuration: `${baseAnimationDuration}ms` }}
         strokeWidth={0.01}
       />
       <circle
@@ -136,7 +161,8 @@ const ScanRange = ({
         r={pxPerKM * maxScanRange}
         stroke="#0f06"
         fill="transparent"
-        className="transition-all duration-1000"
+        className="transition-all"
+        style={{ transitionDuration: `${baseAnimationDuration}ms` }}
         strokeWidth={0.01}
         strokeDasharray="0.03 0.06"
       />
@@ -146,7 +172,8 @@ const ScanRange = ({
         r={pxPerKM * getScanRange(getMaxPoints())}
         stroke="#0f02"
         fill="transparent"
-        className="transition-all duration-1000"
+        className="transition-all"
+        style={{ transitionDuration: `${baseAnimationDuration}ms` }}
         strokeWidth={0.01}
       />
     </g>

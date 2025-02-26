@@ -38,7 +38,7 @@ export type Node = {
 
 export type PublicNodeState = {
   isOwned?: boolean
-  scanDuration?: number
+  lastScannedAt?: number
   scanRange?: number
   maxScanRange?: number
   showScanRange?: boolean

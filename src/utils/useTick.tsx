@@ -26,9 +26,9 @@ const doTick = () => {
   // console.time('update nodes')
   store.renderedNodeIds.forEach((nodeId) => {
     const node = store.nodes[nodeId]
-    if (!node || nodeId === homeId) return
-    if (node.scanDuration || node.hackDuration || node.stealDuration)
-      nodeIdsToUpdate.push(nodeId)
+    if (!node) return
+    if (node.hackDuration || node.stealDuration) nodeIdsToUpdate.push(nodeId)
+    if (nodeId === homeId) return
 
     const maintenance = getNodeHackCost(nodeId) / 10
     if (node.isOwned || node.hackDuration) {
@@ -47,14 +47,6 @@ const doTick = () => {
 
     if (!node) return
     let update: Partial<FullNode> = {}
-
-    const scanDuration = node.scanDuration ?? 0
-    if (scanDuration > 0) {
-      update.scanDuration = scanDuration - 1
-      if (update.scanDuration <= 0) {
-        update.scanDuration = 0
-      }
-    }
 
     const hackDuration = node.hackDuration ?? 0
     if (hackDuration > 0) {

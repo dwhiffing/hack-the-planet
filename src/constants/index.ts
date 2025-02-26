@@ -1,7 +1,7 @@
 import { INodeConfig, INodeType, IUpgrade } from '@/types'
 
+export const baseAnimationDuration = 1500
 export const baseTickspeed = 500
-export const baseScanTime = 5
 export const baseHackTime = 10
 export const startingPoints = 10
 
