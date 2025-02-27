@@ -18,7 +18,6 @@ import { proxy } from 'valtio'
 import nodeOverrides from '@/constants/node-overrides.json'
 
 import { uniq } from 'lodash'
-import { getZoomLevel } from './geo'
 
 type IState = {
   points: number
@@ -116,9 +115,10 @@ export const deserializeSave = (save?: string | null) => {
     ? JSON.parse(save)
     : null
 
+  const allNodes = store.allNodes
   const renderedNodeIds =
     localStorage.getItem('show-all-nodes') === 'true'
-      ? store.allNodes.map((n) => n.id)
+      ? allNodes.map((n) => n.id)
       : _serializedState
         ? uniq([
             homeId,
@@ -130,7 +130,7 @@ export const deserializeSave = (save?: string | null) => {
 
   const nodes: Record<number, FullNode> = {}
   renderedNodeIds.forEach((nodeId) => {
-    const node = store.allNodes.find((n) => n.id === +nodeId)!
+    const node = allNodes.find((n) => n.id === +nodeId)!
     const nodeSavedData = _serializedState?.nodeData[node.id]
     const sources = Object.entries(_serializedState?.nodeData ?? {})
       .filter(([_nodeId, data]) => data.target === +nodeId)

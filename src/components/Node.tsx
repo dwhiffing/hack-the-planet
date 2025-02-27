@@ -123,23 +123,30 @@ export const Node = memo(function Node(props: {
         </g>
       )}
 
-      <circle
-        ref={nodeRef}
-        cx={node.x}
-        cy={node.y}
-        r={s / 2}
-        onMouseDown={onClickNode}
-        stroke={props.isSelected ? '#fff' : 'transparent'}
-        className="node-circle cursor-pointer"
-        opacity={isMounted ? 1 : 0}
+      <g
+        className="node"
         style={{
-          transitionProperty: 'r, stroke, opacity',
-          transitionDuration: `${timeout}ms`,
-          transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
+          transform: `translate(${node.x}px,${node.y}px)`,
         }}
-        strokeWidth={0.01}
-        fill={fill}
-      />
+      >
+        <circle
+          ref={nodeRef}
+          // cx={node.x}
+          // cy={node.y}
+          r={s / 2}
+          onMouseDown={onClickNode}
+          stroke={props.isSelected ? '#fff' : 'transparent'}
+          className="node-circle cursor-pointer"
+          opacity={isMounted ? 1 : 0}
+          style={{
+            transitionProperty: 'r, stroke, opacity',
+            transitionDuration: `${timeout}ms`,
+            transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
+          }}
+          strokeWidth={0.01}
+          fill={fill}
+        />
+      </g>
     </>
   )
 })

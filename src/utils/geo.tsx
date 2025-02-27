@@ -23,8 +23,8 @@ type IConfigKey = keyof typeof countryConfigs
 export const getZoomLevel = (scale: number) => {
   if (scale < 3) return 4
   if (scale < 5) return 3
-  if (scale <= 13) return 2
-  if (scale <= 50) return 1
+  if (scale <= 20) return 2
+  if (scale <= 60) return 1
   return 0
 }
 

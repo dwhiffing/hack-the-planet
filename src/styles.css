@@ -40,27 +40,24 @@ button[disabled] {
 }
 
 .zoom-1 .node .node-circle {
-  transform: scale(1.5);
+  transform: scale(1.25);
 }
 
 .zoom-2 .node .node-circle {
-  transform: scale(2.5);
+  transform: scale(1.75);
 }
 
 .zoom-3 .node .node-circle {
-  transform: scale(4);
+  transform: scale(2.5);
 }
 
 .zoom-4 .node .node-circle {
-  transform: scale(6);
-}
-
-.cursor-grab line.transferring {
-  animation: dash var(--anim-duration) linear forwards;
-  animation-iteration-count: infinite;
+  transform: scale(3);
 }
 
 .zoom-0 line.transferring {
+  animation: dash var(--anim-duration) linear forwards;
+  animation-iteration-count: infinite;
   stroke-dashoffset: 0.26;
 }
 

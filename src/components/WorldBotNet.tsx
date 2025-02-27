@@ -49,7 +49,7 @@ const CityLabels = memo(function CityLabels() {
   return projectedCities.map((city, i) => {
     const [x, y] = city.coords
     return (
-      <>
+      <React.Fragment key={i}>
         <circle cx={x} cy={y} r={0.2} fill="white" />
         <text
           fontSize={0.5}
@@ -63,7 +63,7 @@ const CityLabels = memo(function CityLabels() {
         >
           {city.name}
         </text>
-      </>
+      </React.Fragment>
     )
   })
 })
