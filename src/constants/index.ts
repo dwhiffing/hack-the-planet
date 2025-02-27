@@ -14,9 +14,8 @@ export const background = '#111'
 export const land = '#333'
 export const pxPerKM = 0.04356460038551915
 export const baseScale = 200
-export const zoomScale = 200
 export const minZoom = 1
-export const maxZoom = 200
+export const maxZoom = baseScale
 export const baseTranslate = [0, 0] as [number, number]
 
 export const UPGRADES: IUpgrade[] = [

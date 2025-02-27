@@ -9,6 +9,7 @@
 body {
   color: white;
   background: black;
+  overscroll-behavior-y: none;
 }
 
 button {
@@ -20,20 +21,19 @@ button[disabled] {
   @apply cursor-not-allowed opacity-30;
 }
 
-.controls {
-  @apply absolute right-4 top-4 flex flex-col items-end;
-}
-
 .fade-enter {
   opacity: 0;
 }
+
 .fade-enter-active {
   opacity: 1;
   transition: opacity var(--anim-duration);
 }
+
 .fade-exit {
   opacity: 1;
 }
+
 .fade-exit-active {
   opacity: 0;
   transition: opacity var(--anim-duration);
@@ -55,18 +55,19 @@ button[disabled] {
   transform: scale(6);
 }
 
-.zoom-0 line.transferring {
-  stroke-dashoffset: 0.26;
-}
-
-.not-dragging line.transferring {
+.cursor-grab line.transferring {
   animation: dash var(--anim-duration) linear forwards;
   animation-iteration-count: infinite;
 }
 
+.zoom-0 line.transferring {
+  stroke-dashoffset: 0.26;
+}
+
 .zoom-1 line,
 .zoom-2 line,
-.zoom-3 line {
+.zoom-3 line,
+.zoom-4 line {
   stroke-dasharray: none;
 }
 

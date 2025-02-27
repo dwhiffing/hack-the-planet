@@ -1,4 +1,4 @@
-import React, { memo } from 'react'
+import React, { memo, useMemo } from 'react'
 
 import { IMapProps } from '@/types'
 
@@ -10,13 +10,16 @@ import { getMaxPoints, getUpgradeEffect } from '@/utils/upgrades'
 import { baseTickspeed } from '@/constants'
 
 export const MapStats = () => {
-  const { money, points, pointsPerTick, moneyPerTick } = useSnapshot(store)
+  const { money, points, pointsPerTick, moneyPerTick, upgrades } =
+    useSnapshot(store)
   const tickMulti = 1000 / baseTickspeed
+  // @ts-ignore
+  const maxPoints = useMemo(() => getMaxPoints(), [upgrades])
   return (
     <div>
       <p>
-        points: {points.toFixed(2)}/{getMaxPoints()}(
-        {getUpgradeEffect('max-points')})
+        points: {points.toFixed(2)}/{maxPoints}({getUpgradeEffect('max-points')}
+        )
       </p>
       <p>points income: {pointsPerTick * tickMulti}</p>
       <p>money: {formatMoney(money)}</p>

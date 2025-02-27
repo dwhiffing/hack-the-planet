@@ -1,6 +1,5 @@
-import React, { memo } from 'react'
+import React, { memo, useMemo } from 'react'
 
-import { Group } from '@visx/group'
 import { Node } from '@/components/Node'
 import { store } from '@/utils/valtioState'
 import { useSnapshot } from 'valtio'
@@ -9,59 +8,64 @@ import { projection } from '@/utils/geo'
 import { Link } from './Link'
 
 export const BotNet = memo(function BotNet() {
-  const { selectedNodeId, nodes } = useSnapshot(store)
-  const nodeIds = Object.values(nodes).map((n) => n.id) ?? []
+  const { isDragging } = useSnapshot(store)
 
   return (
-    <Group>
+    <g style={{ pointerEvents: isDragging ? 'none' : 'auto' }}>
       <Links />
-
-      {nodeIds.map((nodeId) => (
-        <Node
-          key={`${nodeId}-node`}
-          nodeId={nodeId}
-          isSelected={selectedNodeId === nodeId}
-        />
-      ))}
+      <Nodes />
       <CityLabels />
-    </Group>
+    </g>
   )
+})
+
+const Nodes = memo(function Nodes() {
+  const { nodes, selectedNodeId } = useSnapshot(store)
+  const nodeIds = useMemo(
+    () => Object.values(nodes).map((n) => n.id) ?? [],
+    [nodes],
+  )
+  return nodeIds.map((nodeId) => (
+    <Node
+      key={`${nodeId}-node`}
+      nodeId={nodeId}
+      isSelected={selectedNodeId === nodeId}
+    />
+  ))
 })
 
 const Links = memo(function Links() {
   const { nodes } = useSnapshot(store)
-  const nodeIds = Object.values(nodes).map((n) => n.id) ?? []
+  const nodeIds = useMemo(
+    () => Object.values(nodes).map((n) => n.id) ?? [],
+    [nodes],
+  )
   return nodeIds.map((nodeId) => (
     <Link key={`${nodeId}-link`} nodeId={nodeId} />
   ))
 })
 
 const CityLabels = memo(function CityLabels() {
-  return (
-    <>
-      {projectedCities.map((city, i) => (
-        <Group
-          key={`city-${i}`}
-          className="pointer-events-none"
-          left={city.coords[0]}
-          top={city.coords[1]}
+  return projectedCities.map((city, i) => {
+    const [x, y] = city.coords
+    return (
+      <>
+        <circle cx={x} cy={y} r={0.2} fill="white" />
+        <text
+          fontSize={0.5}
+          x={x}
+          y={y - 0.6}
+          className="select-none fill-white"
+          textAnchor="middle"
+          dominantBaseline="central"
+          alignmentBaseline="central"
+          textRendering="optimizeSpeed"
         >
-          <circle r={0.2} fill="white" />
-          <text
-            fontSize={0.5}
-            y={-0.6}
-            className="select-none fill-white"
-            textAnchor="middle"
-            dominantBaseline="central"
-            alignmentBaseline="central"
-            textRendering="optimizeSpeed"
-          >
-            {city.name}
-          </text>
-        </Group>
-      ))}
-    </>
-  )
+          {city.name}
+        </text>
+      </>
+    )
+  })
 })
 
 const projectedCities = cities.map((c) => ({

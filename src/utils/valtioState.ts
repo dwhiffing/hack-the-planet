@@ -18,6 +18,7 @@ import { proxy } from 'valtio'
 import nodeOverrides from '@/constants/node-overrides.json'
 
 import { uniq } from 'lodash'
+import { getZoomLevel } from './geo'
 
 type IState = {
   points: number
@@ -26,6 +27,8 @@ type IState = {
   tickspeed: number
   money: number
   moneyPerTick: number
+  zoom: number
+  isDragging: boolean
   selectedNodeId: number
   saveCounter: number
   autoHackTime: number
@@ -71,6 +74,8 @@ const initialState: IState = {
   pointsPerTick: 0,
   moneyPerTick: 0,
   autoHackTime: 0,
+  zoom: 0,
+  isDragging: false,
   saveCounter: saveRate,
   renderedNodeIds: [],
   upgrades: initialUpgrades,

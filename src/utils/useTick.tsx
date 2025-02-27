@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { FullNode } from '@/types'
-import { baseTickspeed, homeId, saveRate } from '@/constants/index'
+import { homeId, saveRate } from '@/constants/index'
 import { onAutohack } from '@/utils/autohack'
 import { getUpgradeEffect } from '@/utils/upgrades'
 import { serializeSave, store } from '@/utils/valtioState'

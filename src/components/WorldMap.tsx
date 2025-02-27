@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { WorldSvg } from '@/components/WorldSvg'
 import { BotNet } from '@/components/WorldBotNet'
 import {
@@ -11,94 +11,98 @@ import { MapControls } from '@/components/WorldControls'
 import { useTick } from '@/utils/useTick'
 import { deserializeSave, store } from '@/utils/valtioState'
 import { useSnapshot } from 'valtio'
-import { minZoom, maxZoom, zoomScale, homeId } from '@/constants/index'
+import { minZoom, maxZoom, homeId, baseScale } from '@/constants/index'
 import { clamp } from 'lodash'
+
+const initNodes = (worldSvg: SVGGElement) => {
+  if (!worldSvg) return
+
+  const nodes = getNodes(worldSvg)
+  store.allNodes = nodes
+  store.groupedNodes = groupNodes(nodes)
+
+  const save =
+    typeof localStorage !== 'undefined'
+      ? localStorage.getItem('hack-the-planet')
+      : undefined
+  deserializeSave(save)
+}
 
 export function WorldMap({ width, height }: { width: number; height: number }) {
   const { tickspeed } = useSnapshot(store)
-  const svgRef = useRef<SVGGElement>(null)
-  const svgRef2 = useRef<SVGGElement>(null)
+  const worldSvgRef = useRef<SVGGElement>(null)
+  const botNetRef = useRef<SVGGElement>(null)
   const transformRef = useRef({ x: 0, y: 0, scale: maxZoom })
-  const [isDragging, setIsDragging] = useState(false)
   const lastMouse = useRef({ x: 0, y: 0 })
   const mouseStart = useRef({ x: 0, y: 0 })
-  const [zoomLevel, setZoomLevel] = useState(0)
+  const rafRef = useRef(false)
 
   useTick(tickspeed)
 
-  const onClickHome = () => {
+  const onClickHome = useCallback(() => {
     const home = store.allNodes.find((n) => n.id == homeId)?.earthCoords
-    if (home && width && height) {
-      const offsetX = width >= 768 ? 150 : 0
-      const offsetY = width >= 768 ? 0 : -150
-      transformRef.current = coordsToTransform(
-        home[0],
-        home[1],
-        zoomScale,
-        width,
-        height,
-        offsetX,
-        offsetY,
-      )
-    }
-  }
+    if (!home || !width || !height) return
 
-  const updateTransform = () => {
-    if (!svgRef.current || !svgRef2.current || !width || !height) return
+    const [x, y] = home
+    const [w, h] = [width, height]
+    const offsetX = width >= 768 ? 150 : 0
+    const offsetY = width >= 768 ? 0 : -150
+    const trans = coordsToTransform(x, y, baseScale, w, h, offsetX, offsetY)
+    transformRef.current = trans
+  }, [width, height])
+
+  const updateTransform = useCallback(() => {
+    if (!worldSvgRef.current || !width || !height) return
 
     if (store.allNodes.length === 0) {
-      const nodes = getNodes(svgRef.current)
-      store.allNodes = nodes
-      store.groupedNodes = groupNodes(nodes)
-
-      const save =
-        typeof localStorage !== 'undefined'
-          ? localStorage.getItem('hack-the-planet')
-          : undefined
-      deserializeSave(save)
+      initNodes(worldSvgRef.current)
       onClickHome()
     }
 
-    const { x, y, scale } = transformRef.current
-    svgRef.current.style.transform = `translate(${x}px, ${y}px) scale(${scale})`
-    svgRef.current.style.visibility = `visible`
-    svgRef2.current.style.transform = `translate(${x}px, ${y}px) scale(${scale})`
-    svgRef2.current.style.visibility = `visible`
+    if (rafRef.current) return
 
-    const newZoomLevel = getZoomLevel(scale)
-    if (zoomLevel !== newZoomLevel) setZoomLevel(newZoomLevel)
-  }
+    rafRef.current = true
 
-  const onZoomIn = () => changeZoom(1.25)
+    requestAnimationFrame(() => {
+      if (!worldSvgRef.current || !botNetRef.current) return
+      const { x, y, scale } = transformRef.current
+      const transform = `translate(${x}px, ${y}px) scale(${scale})`
+      worldSvgRef.current.style.transform = transform
+      botNetRef.current.style.transform = transform
+      store.zoom = getZoomLevel(scale)
 
-  const onZoomOut = () => changeZoom(0.75)
+      rafRef.current = false
+    })
+  }, [width, height, onClickHome])
 
-  const onWheel = (e: any) => {
-    const scaleAmount = 1 - clamp(e.deltaY, -10, 10) / 100
-    changeZoom(scaleAmount, e.clientX, e.clientY)
-  }
+  const changeZoom = useCallback(
+    (amount = 1, _x = width / 2, _y = height / 2) => {
+      const { scale, x, y } = transformRef.current
+      const newScale = Math.max(minZoom, Math.min(maxZoom, scale * amount))
+      const prevX = (_x - x) / scale
+      const prevY = (_y - y) / scale
 
-  const changeZoom = (amount = 1, _x = width / 2, _y = height / 2) => {
-    const { scale, x, y } = transformRef.current
-    const newScale = Math.max(minZoom, Math.min(maxZoom, scale * amount))
-    const prevX = (_x - x) / scale
-    const prevY = (_y - y) / scale
+      transformRef.current.scale = newScale
+      transformRef.current.x = _x - prevX * newScale
+      transformRef.current.y = _y - prevY * newScale
 
-    transformRef.current.scale = newScale
-    transformRef.current.x = _x - prevX * newScale
-    transformRef.current.y = _y - prevY * newScale
+      updateTransform()
+    },
+    [width, height, updateTransform],
+  )
 
-    updateTransform()
-  }
+  const onZoomIn = useCallback(() => changeZoom(1.25), [changeZoom])
+
+  const onZoomOut = useCallback(() => changeZoom(0.75), [changeZoom])
 
   const onPointerDown = (e: any) => {
-    setIsDragging(true)
+    store.isDragging = true
     lastMouse.current = { x: e.clientX, y: e.clientY }
     mouseStart.current = { x: e.clientX, y: e.clientY }
   }
 
   const onPointerMove = (e: any) => {
-    if (!isDragging) return
+    if (!store.isDragging) return
     const dx = e.clientX - lastMouse.current.x
     const dy = e.clientY - lastMouse.current.y
     transformRef.current.x += dx
@@ -113,7 +117,7 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
     if (xDiff + yDiff < 1) {
       store.selectedNodeId = -1
     }
-    setIsDragging(false)
+    store.isDragging = false
   }
 
   useEffect(() => {
@@ -130,19 +134,17 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
         onZoomOut={onZoomOut}
         onZoomIn={onZoomIn}
       />
-      <svg
+      <GameSvg
         width={width}
         height={height}
-        className={`overflow-hidden lg:rounded-xl zoom-${zoomLevel} ${isDragging ? '' : 'not-dragging'}`}
-        onWheel={onWheel}
-        style={{
-          cursor: isDragging ? 'grabbing' : 'grab',
-          overflow: 'hidden',
-        }}
+        onWheel={(e: any) =>
+          changeZoom(1 - clamp(e.deltaY, -10, 10) / 100, e.clientX, e.clientY)
+        }
       >
-        <g ref={svgRef} style={{ visibility: 'hidden' }}>
+        <g ref={worldSvgRef}>
           <WorldSvg />
         </g>
+
         <rect
           className="relative z-10"
           fill="transparent"
@@ -156,16 +158,30 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
           onMouseUp={onPointerUp}
           onMouseDown={onPointerDown}
         />
-        <g
-          ref={svgRef2}
-          style={{
-            visibility: 'hidden',
-            pointerEvents: isDragging ? 'none' : 'auto',
-          }}
-        >
+
+        <g ref={botNetRef}>
           <BotNet />
         </g>
-      </svg>
+      </GameSvg>
     </>
+  )
+}
+
+const GameSvg = (props: {
+  width: number
+  height: number
+  children: any
+  onWheel: any
+}) => {
+  const { zoom, isDragging } = useSnapshot(store)
+  return (
+    <svg
+      width={props.width}
+      height={props.height}
+      className={`overflow-hidden lg:rounded-xl zoom-${zoom} ${isDragging ? 'cursor-grabbing' : 'not-dragging cursor-grab'}`}
+      onWheel={props.onWheel}
+    >
+      {props.children}
+    </svg>
   )
 }

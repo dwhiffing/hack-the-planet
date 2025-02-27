@@ -5,7 +5,6 @@ import React, {
   useRef,
   useState,
 } from 'react'
-import { Group } from '@visx/group'
 import { CSSTransition } from 'react-transition-group'
 
 import {
@@ -78,9 +77,13 @@ export const Node = memo(function Node(props: {
   const timeout = baseAnimationDuration
 
   return (
-    <Group key={node.id} className="node" left={node.x} top={node.y}>
+    <>
       {wasSelected && (
-        <>
+        <g
+          key={node.id}
+          className="node"
+          style={{ transform: `translate(${node.x}px,${node.y}px)` }}
+        >
           <CSSTransition
             nodeRef={scanRef}
             in={isAnimatable && animateScan}
@@ -117,13 +120,13 @@ export const Node = memo(function Node(props: {
               maxScanRange={node.maxScanRange ?? 0}
             />
           </CSSTransition>
-        </>
+        </g>
       )}
 
       <circle
         ref={nodeRef}
-        x={s * -0.5}
-        y={s * -0.5}
+        cx={node.x}
+        cy={node.y}
         r={s / 2}
         onMouseDown={onClickNode}
         stroke={props.isSelected ? '#fff' : 'transparent'}
@@ -137,7 +140,7 @@ export const Node = memo(function Node(props: {
         strokeWidth={0.01}
         fill={fill}
       />
-    </Group>
+    </>
   )
 })
 
