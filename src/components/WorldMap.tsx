@@ -12,6 +12,7 @@ import { useTick } from '@/utils/useTick'
 import { deserializeSave, store } from '@/utils/valtioState'
 import { useSnapshot } from 'valtio'
 import { minZoom, maxZoom, zoomScale, homeId } from '@/constants/index'
+import { clamp } from 'lodash'
 
 export function WorldMap({ width, height }: { width: number; height: number }) {
   const { tickspeed } = useSnapshot(store)
@@ -73,8 +74,7 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
   const onZoomOut = () => changeZoom(0.75)
 
   const onWheel = (e: any) => {
-    e.preventDefault()
-    const scaleAmount = e.deltaY > 0 ? 0.9 : 1.1
+    const scaleAmount = 1 - clamp(e.deltaY, -10, 10) / 100
     changeZoom(scaleAmount, e.clientX, e.clientY)
   }
 
@@ -134,6 +134,7 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
         width={width}
         height={height}
         className={`overflow-hidden lg:rounded-xl zoom-${zoomLevel} ${isDragging ? '' : 'not-dragging'}`}
+        onWheel={onWheel}
         style={{
           cursor: isDragging ? 'grabbing' : 'grab',
           overflow: 'hidden',
@@ -154,7 +155,6 @@ export function WorldMap({ width, height }: { width: number; height: number }) {
           onMouseLeave={onPointerUp}
           onMouseUp={onPointerUp}
           onMouseDown={onPointerDown}
-          onWheel={onWheel}
         />
         <g
           ref={svgRef2}
