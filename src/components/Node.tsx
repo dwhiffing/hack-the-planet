@@ -100,7 +100,7 @@ export const Node = memo(function Node(props: {
                 type="rotate"
                 from="0"
                 to="-360"
-                dur={`${timeout}ms`}
+                dur={`${timeout * 2}ms`}
                 repeatCount="indefinite"
               />
             </path>

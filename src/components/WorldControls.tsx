@@ -24,8 +24,6 @@ export const MapStats = () => {
 }
 
 export const MapControls = memo(function MapControls(props: IMapProps) {
-  const { selectedNodeId } = useSnapshot(store)
-
   return (
     <div className="pointer-events-none absolute inset-0 inset-x-0 flex justify-between p-4 text-white">
       <div className="m-3">

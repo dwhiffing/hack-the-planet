@@ -82,6 +82,7 @@ export const NodeControls = memo(function NodeControls() {
       className="pointer-events-auto absolute inset-x-3 bottom-1 z-20 my-2 max-h-[300px] overflow-scroll rounded-md border border-[#000] bg-[#222] p-2 transition-opacity md:right-auto md:top-1 md:max-h-none md:w-full md:max-w-[300px] md:p-4"
       style={{
         opacity: selectedNodeId !== -1 ? 1 : 0,
+        pointerEvents: selectedNodeId !== -1 ? 'auto' : 'none',
         transitionDuration: `${baseAnimationDuration}ms`,
       }}
     >
