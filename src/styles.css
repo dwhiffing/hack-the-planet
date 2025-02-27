@@ -55,8 +55,7 @@ button[disabled] {
   transform: scale(6);
 }
 
-.zoom-0 line.transferring,
-.zoom-1 line.transferring {
+.zoom-0 line.transferring {
   stroke-dashoffset: 0.26;
 }
 
@@ -65,6 +64,7 @@ button[disabled] {
   animation-iteration-count: infinite;
 }
 
+.zoom-1 line,
 .zoom-2 line,
 .zoom-3 line {
   stroke-dasharray: none;

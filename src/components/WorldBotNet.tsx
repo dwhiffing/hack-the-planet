@@ -14,7 +14,6 @@ export const BotNet = memo(function BotNet() {
 
   return (
     <Group>
-      <CityLabels />
       <Links />
 
       {nodeIds.map((nodeId) => (
@@ -24,6 +23,7 @@ export const BotNet = memo(function BotNet() {
           isSelected={selectedNodeId === nodeId}
         />
       ))}
+      <CityLabels />
     </Group>
   )
 })

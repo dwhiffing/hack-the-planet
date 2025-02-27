@@ -95,6 +95,6 @@ export const getNodeHackCost = (nodeId: number) => {
   const configType = store.nodes[nodeId]?.type ?? 'basic'
   const scaling = store.nodes[nodeId]?.scaling ?? 1
   return (
-    (configType === 'basic' ? 10 : configType === 'rich' ? 25 : 100) * scaling
+    (configType === 'basic' ? 10 : configType === 'rich' ? 50 : 200) * scaling
   )
 }

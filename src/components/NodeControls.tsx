@@ -93,7 +93,6 @@ export const NodeControls = memo(function NodeControls() {
         income:{' '}
         {formatMoney(selectedNodeIncome * getUpgradeEffect('steal-amount'))}
       </p>
-      <p>max income: {formatMoney(selectedNodeIncome)}</p>
       <p>hack cost: {getNodeHackCost(selectedNode.id)}</p>
       <p>country: {selectedNode?.country}</p>
       <p>

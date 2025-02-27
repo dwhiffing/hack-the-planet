@@ -7,18 +7,20 @@ import { store } from '@/utils/valtioState'
 import { NodeControls } from './NodeControls'
 import { SaveControls } from './SaveControls'
 import { getMaxPoints, getUpgradeEffect } from '@/utils/upgrades'
+import { baseTickspeed } from '@/constants'
 
 export const MapStats = () => {
   const { money, points, pointsPerTick, moneyPerTick } = useSnapshot(store)
+  const tickMulti = 1000 / baseTickspeed
   return (
     <div>
       <p>
         points: {points.toFixed(2)}/{getMaxPoints()}(
         {getUpgradeEffect('max-points')})
       </p>
-      <p>points per tick: {pointsPerTick}</p>
-      <p>Money: {formatMoney(money)}</p>
-      <p>Income: {formatMoney(moneyPerTick)}</p>
+      <p>points income: {pointsPerTick * tickMulti}</p>
+      <p>money: {formatMoney(money)}</p>
+      <p>money income: {formatMoney(moneyPerTick * tickMulti)}</p>
     </div>
   )
 }
