@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { memo, useEffect, useRef, useState } from 'react'
 
 import { useSnapshot } from 'valtio'
 import { store } from '@/utils/valtioState'
@@ -6,7 +6,7 @@ import { CSSTransition } from 'react-transition-group'
 import { baseAnimationDuration } from '@/constants'
 
 const baseSpacing = 0.01
-export const Link = ({ nodeId }: { nodeId: number }) => {
+export const Link = memo(function Link({ nodeId }: { nodeId: number }) {
   const { [nodeId]: source } = useSnapshot(store.nodes)
   const { [source?.target ?? -1]: target } = useSnapshot(store.nodes)
   const [isMounted, setIsMounted] = useState(false)
@@ -54,11 +54,11 @@ export const Link = ({ nodeId }: { nodeId: number }) => {
           <animate
             attributeName="stroke-dashoffset"
             values={`${(spacing + spacing2) * -8};0`}
-            dur={`${baseAnimationDuration}ms`}
+            dur={`${baseAnimationDuration * 2}ms`}
             repeatCount="indefinite"
           />
         )}
       </line>
     </CSSTransition>
   )
-}
+})

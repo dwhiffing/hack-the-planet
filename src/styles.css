@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  --anim-duration: 1500ms;
+  --anim-duration: 500ms;
 }
 
 body {

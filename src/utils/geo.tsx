@@ -1,17 +1,11 @@
-import { clamp, groupBy } from 'lodash'
-import { geoMercator, GeoProjection } from 'd3-geo'
-import { TransformMatrix } from '@vx/zoom/lib/types'
+import { groupBy } from 'lodash'
+import { geoMercator } from 'd3-geo'
 
-import { FullNode, INodeType, Node, NodeGroup, Point } from '@/types'
+import { FullNode, INodeType, Node, NodeGroup } from '@/types'
 import { getRandom } from '@/utils/random'
 import { store } from '@/utils/valtioState'
 
-import {
-  baseScale,
-  baseTranslate,
-  countryConfigs,
-  homeId,
-} from '@/constants/index'
+import { baseScale, baseTranslate, countryConfigs } from '@/constants/index'
 import bordersJson from '@/constants/borders.json'
 import continents from '@/constants/continents.json'
 import cities from '@/constants/cities-pruned.json'
@@ -32,19 +26,6 @@ export const getZoomLevel = (scale: number) => {
   if (scale <= 13) return 2
   if (scale <= 50) return 1
   return 0
-}
-
-export const getVisibleGroups = (
-  transformMatrix: TransformMatrix,
-  width: number,
-  height: number,
-) => {
-  const coords = transformToCoords(transformMatrix, width, height)
-  const zoomLevel = getZoomDrawDistance(transformMatrix.scaleX)
-  // if (zoomLevel === -1) return Object.keys(store.groupedNodes).join(':')
-  const groups = getAdjacentGroups(coords[1], coords[0], zoomLevel)
-
-  return groups.join(':')
 }
 
 export const groupNodes = (nodes: Node[]): Record<string, NodeGroup> => {
@@ -149,47 +130,15 @@ export const coordsToTransform = (
     .scale(baseScale * scale)
   const coords = projection([lng, lat])!
   return {
-    scaleX: scale,
-    scaleY: scale,
-    skewX: 0,
-    skewY: 0,
-    translateX: offsetX + width / 2 + coords[0] * -1,
-    translateY: offsetY + height / 2 + coords[1] * -1,
+    scale: scale,
+    x: offsetX + width / 2 + coords[0] * -1,
+    y: offsetY + height / 2 + coords[1] * -1,
   }
-}
-
-let _projection: GeoProjection
-let _lastScale: number = 0
-export const transformToCoords = (
-  matrix: {
-    translateX: number
-    translateY: number
-    scaleX: number
-  },
-  width: number,
-  height: number,
-) => {
-  if (_lastScale !== matrix.scaleX) {
-    _projection = geoMercator()
-      .translate(baseTranslate)
-      .scale(baseScale * matrix.scaleX)
-    _lastScale = matrix.scaleX
-  }
-
-  return _projection.invert!([
-    matrix.translateX * -1 + width / 2,
-    matrix.translateY * -1 + height / 2,
-  ])!
 }
 
 const R = 6371 // Earth's radius in kilometers
 const toRadians = Math.PI / 180
-export function haversineDistance(
-  _x1: number,
-  _y1: number,
-  _x2: number,
-  _y2: number,
-) {
+function haversineDistance(_x1: number, _y1: number, _x2: number, _y2: number) {
   const x1 = _x1 * toRadians
   const y1 = _y1 * toRadians
   const x2 = _x2 * toRadians
@@ -214,15 +163,7 @@ const getCityConfig = (city: { country: string }) => {
   )
 }
 
-const getZoomDrawDistance = (zoom: number) => {
-  // if (zoom < 5) return -1
-  // if (zoom < 9) return 7
-  // if (zoom <= 13) return 4
-  if (zoom <= 50) return 1
-  return 1
-}
-
-export const getGroupFromLatLng = (lat: number, lng: number): string => {
+const getGroupFromLatLng = (lat: number, lng: number): string => {
   const latGroup = Math.floor(lat / rangeSize)
   const lonGroup = Math.floor(lng / (rangeSize * 2))
   return `${latGroup},${lonGroup}`
@@ -336,69 +277,4 @@ function getRandomNonUniformPointsInCircle(
   }
 
   return points
-}
-
-function distance(a: Point, b: Point): number {
-  const dx = a.x - b.x
-  const dy = a.y - b.y
-  return Math.sqrt(dx * dx + dy * dy)
-}
-export function mergeCoordinates(coords: Node[], threshold: number) {
-  if (coords.length === 0) return []
-
-  const grid = new Map<string, Node[]>()
-  const cellSize = threshold
-
-  for (const coord of coords) {
-    const cellKey = getCellKey(coord.x, coord.y, cellSize)
-    if (!grid.has(cellKey)) {
-      grid.set(cellKey, [])
-    }
-    grid.get(cellKey)!.push(coord)
-  }
-
-  // @ts-ignore
-  return [...grid.entries()].map(([key, nodes]) => {
-    const sum = nodes.reduce(
-      // @ts-ignore
-      (acc, { x, y }) => [acc[0] + x, acc[1] + y],
-      [0, 0],
-    )
-    const x = sum[0] / nodes.length
-    const y = sum[1] / nodes.length
-    return {
-      x: +x,
-      y: +y,
-      count: nodes.length,
-      r: clamp(nodes.length / 40, 0.15, 0.75),
-    }
-  })
-}
-
-function getCellKey(x: number, y: number, size: number): string {
-  const cellX = Math.floor(x / size)
-  const cellY = Math.floor(y / size)
-  return `${cellX},${cellY}`
-}
-
-function getNeighbors(
-  x: number,
-  y: number,
-  size: number,
-  grid: Map<string, Node[]>,
-): Node[] {
-  const neighbors: Node[] = []
-  const cellX = Math.floor(x / size)
-  const cellY = Math.floor(y / size)
-
-  for (let dx = -1; dx <= 1; dx++) {
-    for (let dy = -1; dy <= 1; dy++) {
-      const key = `${cellX + dx},${cellY + dy}`
-      if (grid.has(key)) {
-        neighbors.push(...grid.get(key)!)
-      }
-    }
-  }
-
-  return neighbors
 }

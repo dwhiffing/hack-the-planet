@@ -1,4 +1,4 @@
-import React, { memo } from 'react'
+import React, { memo, useEffect, useState } from 'react'
 import { FullNode, IGlobalAction, INodeAction, INodeType } from '@/types'
 import {
   buyUpgrade,
@@ -17,7 +17,12 @@ import {
 import { onHackStart } from '@/utils/hack'
 import { onScan } from '@/utils/scan'
 
-import { baseTickspeed, homeId, UPGRADES } from '@/constants/index'
+import {
+  baseAnimationDuration,
+  baseTickspeed,
+  homeId,
+  UPGRADES,
+} from '@/constants/index'
 import { formatMoney, MapStats } from './WorldControls'
 import { get } from 'lodash'
 
@@ -28,10 +33,14 @@ const onDisconnect = (nodeId: number) => {
 }
 
 export const NodeControls = memo(function NodeControls() {
-  const { selectedNodeId, upgrades, points, money } = useSnapshot(store)
-  const { [selectedNodeId]: _selectedNode } = useSnapshot(store.nodes)
-  const selectedNode = _selectedNode as FullNode
-  const selectedNodeIncome = selectedNode ? getNodeIncome(selectedNodeId) : -1
+  const { selectedNodeId, upgrades, points, money, nodes } = useSnapshot(store)
+  const _selectedNode = nodes[selectedNodeId]
+  const [lastSelectedNode, setLastSelectedNode] = useState(_selectedNode)
+  const selectedNode = lastSelectedNode as FullNode
+  const selectedNodeIncome = selectedNodeId ? getNodeIncome(selectedNodeId) : -1
+  useEffect(() => {
+    if (_selectedNode) setLastSelectedNode(_selectedNode)
+  }, [_selectedNode])
   if (!selectedNode) return null
 
   const globalActions: IGlobalAction[] = [
@@ -60,16 +69,22 @@ export const NodeControls = memo(function NodeControls() {
   ]
 
   const buttons = [
-    ...(selectedNodeId
+    ...(selectedNode.id
       ? selectedNodeActions.filter((a) => a.getIsVisible(selectedNode, points))
       : []),
-    ...(selectedNodeId === homeId
+    ...(selectedNode.id === homeId
       ? globalActions.filter((a) => a.getIsVisible())
       : []),
   ]
 
   return (
-    <div className="">
+    <div
+      className="pointer-events-auto absolute inset-x-3 bottom-1 z-20 my-2 max-h-[300px] overflow-scroll rounded-md border border-[#000] bg-[#222] p-2 transition-opacity md:right-auto md:top-1 md:max-h-none md:w-full md:max-w-[300px] md:p-4"
+      style={{
+        opacity: selectedNodeId !== -1 ? 1 : 0,
+        transitionDuration: `${baseAnimationDuration}ms`,
+      }}
+    >
       <MapStats />
       <NodeDebug node={selectedNode} />
       <p className="mb-3">type: {selectedNode?.type}</p>

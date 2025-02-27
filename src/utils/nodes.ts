@@ -85,14 +85,15 @@ export const getIsNodeHackable = (
 }
 
 export const getNodeIncome = (nodeId: number) => {
+  if (!store.nodes[nodeId]) return 0
   const config = NODE_CONFIGS[store.nodes[nodeId].type]
   // const scaling = store.nodes[nodeId].scaling ?? 1
   return config.baseIncome //* scaling/10
 }
 
 export const getNodeHackCost = (nodeId: number) => {
-  const configType = store.nodes[nodeId].type
-  const scaling = store.nodes[nodeId].scaling ?? 1
+  const configType = store.nodes[nodeId]?.type ?? 'basic'
+  const scaling = store.nodes[nodeId]?.scaling ?? 1
   return (
     (configType === 'basic' ? 10 : configType === 'rich' ? 25 : 100) * scaling
   )

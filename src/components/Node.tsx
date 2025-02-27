@@ -27,7 +27,9 @@ export const Node = memo(function Node(props: {
   const nodeRef = useRef(null)
   const rangeRef = useRef(null)
   const [isMounted, setIsMounted] = useState(false)
+  const [wasSelected, setWasSelected] = useState(false)
   const [animateScan, setAnimateScan] = useState(false)
+  const [isAnimatable, setIsAnimatable] = useState(false)
 
   useEffect(() => {
     setAnimateScan(true)
@@ -37,6 +39,13 @@ export const Node = memo(function Node(props: {
   useEffect(() => {
     if (node && !isMounted) setIsMounted(true)
   }, [node, isMounted])
+
+  useEffect(() => {
+    if (props.isSelected && !wasSelected) {
+      setWasSelected(true)
+      setTimeout(() => setIsAnimatable(true), 100)
+    }
+  }, [props.isSelected, wasSelected])
 
   if (!node) return null
 
@@ -67,49 +76,48 @@ export const Node = memo(function Node(props: {
   }
 
   const timeout = baseAnimationDuration
-  const isConnected = (node.sources?.length ?? 0 > 0) || (node.target ?? 0) > 0
 
   return (
     <Group key={node.id} className="node" left={node.x} top={node.y}>
-      {isConnected && (
-        <CSSTransition
-          nodeRef={scanRef}
-          in={animateScan}
-          timeout={timeout}
-          classNames="fade"
-          unmountOnExit
-        >
-          <path
-            ref={scanRef}
-            className={`pointer-events-none`}
-            d={drawScan(0, 0, pxPerKM * (node.scanRange ?? 0), 0, 40)}
-            fill="#0f03"
+      {wasSelected && (
+        <>
+          <CSSTransition
+            nodeRef={scanRef}
+            in={isAnimatable && animateScan}
+            timeout={timeout}
+            classNames="fade"
+            unmountOnExit
           >
-            <animateTransform
-              attributeName="transform"
-              attributeType="XML"
-              type="rotate"
-              from="0"
-              to="-360"
-              dur={`${timeout}ms`}
-              repeatCount="indefinite"
+            <path
+              ref={scanRef}
+              className={`pointer-events-none`}
+              d={drawScan(0, 0, pxPerKM * (node.scanRange ?? 0), 0, 40)}
+              fill="#0f03"
+            >
+              <animateTransform
+                attributeName="transform"
+                attributeType="XML"
+                type="rotate"
+                from="0"
+                to="-360"
+                dur={`${timeout}ms`}
+                repeatCount="indefinite"
+              />
+            </path>
+          </CSSTransition>
+          <CSSTransition
+            nodeRef={rangeRef}
+            in={isAnimatable && props.isSelected && node.isOwned}
+            timeout={timeout}
+            classNames="fade"
+            unmountOnExit
+          >
+            <ScanRange
+              rangeRef={rangeRef}
+              maxScanRange={node.maxScanRange ?? 0}
             />
-          </path>
-        </CSSTransition>
-      )}
-      {isConnected && (
-        <CSSTransition
-          nodeRef={rangeRef}
-          in={props.isSelected && node.isOwned}
-          timeout={timeout}
-          classNames="fade"
-          unmountOnExit
-        >
-          <ScanRange
-            rangeRef={rangeRef}
-            maxScanRange={node.maxScanRange ?? 0}
-          />
-        </CSSTransition>
+          </CSSTransition>
+        </>
       )}
 
       <circle
@@ -122,7 +130,7 @@ export const Node = memo(function Node(props: {
         className="node-circle cursor-pointer"
         opacity={isMounted ? 1 : 0}
         style={{
-          transitionProperty: isConnected ? 'r, stroke, opacity' : 'none',
+          transitionProperty: 'r, stroke, opacity',
           transitionDuration: `${timeout}ms`,
           transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
         }}
@@ -142,9 +150,11 @@ const ScanRange = ({
 }) => {
   // subscribe to upgrades so that we re-render on max range increase
   const { points, upgrades } = useSnapshot(store)
+  const dur = baseAnimationDuration
 
   return (
     <g ref={rangeRef} className="pointer-events-none">
+      {/* current scan range */}
       <circle
         x={0}
         y={0}
@@ -152,9 +162,10 @@ const ScanRange = ({
         stroke="#0f0a"
         fill="#00ff0009"
         className="transition-all"
-        style={{ transitionDuration: `${baseAnimationDuration}ms` }}
+        style={{ transitionDuration: `${dur}ms` }}
         strokeWidth={0.01}
       />
+      {/* max scanned range */}
       <circle
         x={0}
         y={0}
@@ -162,10 +173,11 @@ const ScanRange = ({
         stroke="#0f06"
         fill="transparent"
         className="transition-all"
-        style={{ transitionDuration: `${baseAnimationDuration}ms` }}
+        style={{ transitionDuration: `${dur}ms` }}
         strokeWidth={0.01}
         strokeDasharray="0.03 0.06"
       />
+      {/* max possible range */}
       <circle
         x={0}
         y={0}
@@ -173,7 +185,7 @@ const ScanRange = ({
         stroke="#0f02"
         fill="transparent"
         className="transition-all"
-        style={{ transitionDuration: `${baseAnimationDuration}ms` }}
+        style={{ transitionDuration: `${dur}ms` }}
         strokeWidth={0.01}
       />
     </g>
